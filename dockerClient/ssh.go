@@ -76,29 +76,33 @@ func (me *Gear) ContainerSsh(shell bool, status bool, cmdArgs ...string) error {
 			break
 		}
 
-		//fmt.Printf("Connect to %s:%s\n", u.Hostname(), port)
+		// fmt.Printf("Connect to %s:%s\n", u.Hostname(), port)
 		me.SshClient = NewSSH(SshArgs {
 			Host: u.Hostname(),
 			Port: port,
 			StatusLine: StatusLine{Disable: status},
 			Shell: shell,
 		})
-		if shell {
-			err = me.SshClient.Connect()
-			if err != nil {
-				break
+		//if shell {
+		//	err = me.SshClient.Connect()
+		//	if err != nil {
+		//		break
+		//	}
+		//
+		//	break
+		//}
+
+		if !shell {
+			switch me.Container.GearConfig.Name {
+				case "golang":
+					me.SshClient.CmdArgs = append([]string{"go"}, cmdArgs...)
+				case "terminus":
+					me.SshClient.CmdArgs = append([]string{"terminus"}, cmdArgs...)
+				default:
+					me.SshClient.CmdArgs = cmdArgs
 			}
-
-			break
-		}
-
-		switch me.Container.GearConfig.Name {
-			case "golang":
-				me.SshClient.CmdArgs = append([]string{"go"}, cmdArgs...)
-			case "terminus":
-				me.SshClient.CmdArgs = append([]string{"terminus"}, cmdArgs...)
-			default:
-				me.SshClient.CmdArgs = cmdArgs
+		} else {
+			me.SshClient.CmdArgs = cmdArgs
 		}
 
 		err = me.SshClient.Connect()

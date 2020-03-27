@@ -1,18 +1,18 @@
 package main
 
 import (
-	"gb-launch/dockerClient"
-	"gb-launch/only"
 	"errors"
 	"flag"
 	"fmt"
+	"gb-launch/dockerClient"
+	"gb-launch/only"
 	"github.com/docker/docker/client"
 	"net/url"
 	"os"
 	"path"
 )
 
-var Version = "1.0"
+var Version = "1.1"
 
 
 func main() {
@@ -119,12 +119,12 @@ func (me *Args) Help() {
 		fmt.Printf("\tLaunch an interactive container within the Gearbox environment.\n")
 		fmt.Printf("\n")
 
-		fmt.Printf("\n")
+		// fmt.Printf("\n")
 		// fmt.Printf("-%s \n\t%s - %s\n", me.DockerHost.Name, me.DockerHost.Usage, me.DockerHost.DefValue)
 
 		flag.PrintDefaults()
 		fmt.Printf("\n")
-		fmt.Printf("\n")
+		// fmt.Printf("\n")
 	}
 }
 
@@ -208,7 +208,7 @@ type Args struct {
 	DockerPort       *string
 	DockerDaemon     *url.URL
 
-	Command          *string
+	//AltCommand       *bool
 	DockerMount      *string
 	ContainerName    *string
 	ContainerVersion *string
@@ -259,19 +259,21 @@ func ProcessArgs() (*Args, error) {
 	var args Args
 
 	for range only.Once {
+		var hargs Hargs
+
 		exe := path.Base(os.Args[0])
 		if exe == "gb-launch" {
 			exe = ""
 		}
 
-		var hargs Hargs
+		// cmd.Execute()
 
 		help_all := flag.Bool("gb-help", false, "Show all help.")
 
 		args.Debug = flag.Bool("gb-debug", false, "DEBUG")
 
-		args.Command = flag.String("gb-cmd", "", "Specify an alternative container command.")
-		hargs.Command = flag.Lookup("gb-cmd")
+		//args.AltCommand = flag.Bool("gb-cmd", false, "Specify an alternative command after '--'.")
+		//hargs.Command = flag.Lookup("gb-cmd")
 
 		args.DockerHost = flag.String("gb-docker-host", "", "Specify an alternative Docker host.")
 		hargs.DockerHost = flag.Lookup("gb-docker-host")
@@ -312,6 +314,12 @@ func ProcessArgs() (*Args, error) {
 
 		// Show help.
 		if *help_all {
+			args.Help()
+			os.Exit(0)
+		}
+
+		// Show help.
+		if *args.ContainerName == "gb_launch" {
 			args.Help()
 			os.Exit(0)
 		}
