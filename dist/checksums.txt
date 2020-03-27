@@ -1,0 +1,4 @@
+c0734372db80309023f051767f53e82dbb0c6e31f5ce1fe8076a0b4cd1ba98c2  gb-launch_v0.0.0-next_Linux_i386.tar.gz
+9976145b1e8b0738fb0039e75721c6fdcd89d4b4a4f256dcad66b0552193dc9a  gb-launch_v0.0.0-next_Darwin_i386.tar.gz
+150752f2d6da01c73b3c083294290025a19a9305e63fdac6113aaa425900ae44  gb-launch_v0.0.0-next_Darwin_x86_64.tar.gz
+6579fca83affd689d7b12183544d5297b40f885497fdb69c56cec323ac29061e  gb-launch_v0.0.0-next_Linux_x86_64.tar.gz
