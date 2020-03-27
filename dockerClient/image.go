@@ -256,14 +256,56 @@ func (me *Image) Pull() error {
 
 		defer out.Close()
 
+		fmt.Printf("Pulling Gearbox container: %s\n", me.Name)
+		d := json.NewDecoder(out)
+		var event *PullEvent
+		for {
+			if err := d.Decode(&event); err != nil {
+				if err == io.EOF {
+					break
+				}
+
+				panic(err)
+			}
+
+			// fmt.Printf("EVENT: %+v\n", event)
+			fmt.Printf("%+v\r", event.Progress)
+		}
+		fmt.Printf("\n%s\n", event.Status)
+
+		// Latest event for new image
+		// EVENT: {Status:Status: Downloaded newer image for busybox:latest Error: Progress:[==================================================>]  699.2kB/699.2kB ProgressDetail:{Current:699243 Total:699243}}
+		// Latest event for up-to-date image
+		// EVENT: {Status:Status: Image is up to date for busybox:latest Error: Progress: ProgressDetail:{Current:0 Total:0}}
+		if event != nil {
+			if strings.Contains(event.Status, fmt.Sprintf("Downloaded newer image for %s", me.Name)) {
+				// new
+				fmt.Println("\nnew")
+			}
+
+			if strings.Contains(event.Status, fmt.Sprintf("Image is up to date for %s", me.Name)) {
+				// up-to-date
+				fmt.Println("\nup-to-date")
+			}
+		}
+
 		//buf := new(bytes.Buffer)
 		//_, err = buf.ReadFrom(out)
 		//fmt.Printf("%s", buf.String())
-
-		_, _ = io.Copy(os.Stdout, out)
+		//_, _ = io.Copy(os.Stdout, out)
 	}
 
 	return err
+}
+
+type PullEvent struct {
+	Status         string `json:"status"`
+	Error          string `json:"error"`
+	Progress       string `json:"progress"`
+	ProgressDetail struct {
+		Current int `json:"current"`
+		Total   int `json:"total"`
+	} `json:"progressDetail"`
 }
 
 
