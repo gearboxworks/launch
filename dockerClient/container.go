@@ -117,6 +117,12 @@ func (me *Gear) ContainerList(f string) error {
 				continue
 			}
 
+			if f != "" {
+				if gc.Name != f {
+					continue
+				}
+			}
+
 			name := strings.TrimPrefix(c.Names[0], "/")
 
 			sshPort := ""
@@ -412,6 +418,8 @@ func (me *Gear) ContainerCreate(gearName string, gearVersion string, gearMount s
 			break
 		}
 		if !ok {
+			//state.Error = me.Search(gearName, gearVersion)
+
 			ok, state.Error = me.FindImage(gearName, gearVersion)
 			if state.Error != nil {
 				me.Image.ID = gearName
@@ -631,7 +639,7 @@ func (me *Container) Stop() error {
 }
 
 
-// Stop all running containers
+// Remove containers
 // Now that you know what containers exist, you can perform operations on them.
 // This example stops all running containers.
 func (me *Container) Remove() error {

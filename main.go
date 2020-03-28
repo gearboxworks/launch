@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"regexp"
+	"strings"
 )
 
 var Version = "1.1"
@@ -31,6 +33,16 @@ func main() {
 		var g *dockerClient.Gear
 		g, state.Error = dockerClient.NewGear(Debug)
 		if state.Error != nil {
+			break
+		}
+
+		if *args.List {
+			state.Error = g.ImageList(*args.ContainerName)
+			if state.Error != nil {
+				break
+			}
+
+			state.Error = g.ContainerList(*args.ContainerName)
 			break
 		}
 
@@ -82,6 +94,46 @@ func main() {
 			break
 		}
 
+		// Remove a container.
+		if *args.ImageRemove {
+			if found {
+				fmt.Printf("Removing image %s\n", *args.ContainerName)
+				state.Error = g.Container.Stop()
+				if state.Error != nil {
+					break
+				}
+
+				state.Error = g.Container.Remove()
+				if state.Error != nil {
+					break
+				}
+
+				state.Error = g.Image.Remove()
+			}
+			//} else {
+			//	fmt.Printf("Container %s doesn't exist.\n", *args.ContainerName)
+			//}
+
+			var ok bool
+			ok, state.Error = g.FindImage(*args.ContainerName, *args.ContainerVersion)
+			if state.Error != nil {
+				state.Error = nil
+				fmt.Printf("Image %s doesn't exist.\n", *args.ContainerName)
+				break
+			}
+			if !ok {
+				fmt.Printf("Image %s doesn't exist.\n", *args.ContainerName)
+				break
+			}
+
+			state.Error = g.Image.Remove()
+			if state.Error != nil {
+				break
+			}
+
+			break
+		}
+
 		// Default - run a shell.
 		if !found {
 			// state = g.ContainerCreate("golang", "", "/Users/mick/Documents/GitHub/containers/docker-golang")
@@ -115,7 +167,12 @@ func main() {
 
 func (me *Args) Help() {
 	for range only.Once {
-		fmt.Printf("gb-launch v%s:\n", Version)
+		exe := path.Base(os.Args[0])
+		exe = strings.TrimSuffix(exe, "-Darwin")
+		exe = strings.TrimSuffix(exe, "-Linux")
+		exe = strings.TrimSuffix(exe, "-Windows")
+
+		fmt.Printf("%s v%s:\n", exe, Version)
 		fmt.Printf("\tLaunch an interactive container within the Gearbox environment.\n")
 		fmt.Printf("\n")
 
@@ -124,7 +181,35 @@ func (me *Args) Help() {
 
 		flag.PrintDefaults()
 		fmt.Printf("\n")
-		// fmt.Printf("\n")
+		fmt.Printf("Examples:\n")
+		fmt.Printf("Run 'ls -l' within a terminus container.\n")
+		fmt.Printf("\t%s -gb-name terminus -gb-shell -- ls -l\n", exe)
+
+		fmt.Printf("Run an interactive shell within a terminus container.\n")
+		fmt.Printf("\t%s -gb-name terminus -gb-shell\n", exe)
+
+		fmt.Printf("Run 'terminus' command within a terminus container.\n")
+		fmt.Printf("\t%s -gb-name terminus\n", exe)
+
+		fmt.Printf("Run 'terminus auth:login' within a terminus container.\n")
+		fmt.Printf("\t%s -gb-name terminus auth:login\n", exe)
+
+		fmt.Printf("\n")
+		fmt.Printf("If %s is symlinked to 'terminus', then you can drop the '-gb-name terminus' ...\n", exe)
+
+		fmt.Printf("Run 'ls -l' within a terminus container.\n")
+		fmt.Printf("\tterminus -gb-shell -- ls -l\n")
+
+		fmt.Printf("Run an interactive shell within a terminus container.\n")
+		fmt.Printf("\tterminus -gb-shell\n")
+
+		fmt.Printf("Run 'terminus' command within a terminus container.\n")
+		fmt.Printf("\tterminus\n")
+
+		fmt.Printf("Run 'terminus auth:login' within a terminus container.\n")
+		fmt.Printf("\tterminus auth:login\n")
+
+		fmt.Printf("\t\n")
 	}
 }
 
@@ -214,11 +299,14 @@ type Args struct {
 	ContainerVersion *string
 	Shell            *bool
 	StatusLine       *bool
+
+	List             *bool
 	ListImages       *bool
 	ListContainers   *bool
 
 	ContainerStop    *bool
 	ContainerRemove  *bool
+	ImageRemove      *bool
 }
 
 type Hargs struct {
@@ -232,11 +320,14 @@ type Hargs struct {
 	ContainerVersion *flag.Flag
 	Shell            *flag.Flag
 	StatusLine       *flag.Flag
+
+	List             *flag.Flag
 	ListImages       *flag.Flag
 	ListContainers   *flag.Flag
 
 	ContainerStop    *flag.Flag
 	ContainerRemove  *flag.Flag
+	ImageRemove      *flag.Flag
 }
 
 type boolFlag struct {
@@ -262,7 +353,9 @@ func ProcessArgs() (*Args, error) {
 		var hargs Hargs
 
 		exe := path.Base(os.Args[0])
-		if exe == "gb-launch" {
+		var ok bool
+		ok, err = regexp.MatchString(`^gb.launch`, exe)
+		if ok {
 			exe = ""
 		}
 
@@ -271,9 +364,6 @@ func ProcessArgs() (*Args, error) {
 		help_all := flag.Bool("gb-help", false, "Show all help.")
 
 		args.Debug = flag.Bool("gb-debug", false, "DEBUG")
-
-		//args.AltCommand = flag.Bool("gb-cmd", false, "Specify an alternative command after '--'.")
-		//hargs.Command = flag.Lookup("gb-cmd")
 
 		args.DockerHost = flag.String("gb-docker-host", "", "Specify an alternative Docker host.")
 		hargs.DockerHost = flag.Lookup("gb-docker-host")
@@ -287,11 +377,14 @@ func ProcessArgs() (*Args, error) {
 		args.ContainerVersion = flag.String("gb-version", "latest", "Specify container version.")
 		hargs.ContainerVersion = flag.Lookup("gb-version")
 
-		args.Shell = flag.Bool("gb-shell", false, "Run a shell.")
+		args.Shell = flag.Bool("gb-shell", false, "Run a shell instead of the default container command.")
 		hargs.Shell = flag.Lookup("gb-shell")
 
-		args.StatusLine = flag.Bool("gb-status", false, "Include a status line.")
+		args.StatusLine = flag.Bool("gb-status", false, "Include a Gearbox status line within the container shell.")
 		hargs.StatusLine = flag.Lookup("gb-status")
+
+		args.List = flag.Bool("gb-list", false, "List all images and containers.")
+		hargs.List = flag.Lookup("gb-list")
 
 		args.ListImages = flag.Bool("gb-images", false, "List all images downloaded.")
 		hargs.ListImages = flag.Lookup("gb-images")
@@ -305,24 +398,15 @@ func ProcessArgs() (*Args, error) {
 		args.ContainerRemove = flag.Bool("gb-remove", false, "Remove a created container.")
 		hargs.ContainerRemove = flag.Lookup("gb-remove")
 
+		args.ImageRemove = flag.Bool("gb-clean", false, "Remove downloaded image.")
+		hargs.ImageRemove = flag.Lookup("gb-clean")
+
 		args.DockerMount = flag.String("gb-project", "", "Specify a project mount point.")
 		hargs.DockerMount = flag.Lookup("gb-project")
 
 		flag.Parse()
 
 		Debug = *args.Debug
-
-		// Show help.
-		if *help_all {
-			args.Help()
-			os.Exit(0)
-		}
-
-		// Show help.
-		if *args.ContainerName == "gb_launch" {
-			args.Help()
-			os.Exit(0)
-		}
 
 		if (*args.DockerHost != "") && (*args.DockerPort != "") {
 			args.DockerDaemon, err = client.ParseHostURL(fmt.Sprintf("tcp://%s:%s", *args.DockerHost, *args.DockerPort))
@@ -332,6 +416,44 @@ func ProcessArgs() (*Args, error) {
 
 			err = os.Setenv("DOCKER_HOST", args.DockerDaemon.String())
 		}
+
+		// Show help.
+		if *help_all {
+			args.Help()
+			os.Exit(0)
+		}
+
+		if *args.ListImages {
+			break
+		}
+
+		if *args.List {
+			break
+		}
+
+		if *args.ListContainers {
+			break
+		}
+
+		if *args.ContainerStop {
+			break
+		}
+
+		if *args.ContainerRemove {
+			break
+		}
+
+		if *args.ImageRemove {
+			break
+		}
+
+		if *args.Shell {
+			break
+		}
+
+		// @TODO Need to figure this logic out.
+		//args.Help()
+		//os.Exit(0)
 	}
 
 	return &args, err

@@ -1,13 +1,15 @@
 package dockerClient
 
 import (
-	"gb-launch/only"
 	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gb-launch/only"
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/client"
 	"github.com/dustin/go-humanize"
 	"github.com/jedib0t/go-pretty/table"
@@ -17,16 +19,15 @@ import (
 )
 
 type Image struct {
-	ID      string
-	Name         string
-	Version      string
+	ID         string
+	Name       string
 
-	Summary *types.ImageSummary
-	Details types.ImageInspect
-	GearConfig   GearConfig
+	Version    string
+	Summary    *types.ImageSummary
+	Details    types.ImageInspect
+	GearConfig GearConfig
 
-	// ctx     *context.Context
-	client  *client.Client
+	client     *client.Client
 }
 
 
@@ -80,11 +81,16 @@ func (me *Gear) ImageList(f string) error {
 			break
 		}
 
+		df := filters.NewArgs()
+		//if f != "" {
+		//	df.Add("label", f)
+		//}
+
 		ctx, cancel := context.WithTimeout(context.Background(), Timeout)
 		defer cancel()
 
 		var images []types.ImageSummary
-		images, err = me.DockerClient.ImageList(ctx, types.ImageListOptions{All: true})
+		images, err = me.DockerClient.ImageList(ctx, types.ImageListOptions{All: true, Filters: df})
 		if err != nil {
 			break
 		}
@@ -106,6 +112,12 @@ func (me *Gear) ImageList(f string) error {
 
 			if i.RepoTags[0] == "<none>:<none>" {
 				continue
+			}
+
+			if f != "" {
+				if gc.Name != f {
+					continue
+				}
 			}
 
 			// foo := fmt.Sprintf("%s/%s", gc.Organization, gc.Name)
@@ -177,7 +189,7 @@ func (me *Gear) FindImage(gearName string, gearVersion string) (bool, error) {
 				if gl == "" {
 					continue
 				}
-				gearVersion = gl
+				// gearVersion = gl
 			} else {
 				if !gc.Versions.HasVersion(gearVersion) {
 					continue
@@ -215,6 +227,46 @@ func (me *Gear) FindImage(gearName string, gearVersion string) (bool, error) {
 	}
 
 	return ok, err
+}
+
+
+// Search for an image in remote registry.
+func (me *Gear) Search(gearName string, gearVersion string) error {
+	var err error
+
+	for range only.Once {
+		err = me.EnsureNotNil()
+		if err != nil {
+			break
+		}
+
+		var repo string
+		if gearVersion == "" {
+			repo = fmt.Sprintf("gearboxworks/%s", gearName)
+		} else {
+			repo = fmt.Sprintf("gearboxworks/%s:%s", gearName, gearVersion)
+		}
+
+		ctx := context.Background()
+		//ctx, cancel := context.WithTimeout(context.Background(), Timeout * 1000)
+		//defer cancel()
+
+		df := filters.NewArgs()
+		//df.Add("name", "terminus")
+		repo = gearName
+
+		var images []registry.SearchResult
+		images, err = me.DockerClient.ImageSearch(ctx, repo, types.ImageSearchOptions{Filters:df, Limit: 100})
+		for _, v := range images {
+			if !strings.HasPrefix(v.Name, "gearboxworks/") {
+				continue
+			}
+			fmt.Printf("%s - %s\n", v.Name, v.Description)
+		}
+
+	}
+
+	return err
 }
 
 
@@ -345,6 +397,36 @@ func (me *Gear) ImageAuthPull() error {
 		defer out.Close()
 
 		_, _ = io.Copy(os.Stdout, out)
+	}
+
+	return err
+}
+
+
+// Remove containers
+// Now that you know what containers exist, you can perform operations on them.
+// This example stops all running containers.
+func (me *Image) Remove() error {
+	var err error
+
+	for range only.Once {
+		err = me.EnsureNotNil()
+		if err != nil {
+			break
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), Timeout)
+		defer cancel()
+
+		options := types.ImageRemoveOptions {
+			Force:         false,
+			PruneChildren: true,
+		}
+
+		_, err = me.client.ImageRemove(ctx, me.ID, options)
+		if err != nil {
+			break
+		}
 	}
 
 	return err

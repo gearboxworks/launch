@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -32,8 +33,11 @@ type SSH struct {
 	StatusLine StatusLine
 
 	Shell      bool
+	Env        Environment
 	CmdArgs    []string
 }
+
+type Environment map[string]string
 
 type StatusLine struct {
 	Text          string
@@ -103,6 +107,11 @@ func (me *Gear) ContainerSsh(shell bool, status bool, cmdArgs ...string) error {
 			}
 		} else {
 			me.SshClient.CmdArgs = cmdArgs
+		}
+
+		err = me.SshClient.getEnv()
+		if err != nil {
+			break
 		}
 
 		err = me.SshClient.Connect()
@@ -220,6 +229,13 @@ func (me *SSH) Connect() error {
 		me.Session.Stdout = os.Stdout
 		me.Session.Stderr = os.Stderr
 		me.Session.Stdin = os.Stdin
+
+		for k, v := range me.Env {
+			err = me.Session.Setenv(k, v)
+			if err != nil {
+				break
+			}
+		}
 
 		if len(me.CmdArgs) == 0 {
 			// Set up terminal modes
@@ -398,6 +414,20 @@ func (me *SSH) Connect() error {
 // 	}
 // 	return err
 // }
+
+func (me *SSH) getEnv() error {
+     var err error
+
+     for range only.Once {
+             me.Env = make(Environment)
+             for _, item := range os.Environ() {
+                     s := strings.SplitN(item, "=", 2)
+                     me.Env[s[0]] = s[1]
+             }
+     }
+
+     return err
+}
 
 // StatusLineWorker() - handles the actual updates to the status line
 func (me *SSH) StatusLineUpdate() {
