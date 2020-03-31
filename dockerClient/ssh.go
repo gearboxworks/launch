@@ -58,14 +58,14 @@ const DefaultSshPort = "22"
 const DefaultStatusLineUpdateDelay = time.Second * 2
 
 
-func (me *Gear) ContainerSsh(shell bool, status bool, cmdArgs ...string) error {
+func (me *DockerGear) ContainerSsh(shell bool, status bool, cmdArgs ...string) error {
 	var err error
 
 	for range only.Once {
 		//me.SshClient = NewSSH()
 
 		var port string
-		port, err = me.GetContainerSsh()
+		port, err = me.Container.GetContainerSsh()
 		if err != nil {
 			break
 		}
@@ -75,13 +75,13 @@ func (me *Gear) ContainerSsh(shell bool, status bool, cmdArgs ...string) error {
 		}
 
 		u := url.URL{}
-		err = u.UnmarshalBinary([]byte(me.DockerClient.DaemonHost()))
+		err = u.UnmarshalBinary([]byte(me.Client.DaemonHost()))
 		if err != nil {
 			break
 		}
 
 		// fmt.Printf("Connect to %s:%s\n", u.Hostname(), port)
-		me.SshClient = NewSSH(SshArgs {
+		me.Ssh = NewSSH(SshArgs {
 			Host: u.Hostname(),
 			Port: port,
 			StatusLine: StatusLine{Disable: status},
@@ -97,24 +97,24 @@ func (me *Gear) ContainerSsh(shell bool, status bool, cmdArgs ...string) error {
 		//}
 
 		if !shell {
-			switch me.Container.GearConfig.Name {
+			switch me.Container.GearConfig.Meta.Name {
 				case "golang":
-					me.SshClient.CmdArgs = append([]string{"go"}, cmdArgs...)
+					me.Ssh.CmdArgs = append([]string{"go"}, cmdArgs...)
 				case "terminus":
-					me.SshClient.CmdArgs = append([]string{"terminus"}, cmdArgs...)
+					me.Ssh.CmdArgs = append([]string{"terminus"}, cmdArgs...)
 				default:
-					me.SshClient.CmdArgs = cmdArgs
+					me.Ssh.CmdArgs = cmdArgs
 			}
 		} else {
-			me.SshClient.CmdArgs = cmdArgs
+			me.Ssh.CmdArgs = cmdArgs
 		}
 
-		err = me.SshClient.getEnv()
+		err = me.Ssh.getEnv()
 		if err != nil {
 			break
 		}
 
-		err = me.SshClient.Connect()
+		err = me.Ssh.Connect()
 		if err != nil {
 			break
 		}

@@ -1,21 +1,19 @@
 package dockerClient
 
 import (
-	"gb-launch/only"
 	"context"
 	"errors"
 	"fmt"
+	"gb-launch/defaults"
+	"gb-launch/gear/gearJson"
+	"gb-launch/only"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
-	"github.com/docker/docker/client"
-	"github.com/dustin/go-humanize"
-	"github.com/jedib0t/go-pretty/table"
 	"io"
 	"os"
-	"strings"
 )
 
 type Container struct {
@@ -25,10 +23,9 @@ type Container struct {
 
 	Summary      *types.Container
 	Details      *types.ContainerJSON
-	GearConfig   *GearConfig
+	GearConfig   *gearJson.GearConfig
 
-	// ctx          *context.Context
-	client       *client.Client
+	_Parent       *DockerGear
 }
 type Containers []Container
 
@@ -57,7 +54,7 @@ func (me *Container) EnsureNotNil() error {
 			break
 		}
 
-		if me.client == nil {
+		if me._Parent.Client == nil {
 			err = errors.New("client is nil")
 			break
 		}
@@ -82,183 +79,6 @@ func (me *Container) EnsureNotNil() error {
 }
 
 
-// List and manage containers
-// You can use the API to list containers that are running, just like using docker ps:
-// func ContainerList(f types.ContainerListOptions) error {
-func (me *Gear) ContainerList(f string) error {
-	var err error
-
-	for range only.Once {
-		if me.Debug {
-			fmt.Printf("DEBUG: ContainerList(%s)\n", f)
-		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), Timeout)
-		defer cancel()
-
-		var containers []types.Container
-		containers, err = me.DockerClient.ContainerList(ctx, types.ContainerListOptions{Size: true, All: true})
-		if err != nil {
-			break
-		}
-
-		t := table.NewWriter()
-		t.SetOutputMirror(os.Stdout)
-		t.AppendHeader(table.Row{"Name", "Class", "State", "Image", "Ports", "SSH port", "IP Address", "Mounts", "Size"})
-
-		for _, c := range containers {
-			var gc *GearConfig
-			gc, err = NewGearConfig(c.Labels["gearbox.json"])
-			if err != nil {
-				continue
-			}
-
-			if gc.Organization != Organization {
-				continue
-			}
-
-			if f != "" {
-				if gc.Name != f {
-					continue
-				}
-			}
-
-			name := strings.TrimPrefix(c.Names[0], "/")
-
-			sshPort := ""
-			var ports string
-			for _, p := range c.Ports {
-				if p.PrivatePort == 22 {
-					sshPort = fmt.Sprintf("%d", p.PublicPort)
-					continue
-				}
-				ports += fmt.Sprintf("%s://%s:%d => %d\n", p.Type, p.IP, p.PublicPort, p.PrivatePort)
-			}
-			if sshPort == "0" {
-				sshPort = "none"
-			}
-
-			var mounts string
-			for _, m := range c.Mounts {
-				// ms += fmt.Sprintf("%s(%s) host:%s => container:%s (RW:%v)\n", m.Name, m.Type, m.Source, m.Destination, m.RW)
-				mounts += fmt.Sprintf("host:%s\n\t=> container:%s (RW:%v)\n", m.Source, m.Destination, m.RW)
-			}
-
-			var ipAddress string
-			for k, n := range c.NetworkSettings.Networks {
-				ipAddress += fmt.Sprintf("(%s) %s\n", k, n.IPAddress)
-			}
-
-			t.AppendRow([]interface{}{name, gc.Class, c.State, c.Image, ports, sshPort, ipAddress, mounts, humanize.Bytes(uint64(c.SizeRootFs))})
-			err = nil
-		}
-
-		t.Render()
-	}
-
-	return err
-}
-
-
-func (me *Gear) FindContainer(gearName string, gearVersion string) (bool, error) {
-	var ok bool
-	var err error
-
-	for range only.Once {
-		if me.Debug {
-			fmt.Printf("DEBUG: FindContainer(%s, %s)\n", gearName, gearVersion)
-		}
-
-		err = me.EnsureNotNil()
-		if err != nil {
-			break
-		}
-
-		if gearName == "" {
-			err = errors.New("empty gearname")
-			break
-		}
-
-		if gearVersion == "" {
-			gearVersion = "latest"
-		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), Timeout)
-		defer cancel()
-
-		var containers []types.Container
-		containers, err = me.DockerClient.ContainerList(ctx, types.ContainerListOptions{All: true})
-		if err != nil {
-			break
-		}
-
-		for _, c := range containers {
-			var gc *GearConfig
-			gc, err = NewGearConfig(c.Labels["gearbox.json"])
-			if err != nil {
-				continue
-			}
-
-			if gc.Organization != Organization {
-				continue
-			}
-
-			if gc.Name != gearName {
-				continue
-			}
-
-			if gearVersion == "latest" {
-				gl := gc.Versions.GetLatest()
-				if gl == "" {
-					continue
-				}
-				gearVersion = gl
-			} else {
-				if !gc.Versions.HasVersion(gearVersion) {
-					continue
-				}
-			}
-
-			me.Container.Name = gearName
-			me.Container.Version = gearVersion
-			me.Container.GearConfig = gc
-			me.Container.Summary = &c
-			me.Container.ID = c.ID
-			me.Container.Name = gc.Name
-			ok = true
-
-			break
-		}
-
-		if err != nil {
-			break
-		}
-
-		if me.Container.Summary == nil {
-			break
-		}
-
-		d := types.ContainerJSON{}
-		d, err = me.DockerClient.ContainerInspect(ctx, me.Container.ID)
-		if err != nil {
-			break
-		}
-		me.Container.Details = &d
-
-		err = me.Container.EnsureNotNil()
-		if err != nil {
-			break
-		}
-	}
-
-	if me.Debug {
-		fmt.Printf("DEBUG: Error - %s\n", err)
-	}
-
-	return ok, err
-}
-
-
 func (me *Container) State() State {
 	var state State
 
@@ -271,28 +91,28 @@ func (me *Container) State() State {
 		df := filters.NewArgs()
 		df.Add("id", me.ID)
 
-		ctx, cancel := context.WithTimeout(context.Background(), Timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
 		defer cancel()
 
 		var containers []types.Container
-		containers, state.Error = me.client.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: df})
+		containers, state.Error = me._Parent.Client.ContainerList(ctx, types.ContainerListOptions{All: true, Filters: df})
 		if state.Error != nil {
 			break
 		}
 		me.Summary = &containers[0]
 
-		me.GearConfig, state.Error = NewGearConfig(me.Summary.Labels["gearbox.json"])
+		me.GearConfig, state.Error = gearJson.New(me.Summary.Labels["gearbox.json"])
 		if state.Error != nil {
 			break
 		}
 
-		if me.GearConfig.Organization != Organization {
+		if me.GearConfig.Meta.Organization != defaults.Organization {
 			state.Error = errors.New("not a Gearbox container")
 			break
 		}
 
 		d := types.ContainerJSON{}
-		d, state.Error = me.client.ContainerInspect(ctx, me.ID)
+		d, state.Error = me._Parent.Client.ContainerInspect(ctx, me.ID)
 		if state.Error != nil {
 			break
 		}
@@ -334,15 +154,15 @@ func (me *Container) Start() State {
 			break
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), Timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
 		defer cancel()
 
-		state.Error = me.client.ContainerStart(ctx, me.ID, types.ContainerStartOptions{})
+		state.Error = me._Parent.Client.ContainerStart(ctx, me.ID, types.ContainerStartOptions{})
 		if state.Error != nil {
 			break
 		}
 
-		statusCh, errCh := me.client.ContainerWait(ctx, me.ID, "") // container.WaitConditionNotRunning
+		statusCh, errCh := me._Parent.Client.ContainerWait(ctx, me.ID, "") // container.WaitConditionNotRunning
 		select {
 			case err := <-errCh:
 				if err != nil {
@@ -390,17 +210,17 @@ func (me *Container) Start() State {
 // This first example shows how to run a container using the Docker API.
 // On the command line, you would use the docker run command, but this is just as easy to do from your own apps too.
 // This is the equivalent of typing docker run alpine echo hello world at the command prompt:
-func (me *Gear) ContainerCreate(gearName string, gearVersion string, gearMount string) State {
+func (me *Container) ContainerCreate(gearName string, gearVersion string, gearMount string) State {
 	var state State
 
 	for range only.Once {
-		if me.Debug {
-			fmt.Printf("DEBUG: ContainerCreate(%s, %s, %s)\n", gearName, gearVersion, gearMount)
-		}
+		//state.Error = me.EnsureNotNil()
+		//if state.Error != nil {
+		//	break
+		//}
 
-		state.Error = me.EnsureNotNil()
-		if state.Error != nil {
-			break
+		if me._Parent.Debug {
+			fmt.Printf("DEBUG: ContainerCreate(%s, %s, %s)\n", gearName, gearVersion, gearMount)
 		}
 
 		if gearName == "" {
@@ -413,38 +233,42 @@ func (me *Gear) ContainerCreate(gearName string, gearVersion string, gearMount s
 		}
 
 		var ok bool
-		ok, state.Error = me.FindContainer(gearName, gearVersion)
+		ok, state.Error = me._Parent.FindContainer(gearName, gearVersion)
 		if state.Error != nil {
 			break
 		}
 		if !ok {
 			//state.Error = me.Search(gearName, gearVersion)
 
-			ok, state.Error = me.FindImage(gearName, gearVersion)
+			ok, state.Error = me._Parent.FindImage(gearName, gearVersion)
 			if state.Error != nil {
-				me.Image.ID = gearName
-				me.Image.Name = gearName
-				me.Image.Version = gearVersion
-				state.Error = me.Image.Pull()
+				me._Parent.Image.ID = gearName
+				me._Parent.Image.Name = gearName
+				me._Parent.Image.Version = gearVersion
+				state.Error = me._Parent.Image.Pull()
 				if state.Error != nil {
 					state.Error = errors.New(fmt.Sprintf("no such image '%s'", gearName))
 					break
 				}
 			}
 
-			ok, state.Error = me.FindContainer(gearName, gearVersion)
+			ok, state.Error = me._Parent.FindContainer(gearName, gearVersion)
 			if state.Error != nil {
 				break
 			}
 		}
 
+		me.ID = me._Parent.Image.ID
+		me.Name = me._Parent.Image.Name
+		me.Version = me._Parent.Image.Version
+
 		// me.Image.Details.Container = "gearboxworks/golang:1.14"
 		// tag := fmt.Sprintf("", me.Image.Name, me.Image.Version)
-		tag := fmt.Sprintf("gearboxworks/%s:%s", me.Image.Name, me.Image.Version)
-		gn := fmt.Sprintf("%s-%s", me.Image.Name, me.Image.Version)
+		tag := fmt.Sprintf("gearboxworks/%s:%s", me.Name, me.Version)
+		gn := fmt.Sprintf("%s-%s", me.Name, me.Version)
 		var binds []string
 		if gearMount != "" {
-			binds = append(binds, fmt.Sprintf("%s:%s", gearMount, DefaultProject))
+			binds = append(binds, fmt.Sprintf("%s:%s", gearMount, defaults.DefaultProject))
 		}
 
 		config := container.Config {
@@ -539,11 +363,11 @@ func (me *Gear) ContainerCreate(gearName string, gearVersion string, gearMount s
 			Init:            nil,
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), Timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
 		defer cancel()
 
 		var resp container.ContainerCreateCreatedBody
-		resp, state.Error = me.DockerClient.ContainerCreate(ctx, &config, &hostConfig, &netConfig, gn)
+		resp, state.Error = me._Parent.Client.ContainerCreate(ctx, &config, &hostConfig, &netConfig, gn)
 		if state.Error != nil {
 			break
 		}
@@ -552,12 +376,12 @@ func (me *Gear) ContainerCreate(gearName string, gearVersion string, gearMount s
 			break
 		}
 
-		me.Container.ID = resp.ID
-		me.Container.Name = me.Image.Name
-		me.Container.Version = me.Image.Version
+		me.ID = resp.ID
+		//me.Container.Name = me.Image.Name
+		//me.Container.Version = me.Image.Version
 
 		// var state State
-		state = me.Container.State()
+		state = me.State()
 		if state.Error != nil {
 			break
 		}
@@ -606,7 +430,7 @@ func (me *Gear) ContainerCreate(gearName string, gearVersion string, gearMount s
 		// stdcopy.StdCopy(os.Stdout, os.Stderr, out)
 	}
 
-	if me.Debug {
+	if me._Parent.Debug {
 		fmt.Printf("DEBUG: Error - %s\n", state.Error)
 	}
 
@@ -626,10 +450,10 @@ func (me *Container) Stop() error {
 			break
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), Timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
 		defer cancel()
 
-		err = me.client.ContainerStop(ctx, me.ID, nil)
+		err = me._Parent.Client.ContainerStop(ctx, me.ID, nil)
 		if err != nil {
 			break
 		}
@@ -651,7 +475,7 @@ func (me *Container) Remove() error {
 			break
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), Timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
 		defer cancel()
 
 		options := types.ContainerRemoveOptions{
@@ -660,7 +484,7 @@ func (me *Container) Remove() error {
 			Force:         false,
 		}
 
-		err = me.client.ContainerRemove(ctx, me.ID, options)
+		err = me._Parent.Client.ContainerRemove(ctx, me.ID, options)
 		if err != nil {
 			break
 		}
@@ -683,12 +507,12 @@ func (me *Container) Logs() error {
 			break
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), Timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
 		defer cancel()
 
 		options := types.ContainerLogsOptions{ShowStdout: true}
 		// Replace this ID with a container that really exists
-		out, err := me.client.ContainerLogs(ctx, "f1064a8a4c82", options)
+		out, err := me._Parent.Client.ContainerLogs(ctx, "f1064a8a4c82", options)
 		if err != nil {
 			break
 		}
@@ -711,10 +535,10 @@ func (me *Container) Commit() error {
 			break
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), Timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
 		defer cancel()
 
-		createResp, err := me.client.ContainerCreate(ctx, &container.Config{
+		createResp, err := me._Parent.Client.ContainerCreate(ctx, &container.Config{
 			Image: "alpine",
 			Cmd:   []string{"touch", "/helloworld"},
 		}, nil, nil, "")
@@ -722,11 +546,11 @@ func (me *Container) Commit() error {
 			break
 		}
 
-		if err := me.client.ContainerStart(ctx, createResp.ID, types.ContainerStartOptions{}); err != nil {
+		if err := me._Parent.Client.ContainerStart(ctx, createResp.ID, types.ContainerStartOptions{}); err != nil {
 			break
 		}
 
-		statusCh, errCh := me.client.ContainerWait(ctx, createResp.ID, container.WaitConditionNotRunning)
+		statusCh, errCh := me._Parent.Client.ContainerWait(ctx, createResp.ID, container.WaitConditionNotRunning)
 		select {
 			case err := <-errCh:
 				if err != nil {
@@ -735,7 +559,7 @@ func (me *Container) Commit() error {
 			case <-statusCh:
 		}
 
-		commitResp, err := me.client.ContainerCommit(ctx, createResp.ID, types.ContainerCommitOptions{Reference: "helloworld"})
+		commitResp, err := me._Parent.Client.ContainerCommit(ctx, createResp.ID, types.ContainerCommitOptions{Reference: "helloworld"})
 		if err != nil {
 			break
 		}
@@ -763,7 +587,7 @@ func findSshPort(c types.Container) error {
 	return err
 }
 
-func (me *Gear) GetContainerSsh() (string, error) {
+func (me *Container) GetContainerSsh() (string, error) {
 	var port string
 	var err error
 
@@ -775,7 +599,7 @@ func (me *Gear) GetContainerSsh() (string, error) {
 
 		err = errors.New("no SSH port")
 
-		for _, p := range me.Container.Summary.Ports {
+		for _, p := range me.Summary.Ports {
 			if p.PrivatePort == 22 {
 				port = fmt.Sprintf("%d", p.PublicPort)
 				err = nil

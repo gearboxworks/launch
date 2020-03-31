@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"gb-launch/dockerClient"
+	"gb-launch/gear"
 	"gb-launch/only"
 	"github.com/docker/docker/client"
 	"net/url"
@@ -14,7 +15,7 @@ import (
 	"strings"
 )
 
-var Version = "1.1"
+var Version = "1.2"
 
 
 func main() {
@@ -30,29 +31,29 @@ func main() {
 			break
 		}
 
-		var g *dockerClient.Gear
-		g, state.Error = dockerClient.NewGear(Debug)
+		var g *gear.Gear
+		g, state.Error = gear.NewGear(Debug)
 		if state.Error != nil {
 			break
 		}
 
 		if *args.List {
-			state.Error = g.ImageList(*args.ContainerName)
+			state.Error = g.Docker.ImageList(*args.ContainerName)
 			if state.Error != nil {
 				break
 			}
 
-			state.Error = g.ContainerList(*args.ContainerName)
+			state.Error = g.Docker.ContainerList(*args.ContainerName)
 			break
 		}
 
 		if *args.ListContainers {
-			state.Error = g.ContainerList(*args.ContainerName)
+			state.Error = g.Docker.ContainerList(*args.ContainerName)
 			break
 		}
 
 		if *args.ListImages {
-			state.Error = g.ImageList(*args.ContainerName)
+			state.Error = g.Docker.ImageList(*args.ContainerName)
 			break
 		}
 
@@ -63,7 +64,7 @@ func main() {
 		}
 
 		var found bool
-		found, state.Error = g.FindContainer(*args.ContainerName, "")
+		found, state.Error = g.Docker.FindContainer(*args.ContainerName, "")
 		if state.Error != nil {
 			break
 		}
@@ -72,7 +73,7 @@ func main() {
 		if *args.ContainerStop {
 			if found {
 				fmt.Printf("Stopping container %s\n", *args.ContainerName)
-				state.Error = g.Container.Stop()
+				state.Error = g.Docker.Container.Stop()
 			} else {
 				fmt.Printf("Container %s doesn't exist.\n", *args.ContainerName)
 			}
@@ -83,11 +84,11 @@ func main() {
 		if *args.ContainerRemove {
 			if found {
 				fmt.Printf("Removing container %s\n", *args.ContainerName)
-				state.Error = g.Container.Stop()
+				state.Error = g.Docker.Container.Stop()
 				if state.Error != nil {
 					break
 				}
-				state.Error = g.Container.Remove()
+				state.Error = g.Docker.Container.Remove()
 			} else {
 				fmt.Printf("Container %s doesn't exist.\n", *args.ContainerName)
 			}
@@ -98,24 +99,24 @@ func main() {
 		if *args.ImageRemove {
 			if found {
 				fmt.Printf("Removing image %s\n", *args.ContainerName)
-				state.Error = g.Container.Stop()
+				state.Error = g.Docker.Container.Stop()
 				if state.Error != nil {
 					break
 				}
 
-				state.Error = g.Container.Remove()
+				state.Error = g.Docker.Container.Remove()
 				if state.Error != nil {
 					break
 				}
 
-				state.Error = g.Image.Remove()
+				state.Error = g.Docker.Image.Remove()
 			}
 			//} else {
 			//	fmt.Printf("Container %s doesn't exist.\n", *args.ContainerName)
 			//}
 
 			var ok bool
-			ok, state.Error = g.FindImage(*args.ContainerName, *args.ContainerVersion)
+			ok, state.Error = g.Docker.FindImage(*args.ContainerName, *args.ContainerVersion)
 			if state.Error != nil {
 				state.Error = nil
 				fmt.Printf("Image %s doesn't exist.\n", *args.ContainerName)
@@ -126,7 +127,7 @@ func main() {
 				break
 			}
 
-			state.Error = g.Image.Remove()
+			state.Error = g.Docker.Image.Remove()
 			if state.Error != nil {
 				break
 			}
@@ -137,13 +138,13 @@ func main() {
 		// Default - run a shell.
 		if !found {
 			// state = g.ContainerCreate("golang", "", "/Users/mick/Documents/GitHub/containers/docker-golang")
-			state = g.ContainerCreate(*args.ContainerName, "", *args.DockerMount)
+			state = g.Docker.Container.ContainerCreate(*args.ContainerName, "", *args.DockerMount)
 			if state.Error != nil {
 				break
 			}
 		}
 
-		state = g.Container.Start()
+		state = g.Docker.Container.Start()
 		if state.Error != nil {
 			break
 		}
@@ -152,7 +153,7 @@ func main() {
 			break
 		}
 
-		state.Error = g.ContainerSsh(*args.Shell, !*args.StatusLine, flag.Args()...)
+		state.Error = g.Docker.ContainerSsh(*args.Shell, !*args.StatusLine, flag.Args()...)
 		if state.Error != nil {
 			break
 		}
@@ -307,6 +308,7 @@ type Args struct {
 	ContainerStop    *bool
 	ContainerRemove  *bool
 	ImageRemove      *bool
+	ImageBuild       *bool
 }
 
 type Hargs struct {
@@ -328,6 +330,7 @@ type Hargs struct {
 	ContainerStop    *flag.Flag
 	ContainerRemove  *flag.Flag
 	ImageRemove      *flag.Flag
+	ImageBuild       *flag.Flag
 }
 
 type boolFlag struct {
@@ -400,6 +403,9 @@ func ProcessArgs() (*Args, error) {
 
 		args.ImageRemove = flag.Bool("gb-clean", false, "Remove downloaded image.")
 		hargs.ImageRemove = flag.Lookup("gb-clean")
+
+		args.ImageBuild = flag.Bool("gb-build", false, "Build an image.")
+		hargs.ImageBuild = flag.Lookup("gb-build")
 
 		args.DockerMount = flag.String("gb-project", "", "Specify a project mount point.")
 		hargs.DockerMount = flag.Lookup("gb-project")
