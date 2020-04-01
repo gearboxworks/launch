@@ -357,8 +357,8 @@ func ProcessArgs() (*Args, error) {
 	for range only.Once {
 		var hargs Hargs
 
-		//exe := path.Base(os.Args[0])
-		exe := path.Base("./bin/gb-launch-Darwin")
+		exe := path.Base(os.Args[0])
+		//exe := path.Base("./bin/gb-launch-Darwin")
 		var ok bool
 		ok, err = regexp.MatchString(`^gb.launch`, exe)
 		if ok {

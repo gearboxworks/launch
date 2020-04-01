@@ -4,6 +4,9 @@ all:
 build:
 	@goreleaser --snapshot --skip-publish --rm-dist
 
+release:
+	@goreleaser --rm-dist
+
 sync:
 	@rsync -HvaxP dist/gb-launch_darwin_amd64/gb-launch mick@macpro:~/Documents/GitHub/containers/docker-template/bin/gb-launch-Darwin
 	@rsync -HvaxP dist/gb-launch_linux_amd64/gb-launch mick@macpro:~/Documents/GitHub/containers/docker-template/bin/gb-launch-Linux
