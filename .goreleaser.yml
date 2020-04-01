@@ -13,6 +13,16 @@ builds:
 
   binary: gb-launch
 
+  goos:
+    - linux
+    - darwin
+    - windows
+  goarch:
+    - 386
+    - amd64
+    - arm
+    - arm64
+
 archives:
 - replacements:
     darwin: Darwin
@@ -33,3 +43,32 @@ changelog:
     exclude:
     - '^docs:'
     - '^test:'
+
+#release:
+#  github:
+#    owner: newclarity
+#    name: gb-launch
+#
+#  # IDs of the archives to use.
+#  # Defaults to all.
+#  ids:
+#    # foo
+#    # bar
+#
+#  # You can change the name of the GitLab release.
+#  # Default is `{{.Tag}}`
+#  # name_template: "{{.ProjectName}}-v{{.Version}} {{.Env.USER}}"
+#  name_template: "Release {{.ProjectName}}-v{{.Version}} {{.Env.USER}}"
+#
+#  # You can disable this pipe in order to not upload any artifacts to
+#  # GitLab.
+#  # Defaults to false.
+#  disable: true
+#
+#  # You can add extra pre-existing files to the release.
+#  # The filename on the release will be the last part of the path (base). If
+#  # another file with the same name exists, the latest one found will be used.
+#  # Defaults to empty.
+#  extra_files:
+#    - glob: ./bin/*
+

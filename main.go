@@ -38,6 +38,8 @@ func main() {
 		}
 
 		if *args.List {
+			//ux.Draw() @TODO - testing.
+
 			state.Error = g.Docker.ImageList(*args.ContainerName)
 			if state.Error != nil {
 				break
@@ -355,7 +357,8 @@ func ProcessArgs() (*Args, error) {
 	for range only.Once {
 		var hargs Hargs
 
-		exe := path.Base(os.Args[0])
+		//exe := path.Base(os.Args[0])
+		exe := path.Base("./bin/gb-launch-Darwin")
 		var ok bool
 		ok, err = regexp.MatchString(`^gb.launch`, exe)
 		if ok {
