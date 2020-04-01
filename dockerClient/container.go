@@ -241,7 +241,7 @@ func (me *Container) ContainerCreate(gearName string, gearVersion string, gearMo
 			//state.Error = me.Search(gearName, gearVersion)
 
 			ok, state.Error = me._Parent.FindImage(gearName, gearVersion)
-			if state.Error != nil {
+			if (state.Error != nil) || (!ok) {
 				me._Parent.Image.ID = gearName
 				me._Parent.Image.Name = gearName
 				me._Parent.Image.Version = gearVersion

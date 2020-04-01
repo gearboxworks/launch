@@ -86,6 +86,7 @@ func (me *DockerGear) ContainerList(f string) error {
 		}
 
 		t.Render()
+		err = nil
 	}
 
 	return err
@@ -185,7 +186,7 @@ func (me *DockerGear) FindContainer(gearName string, gearVersion string) (bool, 
 	}
 
 	if me.Debug {
-		fmt.Printf("DEBUG: Error - %s\n", err)
+		fmt.Printf("DEBUG: FindContainer() error: %s\n", err)
 	}
 
 	return ok, err

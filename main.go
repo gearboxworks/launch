@@ -7,6 +7,7 @@ import (
 	"gb-launch/dockerClient"
 	"gb-launch/gear"
 	"gb-launch/only"
+	"gb-launch/ospaths"
 	"github.com/docker/docker/client"
 	"net/url"
 	"os"
@@ -37,6 +38,7 @@ func main() {
 			break
 		}
 
+
 		if *args.List {
 			//ux.Draw() @TODO - testing.
 
@@ -46,18 +48,26 @@ func main() {
 			}
 
 			state.Error = g.Docker.ContainerList(*args.ContainerName)
+			if state.Error != nil {
+				break
+			}
+
+			state.Error = g.Docker.NetworkList(*args.ContainerName)
 			break
 		}
+
 
 		if *args.ListContainers {
 			state.Error = g.Docker.ContainerList(*args.ContainerName)
 			break
 		}
 
+
 		if *args.ListImages {
 			state.Error = g.Docker.ImageList(*args.ContainerName)
 			break
 		}
+
 
 		if *args.ContainerName == "" {
 			state.Error = errors.New("no container specified")
@@ -67,6 +77,11 @@ func main() {
 
 		var found bool
 		found, state.Error = g.Docker.FindContainer(*args.ContainerName, "")
+		if state.Error != nil {
+			break
+		}
+
+		state = g.Docker.NetworkCreate("gearboxnet")
 		if state.Error != nil {
 			break
 		}
@@ -97,7 +112,7 @@ func main() {
 			break
 		}
 
-		// Remove a container.
+		// Remove an image.
 		if *args.ImageRemove {
 			if found {
 				fmt.Printf("Removing image %s\n", *args.ContainerName)
@@ -357,13 +372,19 @@ func ProcessArgs() (*Args, error) {
 	for range only.Once {
 		var hargs Hargs
 
-		exe := path.Base(os.Args[0])
-		//exe := path.Base("./bin/gb-launch-Darwin")
+		//exe := path.Base(os.Args[0])
+		//foo := ospaths.Split("C:\\\\Users\\\\mick\\\\Documents\\\\gb-launch")
+		foo := ospaths.Split(os.Args[0])
+		exe := foo.File.String()
+		//fmt.Printf("F1: %s\n", exe)
+		//fmt.Printf("F2: %s %s\n", foo.File.String(), foo.Dir.String())
+		//exe := path.Base("C:\\\\Users\\\\mick\\\\Documents\\\\gb-launch-Darwin")
 		var ok bool
 		ok, err = regexp.MatchString(`^gb.launch`, exe)
 		if ok {
 			exe = ""
 		}
+		//fmt.Printf("F3: %s\n", exe)
 
 		// cmd.Execute()
 

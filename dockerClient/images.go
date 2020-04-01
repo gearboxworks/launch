@@ -117,6 +117,10 @@ func (me *DockerGear) FindImage(gearName string, gearVersion string) (bool, erro
 			break
 		}
 
+		if len(images) == 0 {
+			break
+		}
+
 		for _, i := range images {
 			var gc *gearJson.GearConfig
 			gc, err = gearJson.New(i.Labels["gearbox.json"])
