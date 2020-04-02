@@ -92,11 +92,13 @@ func main() {
 		if state.IsError() {
 			break
 		}
+		state.ClearAll()
 
 		state = g.Docker.NetworkCreate("gearboxnet")
 		if state.IsError() {
 			break
 		}
+		state.ClearAll()
 
 		// Stop a container.
 		if *args.ContainerStop {

@@ -77,6 +77,12 @@ func (me *State) ClearError() {
 	me.Error = nil
 }
 
+func (me *State) ClearAll() {
+	me.Ok = nil
+	me.Warning = nil
+	me.Error = nil
+}
+
 
 func (me *State) IsRunning() bool {
 	var ok bool
