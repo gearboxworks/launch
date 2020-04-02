@@ -1,8 +1,10 @@
 package dockerClient
 
 import (
-	"errors"
+	"context"
+	"gb-launch/defaults"
 	"gb-launch/only"
+	"gb-launch/ux"
 	"github.com/docker/docker/client"
 )
 
@@ -18,41 +20,54 @@ type DockerGear struct {
 }
 
 
-func New(d bool) (*DockerGear, error) {
+func New(d bool) (*DockerGear, ux.State) {
 	var cli DockerGear
-	var err error
+	var state ux.State
 
 	for range only.Once {
 		cli.Debug = d
 
+		var err error
 		cli.Client, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 		//cli.DockerClient, err = client.NewEnvClient()
 		if err != nil {
+			state.SetError("Docker client error: %s", err)
 			break
 		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
+		defer cancel()
+
+		//var result types.Ping
+		_, err = cli.Client.Ping(ctx)
+		if err != nil {
+			state.SetError("Docker client error: %s", err)
+			break
+		}
+		//fmt.Printf("PING: %v", result)
 
 		cli.Image._Parent = &cli
 		cli.Container._Parent = &cli
 	}
 
-	return &cli, err
+	return &cli, state
 }
 
 
-func (gear *DockerGear) EnsureNotNil() error {
-	var err error
+func (gear *DockerGear) EnsureNotNil() ux.State {
+	var state ux.State
 
 	for range only.Once {
 		if gear == nil {
-			err = errors.New("gear is nil")
+			state.SetError("gear is nil")
 			break
 		}
 
 		if gear.Client == nil {
-			err = errors.New("docker client is nil")
+			state.SetError("docker client is nil")
 			break
 		}
 	}
 
-	return err
+	return state
 }

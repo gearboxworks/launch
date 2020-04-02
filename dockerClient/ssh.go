@@ -4,6 +4,7 @@ import (
 	"gb-launch/only"
 	"errors"
 	"fmt"
+	"gb-launch/ux"
 	"github.com/fatih/color"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
@@ -58,25 +59,25 @@ const DefaultSshPort = "22"
 const DefaultStatusLineUpdateDelay = time.Second * 2
 
 
-func (me *DockerGear) ContainerSsh(shell bool, status bool, cmdArgs ...string) error {
-	var err error
+func (me *DockerGear) ContainerSsh(shell bool, status bool, cmdArgs ...string) ux.State {
+	var state ux.State
 
 	for range only.Once {
-		//me.SshClient = NewSSH()
-
 		var port string
-		port, err = me.Container.GetContainerSsh()
-		if err != nil {
+		port, state = me.Container.GetContainerSsh()
+		if state.IsError() {
 			break
 		}
 		if port == "" {
-			err = errors.New("no container")
+			state.SetError("no SSH port in gear")
 			break
 		}
 
 		u := url.URL{}
+		var err error
 		err = u.UnmarshalBinary([]byte(me.Client.DaemonHost()))
 		if err != nil {
+			state.SetError("error finding SSH port: %s", err)
 			break
 		}
 
@@ -120,7 +121,7 @@ func (me *DockerGear) ContainerSsh(shell bool, status bool, cmdArgs ...string) e
 		}
 	}
 
-	return err
+	return state
 }
 
 func NewSSH(args ...SshArgs) *SSH {

@@ -1,11 +1,11 @@
 package gear
 
 import (
-	"errors"
 	"gb-launch/dockerClient"
 	"gb-launch/gear/gearJson"
 	"gb-launch/githubClient"
 	"gb-launch/only"
+	"gb-launch/ux"
 	"github.com/docker/docker/client"
 )
 // DOCKER_HOST=tcp://macpro:2376
@@ -18,23 +18,25 @@ type Gear struct {
 }
 
 
-func NewGear(d bool) (*Gear, error) {
+func NewGear(d bool) (*Gear, ux.State) {
 	var cli Gear
-	var err error
+	var state ux.State
 
 	for range only.Once {
-		cli.Docker, err = dockerClient.New(d)
-		if err != nil {
+		cli.Docker, state = dockerClient.New(d)
+		if state.IsError() {
+			state.SetError("can not connect to Docker service")
 			break
 		}
 
-		cli.Repo, err = githubClient.New()
-		if err != nil {
-			break
-		}
+		cli.Repo, state = githubClient.New()
+		state.ClearError()
+		//if state.IsError() {
+		//	break
+		//}
 	}
 
-	return &cli, err
+	return &cli, state
 }
 
 
@@ -58,25 +60,25 @@ func (gear *Gear) DecodeError(err error) (bool, error) {
 	return ok, err
 }
 
-func (gear *Gear) EnsureNotNil() error {
-	var err error
+func (gear *Gear) EnsureNotNil() ux.State {
+	var state ux.State
 
 	for range only.Once {
 		if gear == nil {
-			err = errors.New("gear is nil")
+			state.SetError("gear is nil")
 			break
 		}
 
-		err = gear.Docker.EnsureNotNil()
-		if err != nil {
+		state = gear.Docker.EnsureNotNil()
+		if state.IsError() {
 			break
 		}
 
-		err = gear.Repo.EnsureNotNil()
-		if err != nil {
+		state = gear.Repo.EnsureNotNil()
+		if state.IsError() {
 			break
 		}
 	}
 
-	return err
+	return state
 }

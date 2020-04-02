@@ -2,8 +2,8 @@ package gearJson
 
 import (
 	"encoding/json"
-	"errors"
 	"gb-launch/only"
+	"gb-launch/ux"
 )
 
 type GearConfig struct {
@@ -103,46 +103,46 @@ func (vers *GearVersions) HasVersion(c string) bool {
 }
 
 
-func New(cs string) (*GearConfig, error) {
+func New(cs string) (*GearConfig, ux.State) {
 	var gc GearConfig
-	var err error
+	var state ux.State
 
 	for range only.Once {
 		if cs == "" {
-			err = errors.New("gear config is nil")
+			state.SetError("gear config is empty")
 			break
 		}
 
 		js := []byte(cs)
 		if js == nil {
-			err = errors.New("gear config is nil")
+			state.SetError("gear config json is nil")
 			break
 		}
 
-		err = json.Unmarshal(js, &gc)
+		err := json.Unmarshal(js, &gc)
 		if err != nil {
-			err = errors.New("gearbox.json schema unknown")
+			state.SetError("gearbox.json schema unknown: %s", err)
 			break
 		}
 
-		err = gc.ValidateGearConfig()
-		if err != nil {
+		state = gc.ValidateGearConfig()
+		if state.IsError() {
 			break
 		}
 	}
 
-	return &gc, err
+	return &gc, state
 }
 
-func (me *GearConfig) ValidateGearConfig() error {
-	var err error
+func (me *GearConfig) ValidateGearConfig() ux.State {
+	var state ux.State
 
 	for range only.Once {
 		if me == nil {
-			err = errors.New("gear config is nil")
+			state.SetError("gear config is nil")
 			break
 		}
 	}
 
-	return err
+	return state
 }

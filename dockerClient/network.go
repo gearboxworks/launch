@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"gb-launch/defaults"
 	"gb-launch/only"
+	"gb-launch/ux"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/network"
@@ -16,8 +17,8 @@ import (
 // List and manage containers
 // You can use the API to list containers that are running, just like using docker ps:
 // func ContainerList(f types.ContainerListOptions) error {
-func (me *DockerGear) NetworkList(f string) error {
-	var err error
+func (me *DockerGear) NetworkList(f string) ux.State {
+	var state ux.State
 
 	for range only.Once {
 		if me.Debug {
@@ -31,42 +32,57 @@ func (me *DockerGear) NetworkList(f string) error {
 		df.Add("name", f)
 
 		var nets []types.NetworkResource
+		var err error
 		nets, err = me.Client.NetworkList(ctx, types.NetworkListOptions{Filters: df})
 		if err != nil {
+			state.SetError("error listing networks")
 			break
 		}
 
+		ux.PrintfCyan("\nConfigured Gearbox networks:\n")
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
-		t.AppendHeader(table.Row{"Name", "Driver"})
+		t.AppendHeader(table.Row{
+			"Name",
+			"Driver",
+			"Subnet",
+		})
 
 		for _, c := range nets {
-			t.AppendRow([]interface{}{c.Name, c.Driver})
+			n := ""
+			if len(c.IPAM.Config) > 0 {
+				n = c.IPAM.Config[0].Subnet
+			}
+
+			t.AppendRow([]interface{}{
+				ux.SprintfWhite(c.Name),
+				ux.SprintfWhite(c.Driver),
+				ux.SprintfWhite(n),
+			})
 		}
 
 		t.Render()
 	}
 
-	return err
+	return state
 }
 
 
-func (me *DockerGear) FindNetwork(netName string) (bool, error) {
-	var ok bool
-	var err error
+func (me *DockerGear) FindNetwork(netName string) ux.State {
+	var state ux.State
 
 	for range only.Once {
 		if me.Debug {
 			fmt.Printf("DEBUG: FindNetwork(%s)\n", netName)
 		}
 
-		err = me.EnsureNotNil()
-		if err != nil {
+		state = me.EnsureNotNil()
+		if state.IsError() {
 			break
 		}
 
 		if netName == "" {
-			err = errors.New("empty gearname")
+			state.SetError("empty gear name")
 			break
 		}
 
@@ -77,29 +93,31 @@ func (me *DockerGear) FindNetwork(netName string) (bool, error) {
 		defer cancel()
 
 		var nets []types.NetworkResource
+		var err error
 		nets, err = me.Client.NetworkList(ctx, types.NetworkListOptions{Filters: df})
 		if err != nil {
+			state.SetError("gear image search error: %s", err)
 			break
 		}
 
 		for _, c := range nets {
 			if c.Name == netName {
-				ok = true
+				state.SetOk("found")
 				break
 			}
 		}
 	}
 
 	if me.Debug {
-		fmt.Printf("DEBUG: FindNetwork() error: %s\n", err)
+		state.Print()
 	}
 
-	return ok, err
+	return state
 }
 
 
-func (me *DockerGear) NetworkCreate(netName string) State {
-	var state State
+func (me *DockerGear) NetworkCreate(netName string) ux.State {
+	var state ux.State
 
 	for range only.Once {
 		if me.Debug {
@@ -107,16 +125,15 @@ func (me *DockerGear) NetworkCreate(netName string) State {
 		}
 
 		if netName == "" {
-			state.Error = errors.New("empty netName")
+			state.SetError("empty netName")
 			break
 		}
 
-		var ok bool
-		ok, state.Error = me.FindNetwork(netName)
-		if state.Error != nil {
+		state = me.FindNetwork(netName)
+		if state.IsError() {
 			break
 		}
-		if ok {
+		if state.IsOk() {
 			break
 		}
 

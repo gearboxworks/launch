@@ -1,13 +1,12 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
-	"gb-launch/dockerClient"
 	"gb-launch/gear"
 	"gb-launch/only"
 	"gb-launch/ospaths"
+	"gb-launch/ux"
 	"github.com/docker/docker/client"
 	"net/url"
 	"os"
@@ -18,81 +17,101 @@ import (
 
 var Version = "1.3"
 
+func init() {
+	_ = ux.Open()
+}
 
 func main() {
-	var state dockerClient.State
+	//var response dockerClient.Response
+	var state ux.State
 
 	for range only.Once {
 		var err error
 		var args *Args
 		args, err = ProcessArgs()
 		if err != nil {
-			fmt.Printf("ERROR: %s\n\n", err)
+			ux.PrintError(err)
 			args.Help()
 			break
 		}
 
 		var g *gear.Gear
-		g, state.Error = gear.NewGear(Debug)
-		if state.Error != nil {
+		g, state = gear.NewGear(Debug)
+		if state.IsError() {
 			break
 		}
 
+		// @TODO - testing.
+		//ux.PrintfOk("OK - it works\n")
+		//ux.PrintfWarning("WARNING - it may or may not have worked... sort of\n")
+		//ux.PrintfError("ERROR - oops, no beer in the fridge\n")
+		//err = errors.New("what? no beer!")
+		//ux.PrintError(err)
+		//_ = ux.Draw2()
+		//ux.Draw3()
+		//_ = ux.Draw4()
+		//_ = ux.Draw5()
+
 
 		if *args.List {
-			//ux.Draw() @TODO - testing.
-
-			state.Error = g.Docker.ImageList(*args.ContainerName)
-			if state.Error != nil {
+			state = g.Docker.ImageList(*args.ContainerName)
+			if state.IsError() {
 				break
 			}
 
-			state.Error = g.Docker.ContainerList(*args.ContainerName)
-			if state.Error != nil {
+			state = g.Docker.ContainerList(*args.ContainerName)
+			if state.IsError() {
 				break
 			}
 
-			state.Error = g.Docker.NetworkList(*args.ContainerName)
+			state = g.Docker.NetworkList("gearboxnet")
 			break
 		}
 
 
 		if *args.ListContainers {
-			state.Error = g.Docker.ContainerList(*args.ContainerName)
+			state = g.Docker.ContainerList(*args.ContainerName)
 			break
 		}
 
 
 		if *args.ListImages {
-			state.Error = g.Docker.ImageList(*args.ContainerName)
+			state = g.Docker.ImageList(*args.ContainerName)
 			break
 		}
 
 
 		if *args.ContainerName == "" {
-			state.Error = errors.New("no container specified")
+			state.SetError("no container specified")
 			args.Help()
 			break
 		}
 
 		var found bool
-		found, state.Error = g.Docker.FindContainer(*args.ContainerName, "")
-		if state.Error != nil {
+		found, state = g.Docker.FindContainer(*args.ContainerName, "")
+		if state.IsError() {
 			break
 		}
 
 		state = g.Docker.NetworkCreate("gearboxnet")
-		if state.Error != nil {
+		if state.IsError() {
 			break
 		}
 
 		// Stop a container.
 		if *args.ContainerStop {
 			if found {
-				fmt.Printf("Stopping container %s\n", *args.ContainerName)
-				state.Error = g.Docker.Container.Stop()
+				ux.Printf("Stopping gear '%s': ", *args.ContainerName)
+				state = g.Docker.Container.Stop()
+				if state.IsError() {
+					ux.PrintfRed("error stopping - %s\n", state.Error)
+				} else if state.IsExited() {
+					ux.PrintfGreen("OK\n")
+				} else {
+					ux.PrintfYellow("cannot be stopped\n")
+				}
 			} else {
-				fmt.Printf("Container %s doesn't exist.\n", *args.ContainerName)
+				ux.PrintfWarning("Gear '%s' doesn't exist.\n", *args.ContainerName)
 			}
 			break
 		}
@@ -100,14 +119,27 @@ func main() {
 		// Remove a container.
 		if *args.ContainerRemove {
 			if found {
-				fmt.Printf("Removing container %s\n", *args.ContainerName)
-				state.Error = g.Docker.Container.Stop()
-				if state.Error != nil {
+				ux.Printf("Stopping gear '%s': ", *args.ContainerName)
+				state = g.Docker.Container.Stop()
+				if state.IsError() {
+					ux.PrintfRed("error stopping - %s\n", state.Error)
+					break
+				} else if state.IsExited() {
+					ux.PrintfGreen("OK\n")
+				} else {
+					ux.PrintfYellow("cannot be stopped\n")
 					break
 				}
-				state.Error = g.Docker.Container.Remove()
+
+				ux.Printf("Removing gear '%s': ", *args.ContainerName)
+				state = g.Docker.Container.Remove()
+				if state.IsError() {
+					ux.PrintfRed("error removing - %s\n", state.Error)
+				} else {
+					ux.PrintfGreen("OK\n")
+				}
 			} else {
-				fmt.Printf("Container %s doesn't exist.\n", *args.ContainerName)
+				ux.PrintfWarning("Gear '%s' doesn't exist.\n", *args.ContainerName)
 			}
 			break
 		}
@@ -115,38 +147,44 @@ func main() {
 		// Remove an image.
 		if *args.ImageRemove {
 			if found {
-				fmt.Printf("Removing image %s\n", *args.ContainerName)
-				state.Error = g.Docker.Container.Stop()
-				if state.Error != nil {
+				ux.Printf("Stopping gear '%s': ", *args.ContainerName)
+				state = g.Docker.Container.Stop()
+				if state.IsError() {
+					ux.PrintfRed("error stopping - %s\n", state.Error)
+					break
+				} else if state.IsExited() {
+					ux.PrintfGreen("OK\n")
+				} else {
+					ux.PrintfYellow("cannot be stopped\n")
 					break
 				}
 
-				state.Error = g.Docker.Container.Remove()
-				if state.Error != nil {
-					break
+				ux.Printf("Removing gear '%s': ", *args.ContainerName)
+				state = g.Docker.Container.Remove()
+				if state.IsError() {
+					ux.PrintfRed("error removing - %s\n", state.Error)
+				} else {
+					ux.PrintfGreen("OK\n")
 				}
-
-				state.Error = g.Docker.Image.Remove()
 			}
-			//} else {
-			//	fmt.Printf("Container %s doesn't exist.\n", *args.ContainerName)
-			//}
 
 			var ok bool
-			ok, state.Error = g.Docker.FindImage(*args.ContainerName, *args.ContainerVersion)
-			if state.Error != nil {
-				state.Error = nil
-				fmt.Printf("Image %s doesn't exist.\n", *args.ContainerName)
+			ok, state = g.Docker.FindImage(*args.ContainerName, *args.ContainerVersion)
+			if state.IsError() {
+				state.SetWarning("Gear image '%s' doesn't exist.\n", *args.ContainerName)
 				break
 			}
 			if !ok {
-				fmt.Printf("Image %s doesn't exist.\n", *args.ContainerName)
+				ux.PrintfYellow("Gear image '%s' doesn't exist.\n", *args.ContainerName)
 				break
 			}
 
-			state.Error = g.Docker.Image.Remove()
-			if state.Error != nil {
-				break
+			ux.Printf("Removing gear image '%s': ", *args.ContainerName)
+			state = g.Docker.Image.Remove()
+			if state.IsError() {
+				ux.PrintfRed("error removing - '%s'\n", state.Error)
+			} else {
+				ux.PrintfGreen("OK\n")
 			}
 
 			break
@@ -156,31 +194,32 @@ func main() {
 		if !found {
 			// state = g.ContainerCreate("golang", "", "/Users/mick/Documents/GitHub/containers/docker-golang")
 			state = g.Docker.Container.ContainerCreate(*args.ContainerName, "", *args.DockerMount)
-			if state.Error != nil {
+			if state.IsError() {
 				break
 			}
 		}
 
 		state = g.Docker.Container.Start()
-		if state.Error != nil {
+		if state.IsError() {
 			break
 		}
 		if !state.IsRunning() {
-			state.Error = errors.New("container not started")
+			state.SetError("container not started")
 			break
 		}
 
-		state.Error = g.Docker.ContainerSsh(*args.Shell, !*args.StatusLine, flag.Args()...)
-		if state.Error != nil {
-			break
-		}
+		state = g.Docker.ContainerSsh(*args.Shell, !*args.StatusLine, flag.Args()...)
+		break
 	}
 
-	if state.Error != nil {
-		fmt.Printf("Gearbox error: %s\n", state.Error)
-	}
 
-	os.Exit(0)
+	exit := 0
+	if state.IsError() {
+		ux.PrintError(state.Error)
+		exit = 1
+	}
+	ux.Close()
+	os.Exit(exit)
 }
 
 func (me *Args) Help() {
@@ -190,44 +229,44 @@ func (me *Args) Help() {
 		exe = strings.TrimSuffix(exe, "-Linux")
 		exe = strings.TrimSuffix(exe, "-Windows")
 
-		fmt.Printf("%s v%s:\n", exe, Version)
-		fmt.Printf("\tLaunch an interactive container within the Gearbox environment.\n")
-		fmt.Printf("\n")
+		ux.PrintfCyan("\nGearbox: %s v%s:\n", exe, Version)
+		ux.PrintfWhite("\tLaunch an interactive container within the Gearbox environment.\n")
+		ux.PrintfWhite("\n")
 
 		// fmt.Printf("\n")
 		// fmt.Printf("-%s \n\t%s - %s\n", me.DockerHost.Name, me.DockerHost.Usage, me.DockerHost.DefValue)
 
 		flag.PrintDefaults()
-		fmt.Printf("\n")
-		fmt.Printf("Examples:\n")
-		fmt.Printf("Run 'ls -l' within a terminus container.\n")
-		fmt.Printf("\t%s -gb-name terminus -gb-shell -- ls -l\n", exe)
+		ux.PrintfWhite("\n")
+		ux.PrintfWhite("Examples:\n")
+		ux.PrintfWhite("Run 'ls -l' within a terminus container.\n")
+		ux.PrintfGreen("\t%s -gb-name terminus -gb-shell -- ls -l\n", exe)
 
-		fmt.Printf("Run an interactive shell within a terminus container.\n")
-		fmt.Printf("\t%s -gb-name terminus -gb-shell\n", exe)
+		ux.PrintfWhite("Run an interactive shell within a terminus container.\n")
+		ux.PrintfGreen("\t%s -gb-name terminus -gb-shell\n", exe)
 
-		fmt.Printf("Run 'terminus' command within a terminus container.\n")
-		fmt.Printf("\t%s -gb-name terminus\n", exe)
+		ux.PrintfWhite("Run 'terminus' command within a terminus container.\n")
+		ux.PrintfGreen("\t%s -gb-name terminus\n", exe)
 
-		fmt.Printf("Run 'terminus auth:login' within a terminus container.\n")
-		fmt.Printf("\t%s -gb-name terminus auth:login\n", exe)
+		ux.PrintfWhite("Run 'terminus auth:login' within a terminus container.\n")
+		ux.PrintfGreen("\t%s -gb-name terminus auth:login\n", exe)
 
-		fmt.Printf("\n")
-		fmt.Printf("If %s is symlinked to 'terminus', then you can drop the '-gb-name terminus' ...\n", exe)
+		ux.PrintfWhite("\n")
+		ux.PrintfWhite("If %s is symlinked to 'terminus', then you can drop the '-gb-name terminus' ...\n", exe)
 
-		fmt.Printf("Run 'ls -l' within a terminus container.\n")
-		fmt.Printf("\tterminus -gb-shell -- ls -l\n")
+		ux.PrintfWhite("Run 'ls -l' within a terminus container.\n")
+		ux.PrintfGreen("\tterminus -gb-shell -- ls -l\n")
 
-		fmt.Printf("Run an interactive shell within a terminus container.\n")
-		fmt.Printf("\tterminus -gb-shell\n")
+		ux.PrintfWhite("Run an interactive shell within a terminus container.\n")
+		ux.PrintfGreen("\tterminus -gb-shell\n")
 
-		fmt.Printf("Run 'terminus' command within a terminus container.\n")
-		fmt.Printf("\tterminus\n")
+		ux.PrintfWhite("Run 'terminus' command within a terminus container.\n")
+		ux.PrintfGreen("\tterminus\n")
 
-		fmt.Printf("Run 'terminus auth:login' within a terminus container.\n")
-		fmt.Printf("\tterminus auth:login\n")
+		ux.PrintfWhite("Run 'terminus auth:login' within a terminus container.\n")
+		ux.PrintfGreen("\tterminus auth:login\n")
 
-		fmt.Printf("\t\n")
+		ux.PrintfWhite("\t\n")
 	}
 }
 
@@ -372,19 +411,17 @@ func ProcessArgs() (*Args, error) {
 	for range only.Once {
 		var hargs Hargs
 
-		//exe := path.Base(os.Args[0])
 		//foo := ospaths.Split("C:\\\\Users\\\\mick\\\\Documents\\\\gb-launch")
+		//foo := ospaths.Split("C:\\\\Users\\\\mick\\\\Documents\\\\gb-launch-Darwin")
+		//foo := ospaths.Split("./bin/gb-launch-Darwin")
 		foo := ospaths.Split(os.Args[0])
 		exe := foo.File.String()
-		//fmt.Printf("F1: %s\n", exe)
 		//fmt.Printf("F2: %s %s\n", foo.File.String(), foo.Dir.String())
-		//exe := path.Base("C:\\\\Users\\\\mick\\\\Documents\\\\gb-launch-Darwin")
 		var ok bool
 		ok, err = regexp.MatchString(`^gb.launch`, exe)
 		if ok {
 			exe = ""
 		}
-		//fmt.Printf("F3: %s\n", exe)
 
 		// cmd.Execute()
 
@@ -445,6 +482,11 @@ func ProcessArgs() (*Args, error) {
 			}
 
 			err = os.Setenv("DOCKER_HOST", args.DockerDaemon.String())
+		}
+
+		ok, _ = regexp.MatchString(`^gb.launch`, *args.ContainerName)
+		if ok {
+			*args.ContainerName = ""
 		}
 
 		// Show help.

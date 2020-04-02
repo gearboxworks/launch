@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"gb-launch/defaults"
 	"gb-launch/gear/gearJson"
 	"gb-launch/only"
+	"gb-launch/ux"
 	"github.com/docker/docker/api/types"
 	"io"
 	"os"
@@ -28,43 +28,43 @@ type Image struct {
 }
 
 
-func (me *Image) EnsureNotNil() error {
-	var err error
+func (me *Image) EnsureNotNil() ux.State {
+	var state ux.State
 
 	for range only.Once {
 		if me == nil {
-			err = errors.New("gear is nil")
+			state.SetError("gear is nil")
 			break
 		}
 
 		if me.ID == "" {
-			err = errors.New("ID is nil")
+			state.SetError("ID is nil")
 			break
 		}
 
 		if me.Name == "" {
-			err = errors.New("name is nil")
+			state.SetError("name is nil")
 			break
 		}
 
 		if me.Version == "" {
-			err = errors.New("version is nil")
+			state.SetError("version is nil")
 			break
 		}
 	}
 
-	return err
+	return state
 }
 
 
 // Pull an image
 // Pull an image, like docker pull:
-func (me *Image) Pull() error {
-	var err error
+func (me *Image) Pull() ux.State {
+	var state ux.State
 
 	for range only.Once {
-		err = me.EnsureNotNil()
-		if err != nil {
+		state = me.EnsureNotNil()
+		if state.IsError() {
 			break
 		}
 
@@ -88,45 +88,54 @@ func (me *Image) Pull() error {
 		//}
 
 		var out io.ReadCloser
+		var err error
 		out, err = me._Parent.Client.ImagePull(ctx, repo, types.ImagePullOptions{All: false})
 		if err != nil {
+			state.SetError("error pulling gear: %s", err)
 			break
 		}
 
 		defer out.Close()
 
-		fmt.Printf("Pulling Gearbox container: %s\n", me.Name)
+		ux.Printf("pulling Gearbox gear: %s\n", me.Name)
 		d := json.NewDecoder(out)
 		var event *PullEvent
 		for {
-			if err := d.Decode(&event); err != nil {
+			err := d.Decode(&event)
+			if err != nil {
 				if err == io.EOF {
 					break
 				}
 
-				panic(err)
+				state.SetError("error pulling gear: %s", err)
+				break
 			}
 
 			// fmt.Printf("EVENT: %+v\n", event)
-			fmt.Printf("%+v\r", event.Progress)
+			ux.Printf("%+v\r", event.Progress)
 		}
-		fmt.Printf("\n%s\n", event.Status)
+
+		if state.IsError() {
+			break
+		}
 
 		// Latest event for new image
 		// EVENT: {Status:Status: Downloaded newer image for busybox:latest Error: Progress:[==================================================>]  699.2kB/699.2kB ProgressDetail:{Current:699243 Total:699243}}
 		// Latest event for up-to-date image
 		// EVENT: {Status:Status: Image is up to date for busybox:latest Error: Progress: ProgressDetail:{Current:0 Total:0}}
 		if event != nil {
-			if strings.Contains(event.Status, fmt.Sprintf("Downloaded newer image for %s", me.Name)) {
+			if strings.HasPrefix(event.Status, "Status: Downloaded newer image for") {
 				// new
-				fmt.Println("\nnew")
-			}
-
-			if strings.Contains(event.Status, fmt.Sprintf("Image is up to date for %s", me.Name)) {
+				ux.PrintfOk("pulling Gearbox gear %s - OK\n", me.Name)
+			} else if strings.HasPrefix(event.Status, "Status: Image is up to date for") {
 				// up-to-date
-				fmt.Println("\nup-to-date")
+				ux.PrintfOk("pulling Gearbox gear %s - image up to date\n", me.Name)
+			} else {
+				ux.PrintfWarning("pulling Gearbox gear %s - unknown\n", me.Name)
 			}
 		}
+		ux.Printf("\nGear image pull OK: %+v\n", event)
+		ux.Printf("%s\n", event.Status)
 
 		//buf := new(bytes.Buffer)
 		//_, err = buf.ReadFrom(out)
@@ -134,7 +143,7 @@ func (me *Image) Pull() error {
 		//_, _ = io.Copy(os.Stdout, out)
 	}
 
-	return err
+	return state
 }
 
 type PullEvent struct {
@@ -150,12 +159,12 @@ type PullEvent struct {
 
 // Pull an image with authentication
 // Pull an image, like docker pull, with authentication:
-func (me *Image) ImageAuthPull() error {
-	var err error
+func (me *Image) ImageAuthPull() ux.State {
+	var state ux.State
 
 	for range only.Once {
-		err = me.EnsureNotNil()
-		if err != nil {
+		state = me.EnsureNotNil()
+		if state.IsError() {
 			break
 		}
 
@@ -163,8 +172,11 @@ func (me *Image) ImageAuthPull() error {
 			Username: "username",
 			Password: "password",
 		}
+
+		var err error
 		encodedJSON, err := json.Marshal(authConfig)
 		if err != nil {
+			state.SetError("error pulling gear: %s", err)
 			break
 		}
 		authStr := base64.URLEncoding.EncodeToString(encodedJSON)
@@ -174,6 +186,7 @@ func (me *Image) ImageAuthPull() error {
 
 		out, err := me._Parent.Client.ImagePull(ctx, "alpine", types.ImagePullOptions{RegistryAuth: authStr})
 		if err != nil {
+			state.SetError("error pulling gear: %s", err)
 			break
 		}
 
@@ -182,19 +195,19 @@ func (me *Image) ImageAuthPull() error {
 		_, _ = io.Copy(os.Stdout, out)
 	}
 
-	return err
+	return state
 }
 
 
 // Remove containers
 // Now that you know what containers exist, you can perform operations on them.
 // This example stops all running containers.
-func (me *Image) Remove() error {
-	var err error
+func (me *Image) Remove() ux.State {
+	var state ux.State
 
 	for range only.Once {
-		err = me.EnsureNotNil()
-		if err != nil {
+		state = me.EnsureNotNil()
+		if state.IsError() {
 			break
 		}
 
@@ -206,11 +219,12 @@ func (me *Image) Remove() error {
 			PruneChildren: true,
 		}
 
-		_, err = me._Parent.Client.ImageRemove(ctx, me.ID, options)
+		_, err := me._Parent.Client.ImageRemove(ctx, me.ID, options)
 		if err != nil {
+			state.SetError("error removing gear: %s", err)
 			break
 		}
 	}
 
-	return err
+	return state
 }

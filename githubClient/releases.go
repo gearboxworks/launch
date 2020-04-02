@@ -1,10 +1,10 @@
 package githubClient
 
 import (
-	"errors"
 	"fmt"
 	"gb-launch/only"
 	"gb-launch/ospaths"
+	"gb-launch/ux"
 	"github.com/cavaliercoder/grab"
 	"github.com/google/go-github/github"
 	"golang.org/x/net/context"
@@ -46,9 +46,9 @@ type ReleaseSelector struct {
 }
 
 
-func New() (*GitHubRepo, error) {
+func New() (*GitHubRepo, ux.State) {
 	var ret *GitHubRepo
-	var err error
+	var state ux.State
 
 	for range only.Once {
 		p := ospaths.New("")
@@ -57,7 +57,7 @@ func New() (*GitHubRepo, error) {
 		me.BaseDir = p.UserConfigDir.AddToPath("iso")
 		me.Map = make(ReleasesMap)
 
-		err = me.UpdateReleases()
+		state = me.UpdateReleases()
 
 		ret = &me
 
@@ -67,16 +67,16 @@ func New() (*GitHubRepo, error) {
 	//eblog.LogIfNil(ret, err)
 	//eblog.LogIfError(entity.VmBoxEntityName, err)
 
-	return ret, err
+	return ret, state
 }
 
 
-func (me *GitHubRepo) ShowReleases() error {
-	var err error
+func (me *GitHubRepo) ShowReleases() ux.State {
+	var state ux.State
 
 	for range only.Once {
-		err = me.EnsureNotNil()
-		if err != nil {
+		state = me.EnsureNotNil()
+		if state.IsError() {
 			break
 		}
 
@@ -112,21 +112,21 @@ func (me *GitHubRepo) ShowReleases() error {
 	//eblog.LogIfNil(me, err)
 	//eblog.LogIfError(entity.VmBoxEntityName, err)
 
-	return err
+	return state
 }
 
 
-func (me *Release) ShowRelease() error {
-	var err error
+func (me *Release) ShowRelease() ux.State {
+	var state ux.State
 
 	for range only.Once {
-		err = me.EnsureNotNil()
-		if err != nil {
+		state = me.EnsureNotNil()
+		if state.IsError() {
 			break
 		}
 
 		if me.Instance.Name == nil {
-			err = errors.New("no release version specified")
+			state.SetError("no release version specified")
 			break
 		}
 
@@ -151,18 +151,18 @@ func (me *Release) ShowRelease() error {
 	//eblog.LogIfNil(me, err)
 	//eblog.LogIfError(entity.VmBoxEntityName, err)
 
-	return err
+	return state
 }
 
 
-func (me *GitHubRepo) UpdateReleases() error {
+func (me *GitHubRepo) UpdateReleases() ux.State {
 
 	var rm = make(ReleasesMap)
-	var err error
+	var state ux.State
 
 	for range only.Once {
-		err = me.EnsureNotNil()
-		if err != nil {
+		state = me.EnsureNotNil()
+		if state.IsError() {
 			break
 		}
 
@@ -177,9 +177,9 @@ func (me *GitHubRepo) UpdateReleases() error {
 		//ctx := context.Background()
 		opt := &github.ListOptions{}
 
-		releases, _, err := client.Repositories.ListReleases(context.Background(), "gearboxworks", "gearbox-os", opt)
+		releases, _, err := client.Repositories.ListReleases(context.Background(), "gearboxworks", "docker-os", opt)
 		if err != nil {
-			err = errors.New("can't fetch GitHub releases")
+			state.SetError("can't fetch GitHub releases")
 			break
 		}
 
@@ -231,7 +231,7 @@ func (me *GitHubRepo) UpdateReleases() error {
 	//eblog.LogIfNil(me, err)
 	//eblog.LogIfError(entity.VmBoxEntityName, err)
 
-	return err
+	return state
 }
 
 
@@ -242,14 +242,13 @@ Updates the following:
    me.VmIsoUrl 		string
    me.VmIsoRelease    Release
 */
-func (me *GitHubRepo) SelectRelease(selector ReleaseSelector) (*Release, error) {
-
-	var err error
+func (me *GitHubRepo) SelectRelease(selector ReleaseSelector) (*Release, ux.State) {
 	var r *Release
+	var state ux.State
 
 	for range only.Once {
-		err = me.EnsureNotNil()
-		if err != nil {
+		state = me.EnsureNotNil()
+		if state.IsError() {
 			break
 		}
 
@@ -268,34 +267,33 @@ func (me *GitHubRepo) SelectRelease(selector ReleaseSelector) (*Release, error) 
 	//eblog.LogIfNil(me, err)
 	//eblog.LogIfError(entity.VmBoxEntityName, err)
 
-	return r, err
+	return r, state
 }
 
 
-func (me *Release) GetIso() error {
-
-	var err error
+func (me *Release) GetIso() ux.State {
+	var state ux.State
 
 	for range only.Once {
-		err = me.EnsureNotNil()
-		if err != nil {
+		state = me.EnsureNotNil()
+		if state.IsError() {
 			break
 		}
 
 		if me.File.String() == "" {
-			err = errors.New(fmt.Sprintf("no Gearbox OS iso file defined VmIsoUrl:%s VmIsoFile:%s", me.Url, me.File.String()))
+			state.SetError(fmt.Sprintf("no Gearbox OS iso file defined VmIsoUrl:%s VmIsoFile:%s", me.Url, me.File.String()))
 			break
 		}
 
 		if me.Url == "" {
-			err = errors.New(fmt.Sprintf("no Gearbox OS iso url defined VmIsoUrl:%s VmIsoFile:%s", me.Url, me.File.String()))
+			state.SetError(fmt.Sprintf("no Gearbox OS iso url defined VmIsoUrl:%s VmIsoFile:%s", me.Url, me.File.String()))
 			break
 		}
 
 
-		var state int
-		state, err = me.IsIsoFilePresent()
-		if state != IsoFileNeedsToDownload {
+		var numb int
+		numb, state = me.IsIsoFilePresent()
+		if numb != IsoFileNeedsToDownload {
 			break
 		}
 
@@ -339,7 +337,7 @@ func (me *Release) GetIso() error {
 		// check for errors
 		if err := resp.Err(); err != nil {
 			fmt.Printf("\nDownload failed\n")
-			err = errors.New(fmt.Sprintf("ISO download failed VmIsoUrl:%s VmIsoFile:%s", me.Url, me.File.String()))
+			state.SetError(fmt.Sprintf("ISO download failed VmIsoUrl:%s VmIsoFile:%s", me.Url, me.File.String()))
 			break
 		}
 		fmt.Printf("%s VM: Downloaded ISO completed OK.\n",
@@ -356,7 +354,7 @@ func (me *Release) GetIso() error {
 	//eblog.LogIfNil(me, err)
 	//eblog.LogIfError(entity.VmBoxEntityName, err)
 
-	return err
+	return state
 }
 
 
@@ -376,38 +374,38 @@ func (me *Release) GetIso() error {
 const IsoFileNeedsToDownload	= 0
 const IsoFileIsDownloading		= 1
 const IsoFileDownloaded			= 2
-func (me *Release) IsIsoFilePresent() (int, error) {
-
-	var err error
+func (me *Release) IsIsoFilePresent() (int, ux.State) {
+	var state ux.State
 	var ret int
 	var stat os.FileInfo
 
 	for range only.Once {
-		err = me.EnsureNotNil()
-		if err != nil {
+		state = me.EnsureNotNil()
+		if state.IsError() {
 			break
 		}
 
 		if me.File.String() == "" {
-			err = errors.New( fmt.Sprintf("no Gearbox OS iso file defined VmIsoUrl:%s VmIsoFile:%s", me.Url, me.File.String()))
+			state.SetError( fmt.Sprintf("no Gearbox OS iso file defined VmIsoUrl:%s VmIsoFile:%s", me.Url, me.File.String()))
 			break
 		}
 
+		var err error
 		stat, err = os.Stat(me.File.String())
 		if os.IsNotExist(err) {
-			err = errors.New(fmt.Sprintf("ISO file needs to download from GitHub VmIsoUrl:%s VmIsoFile:%s", me.Url, me.File.String()))
+			state.SetError("ISO file needs to download from GitHub VmIsoUrl:%s VmIsoFile:%s", me.Url, me.File.String())
 			ret = IsoFileNeedsToDownload
 			break
 		}
 
 		if me.IsDownloading {
-			err = errors.New(fmt.Sprintf("ISO file still downloading VmIsoUrl:%s VmIsoFile:%s Percent:%d", me.Url, me.File.String(), me.DlIndex))
+			state.SetError("ISO file still downloading VmIsoUrl:%s VmIsoFile:%s Percent:%d", me.Url, me.File.String(), me.DlIndex)
 			ret = IsoFileIsDownloading
 			break
 		}
 
 		if stat.Size() != me.Size {
-			err = errors.New(fmt.Sprintf("ISO file needs to re-download from GitHub VmIsoUrl:%s VmIsoFile:%s", me.Url, me.File.String()))
+			state.SetError("ISO file needs to re-download from GitHub VmIsoUrl:%s VmIsoFile:%s", me.Url, me.File.String())
 			ret = IsoFileNeedsToDownload
 			break
 		}
@@ -426,63 +424,60 @@ func (me *Release) IsIsoFilePresent() (int, error) {
 	//eblog.LogIfNil(me, err)
 	//eblog.LogIfError(entity.VmBoxEntityName, err)
 
-	return ret, err
+	return ret, state
 }
 
 
-func (me *GitHubRepo) EnsureNotNil() error {
-
-	var err error
+func (me *GitHubRepo) EnsureNotNil() ux.State {
+	var state ux.State
 
 	for range only.Once {
 		if me == nil {
-			err = errors.New("Releases is nil")
+			state.SetError("releases is nil")
 			break
 		}
 	}
 
-	return err
+	return state
 }
 
-func EnsureReleasesNotNil(me *GitHubRepo) error {
+func EnsureReleasesNotNil(me *GitHubRepo) ux.State {
 	return me.EnsureNotNil()
 }
 
 
-func (me *ReleasesMap) EnsureNotNil() error {
-
-	var err error
+func (me *ReleasesMap) EnsureNotNil() ux.State {
+	var state ux.State
 
 	for range only.Once {
 		if me == nil {
-			err = errors.New("Release is nil")
+			state.SetError("Release is nil")
 			break
 		}
 	}
 
-	return err
+	return state
 }
 
-func EnsureReleasesMapNotNil(me *ReleasesMap) error {
+func EnsureReleasesMapNotNil(me *ReleasesMap) ux.State {
 	return me.EnsureNotNil()
 }
 
 
-func (me *Release) EnsureNotNil() error {
-
-	var err error
+func (me *Release) EnsureNotNil() ux.State {
+	var state ux.State
 
 	for range only.Once {
 		if me == nil {
-			err = errors.New("Release is nil")
+			state.SetError("Release is nil")
 			break
 		}
 	}
 
-	return err
+	return state
 }
 
-func EnsureReleaseNotNil(me *Release) error {
+func EnsureReleaseNotNil(me *Release) ux.State {
 	return me.EnsureNotNil()
 }
 

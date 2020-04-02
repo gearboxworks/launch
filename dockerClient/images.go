@@ -2,11 +2,11 @@ package dockerClient
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"gb-launch/defaults"
 	"gb-launch/gear/gearJson"
 	"gb-launch/only"
+	"gb-launch/ux"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/registry"
@@ -20,16 +20,18 @@ import (
 // List all images
 // List the images on your Engine, similar to docker image ls:
 // func ImageList(f types.ImageListOptions) error {
-func (me *DockerGear) ImageList(f string) error {
-	var err error
+func (me *DockerGear) ImageList(f string) ux.State {
+	var state ux.State
 
 	for range only.Once {
+		var err error
+
 		if me.Debug {
 			fmt.Printf("DEBUG: ImageList(%s)\n", f)
 		}
 
-		err = me.EnsureNotNil()
-		if err != nil {
+		state = me.EnsureNotNil()
+		if state.IsError() {
 			break
 		}
 
@@ -44,17 +46,19 @@ func (me *DockerGear) ImageList(f string) error {
 		var images []types.ImageSummary
 		images, err = me.Client.ImageList(ctx, types.ImageListOptions{All: true, Filters: df})
 		if err != nil {
+			state.SetError("gear image list error: %s", err)
 			break
 		}
 
+		ux.PrintfCyan("\nConfigured Gearbox images:\n")
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
 		t.AppendHeader(table.Row{"Class", "State", "Image", "Ports", "Size"})
 
 		for _, i := range images {
 			var gc *gearJson.GearConfig
-			gc, err = gearJson.New(i.Labels["gearbox.json"])
-			if err != nil {
+			gc, state = gearJson.New(i.Labels["gearbox.json"])
+			if state.IsError() {
 				continue
 			}
 
@@ -73,34 +77,41 @@ func (me *DockerGear) ImageList(f string) error {
 			}
 
 			// foo := fmt.Sprintf("%s/%s", gc.Organization, gc.Name)
-			t.AppendRow([]interface{}{gc.Meta.Class, gc.Meta.State, i.RepoTags[0], strings.Join(gc.Build.Ports, " "), humanize.Bytes(uint64(i.Size))})
+			t.AppendRow([]interface{}{
+				ux.SprintfWhite(gc.Meta.Class),
+				ux.SprintfWhite(gc.Meta.State),
+				ux.SprintfWhite(i.RepoTags[0]),
+				ux.SprintfWhite(strings.Join(gc.Build.Ports, " ")),
+				ux.SprintfWhite(humanize.Bytes(uint64(i.Size))),
+			})
 		}
 
 		// t.AppendFooter(table.Row{"", "", "Total", 10000})
 		t.Render()
-		err = nil
+		state.ClearError()
 	}
 
-	return err
+	return state
 }
 
 
-func (me *DockerGear) FindImage(gearName string, gearVersion string) (bool, error) {
+func (me *DockerGear) FindImage(gearName string, gearVersion string) (bool, ux.State) {
 	var ok bool
-	var err error
+	var state ux.State
+	//var err error
 
 	for range only.Once {
 		if me.Debug {
 			fmt.Printf("DEBUG: FindImage(%s, %s)\n", gearName, gearVersion)
 		}
 
-		err = me.EnsureNotNil()
-		if err != nil {
+		state = me.EnsureNotNil()
+		if state.IsError() {
 			break
 		}
 
 		if gearName == "" {
-			err = errors.New("empty gearname")
+			state.SetError("empty gear name")
 			break
 		}
 
@@ -112,8 +123,10 @@ func (me *DockerGear) FindImage(gearName string, gearVersion string) (bool, erro
 		defer cancel()
 
 		var images []types.ImageSummary
+		var err error
 		images, err = me.Client.ImageList(ctx, types.ImageListOptions{All: true})
 		if err != nil {
+			state.SetError("gear image list error: %s", err)
 			break
 		}
 
@@ -123,8 +136,8 @@ func (me *DockerGear) FindImage(gearName string, gearVersion string) (bool, erro
 
 		for _, i := range images {
 			var gc *gearJson.GearConfig
-			gc, err = gearJson.New(i.Labels["gearbox.json"])
-			if err != nil {
+			gc, state = gearJson.New(i.Labels["gearbox.json"])
+			if state.IsError() {
 				continue
 			}
 
@@ -163,7 +176,7 @@ func (me *DockerGear) FindImage(gearName string, gearVersion string) (bool, erro
 			break
 		}
 
-		if err != nil {
+		if state.IsError() {
 			break
 		}
 
@@ -173,26 +186,29 @@ func (me *DockerGear) FindImage(gearName string, gearVersion string) (bool, erro
 
 		me.Image.Details, _, err = me.Client.ImageInspectWithRaw(ctx, me.Image.ID)
 		if err != nil {
+			state.SetError("error inspecting gear: %s", err)
 			break
 		}
 
-		err = me.Image.EnsureNotNil()
-		if err != nil {
+		state = me.Image.EnsureNotNil()
+		if state.IsError() {
 			break
 		}
+
+		state.SetOk("found image")
 	}
 
-	return ok, err
+	return ok, state
 }
 
 
 // Search for an image in remote registry.
-func (me *DockerGear) Search(gearName string, gearVersion string) error {
-	var err error
+func (me *DockerGear) Search(gearName string, gearVersion string) ux.State {
+	var state ux.State
 
 	for range only.Once {
-		err = me.EnsureNotNil()
-		if err != nil {
+		state = me.EnsureNotNil()
+		if state.IsError() {
 			break
 		}
 
@@ -212,15 +228,20 @@ func (me *DockerGear) Search(gearName string, gearVersion string) error {
 		repo = gearName
 
 		var images []registry.SearchResult
+		var err error
 		images, err = me.Client.ImageSearch(ctx, repo, types.ImageSearchOptions{Filters:df, Limit: 100})
+		if err != nil {
+			state.SetError("gear image search error: %s", err)
+			break
+		}
+
 		for _, v := range images {
 			if !strings.HasPrefix(v.Name, "gearboxworks/") {
 				continue
 			}
 			fmt.Printf("%s - %s\n", v.Name, v.Description)
 		}
-
 	}
 
-	return err
+	return state
 }
