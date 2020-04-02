@@ -29,6 +29,7 @@ import (
 var _defined bool
 var Color aurora.Aurora
 
+
 func Open() error {
 	var err error
 

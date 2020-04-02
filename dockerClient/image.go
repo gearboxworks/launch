@@ -114,6 +114,7 @@ func (me *Image) Pull() ux.State {
 			// fmt.Printf("EVENT: %+v\n", event)
 			ux.Printf("%+v\r", event.Progress)
 		}
+		ux.Printf("\n")
 
 		if state.IsError() {
 			break
@@ -134,7 +135,7 @@ func (me *Image) Pull() ux.State {
 				ux.PrintfWarning("pulling Gearbox gear %s - unknown\n", me.Name)
 			}
 		}
-		ux.Printf("\nGear image pull OK: %+v\n", event)
+		//ux.Printf("\nGear image pull OK: %+v\n", event)
 		ux.Printf("%s\n", event.Status)
 
 		//buf := new(bytes.Buffer)

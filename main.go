@@ -215,9 +215,12 @@ func main() {
 
 	exit := 0
 	if state.IsError() {
-		ux.PrintError(state.Error)
 		exit = 1
 	}
+	if state.IsWarning() {
+		exit = 2
+	}
+	state.Print()
 	ux.Close()
 	os.Exit(exit)
 }
