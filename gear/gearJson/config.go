@@ -2,6 +2,7 @@ package gearJson
 
 import (
 	"encoding/json"
+	"fmt"
 	"gb-launch/only"
 	"gb-launch/ux"
 )
@@ -65,8 +66,18 @@ type GearExtensions struct {
 }
 
 type GearEnv map[string]string
-type GearPorts []string
+type GearPorts map[string]string
 type GearArgs string
+
+func (ports *GearPorts) ToString() string {
+	var p string
+
+	for k, v := range *ports {
+		p = fmt.Sprintf("%s %s:%s", p, k, v)
+	}
+
+	return p
+}
 
 type GearVersion struct {
 	MajorVersion string `json:"majorversion"`

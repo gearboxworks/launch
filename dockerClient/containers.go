@@ -192,6 +192,7 @@ func (me *DockerGear) FindContainer(gearName string, gearVersion string) (bool, 
 			me.Container.ID = c.ID
 			me.Container.Name = gc.Meta.Name
 			ok = true
+			state.ClearAll()
 
 			break
 		}

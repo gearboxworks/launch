@@ -81,7 +81,7 @@ func (me *DockerGear) ImageList(f string) ux.State {
 				ux.SprintfWhite(gc.Meta.Class),
 				ux.SprintfWhite(gc.Meta.State),
 				ux.SprintfWhite(i.RepoTags[0]),
-				ux.SprintfWhite(strings.Join(gc.Build.Ports, " ")),
+				ux.SprintfWhite(gc.Build.Ports.ToString()),
 				ux.SprintfWhite(humanize.Bytes(uint64(i.Size))),
 			})
 		}
