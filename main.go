@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-var Version = "1.4.1"
+var Version = "1.4.2"
 
 func init() {
 	_ = ux.Open()
