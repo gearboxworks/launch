@@ -4,7 +4,7 @@ package ospaths
 
 import (
 	"fmt"
-	"gb-launch/defaults"
+	"launch/defaults"
 	"github.com/gearboxworks/go-osbridge"
 	"github.com/gearboxworks/go-status/only"
 	"github.com/getlantern/errors"

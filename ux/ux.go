@@ -3,7 +3,7 @@ package ux
 import (
 	"errors"
 	"fmt"
-	"gb-launch/only"
+	"launch/only"
 	"github.com/gdamore/tcell"
 	termui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"

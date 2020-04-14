@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"gb-launch/gear"
-	"gb-launch/only"
-	"gb-launch/ospaths"
-	"gb-launch/ux"
+	"launch/gear"
+	"launch/only"
+	"launch/ospaths"
+	"launch/ux"
 	"github.com/docker/docker/client"
 	"net/url"
 	"os"
@@ -416,9 +416,9 @@ func ProcessArgs() (*Args, error) {
 	for range only.Once {
 		var hargs Hargs
 
-		//foo := ospaths.Split("C:\\\\Users\\\\mick\\\\Documents\\\\gb-launch")
-		//foo := ospaths.Split("C:\\\\Users\\\\mick\\\\Documents\\\\gb-launch-Darwin")
-		//foo := ospaths.Split("./bin/gb-launch-Darwin")
+		//foo := ospaths.Split("C:\\\\Users\\\\mick\\\\Documents\\\\launch")
+		//foo := ospaths.Split("C:\\\\Users\\\\mick\\\\Documents\\\\launch-Darwin")
+		//foo := ospaths.Split("./bin/launch-Darwin")
 		foo := ospaths.Split(os.Args[0])
 		exe := foo.File.String()
 		//fmt.Printf("F2: %s %s\n", foo.File.String(), foo.Dir.String())

@@ -2,9 +2,9 @@ package githubClient
 
 import (
 	"fmt"
-	"gb-launch/only"
-	"gb-launch/ospaths"
-	"gb-launch/ux"
+	"launch/only"
+	"launch/ospaths"
+	"launch/ux"
 	"github.com/cavaliercoder/grab"
 	"github.com/google/go-github/github"
 	"golang.org/x/net/context"

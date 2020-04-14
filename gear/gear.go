@@ -1,11 +1,11 @@
 package gear
 
 import (
-	"gb-launch/dockerClient"
-	"gb-launch/gear/gearJson"
-	"gb-launch/githubClient"
-	"gb-launch/only"
-	"gb-launch/ux"
+	"launch/dockerClient"
+	"launch/gear/gearJson"
+	"launch/githubClient"
+	"launch/only"
+	"launch/ux"
 	"github.com/docker/docker/client"
 )
 // DOCKER_HOST=tcp://macpro:2376

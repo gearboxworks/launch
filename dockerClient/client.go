@@ -2,9 +2,9 @@ package dockerClient
 
 import (
 	"context"
-	"gb-launch/defaults"
-	"gb-launch/only"
-	"gb-launch/ux"
+	"launch/defaults"
+	"launch/only"
+	"launch/ux"
 	"github.com/docker/docker/client"
 )
 

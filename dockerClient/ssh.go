@@ -1,10 +1,10 @@
 package dockerClient
 
 import (
-	"gb-launch/only"
+	"launch/only"
 	"errors"
 	"fmt"
-	"gb-launch/ux"
+	"launch/ux"
 	"github.com/fatih/color"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"

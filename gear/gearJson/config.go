@@ -3,8 +3,8 @@ package gearJson
 import (
 	"encoding/json"
 	"fmt"
-	"gb-launch/only"
-	"gb-launch/ux"
+	"launch/only"
+	"launch/ux"
 )
 
 type GearConfig struct {

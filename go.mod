@@ -1,4 +1,4 @@
-module gb-launch
+module launch
 
 go 1.14
 
