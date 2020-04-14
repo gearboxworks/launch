@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"launch/defaults"
 	"launch/gear"
 	"launch/only"
 	"launch/ospaths"
@@ -64,7 +65,7 @@ func main() {
 				break
 			}
 
-			state = g.Docker.NetworkList("gearboxnet")
+			state = g.Docker.NetworkList(defaults.GearboxNetwork)
 			break
 		}
 
@@ -94,7 +95,7 @@ func main() {
 		}
 		state.ClearAll()
 
-		state = g.Docker.NetworkCreate("gearboxnet")
+		state = g.Docker.NetworkCreate(defaults.GearboxNetwork)
 		if state.IsError() {
 			break
 		}

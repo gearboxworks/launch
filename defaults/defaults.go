@@ -7,4 +7,5 @@ const (
 	Organization = "gearboxworks"
 	Timeout = time.Second * 2
 	DefaultProject = "/home/gearbox/projects/default"
+	GearboxNetwork = "gearboxnet"
 )

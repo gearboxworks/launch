@@ -331,7 +331,7 @@ func (me *Container) ContainerCreate(gearName string, gearVersion string, gearMo
 				Type:   "",
 				Config: nil,
 			},
-			NetworkMode:     "gearboxnet",
+			NetworkMode:     defaults.GearboxNetwork,
 			PortBindings:    nil,						// @TODO
 			RestartPolicy:   container.RestartPolicy {
 				Name:              "",
