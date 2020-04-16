@@ -78,7 +78,12 @@ func (me *DockerGear) ContainerList(f string) ux.State {
 					sshPort = fmt.Sprintf("%d", p.PublicPort)
 					continue
 				}
-				ports += fmt.Sprintf("%s://%s:%d => %d\n", p.Type, p.IP, p.PublicPort, p.PrivatePort)
+				//ports += fmt.Sprintf("%s://%s:%d => %d\n", p.Type, p.IP, p.PublicPort, p.PrivatePort)
+				if p.IP == "0.0.0.0" {
+					ports += fmt.Sprintf("%d => %d\n", p.PublicPort, p.PrivatePort)
+				} else {
+					ports += fmt.Sprintf("%s://%s:%d => %d\n", p.Type, p.IP, p.PublicPort, p.PrivatePort)
+				}
 			}
 			if sshPort == "0" {
 				sshPort = "none"

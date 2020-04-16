@@ -73,7 +73,7 @@ func (ports *GearPorts) ToString() string {
 	var p string
 
 	for k, v := range *ports {
-		p = fmt.Sprintf("%s %s:%s", p, k, v)
+		p = fmt.Sprintf("%s %s:%s\n", p, k, v)
 	}
 
 	return p
