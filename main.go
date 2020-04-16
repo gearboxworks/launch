@@ -1,17 +1,11 @@
 package main
 
 import (
-	"flag"
 	"launch/cmd"
 	"launch/only"
 	"launch/ux"
-	"net/url"
 	"os"
-	"path"
-	"strings"
 )
-
-var Version = "1.4.2"
 
 func init() {
 	_ = ux.Open()
@@ -41,7 +35,6 @@ func main() {
 		if state.IsError() {
 			break
 		}
-
 		state = cmd.GetState()
 
 		//var args *Args
@@ -51,13 +44,13 @@ func main() {
 		//	args.Help()
 		//	break
 		//}
-
+		//
 		//var g *gear.Gear
 		//g, state = gear.NewGear(Debug)
 		//if state.IsError() {
 		//	break
 		//}
-
+		//
 		// @TODO - testing.
 		//ux.PrintfOk("OK - it works\n")
 		//ux.PrintfWarning("WARNING - it may or may not have worked... sort of\n")
@@ -68,7 +61,7 @@ func main() {
 		//ux.Draw3()
 		//_ = ux.Draw4()
 		//_ = ux.Draw5()
-
+		//
 		//if *args.List {
 		//	state = g.Docker.ImageList(*args.ContainerName)
 		//	if state.IsError() {
@@ -102,7 +95,7 @@ func main() {
 		//	args.Help()
 		//	break
 		//}
-
+		//
 		//var found bool
 		//found, state = g.Docker.FindContainer(*args.ContainerName, "")
 		//if state.IsError() {
@@ -230,7 +223,6 @@ func main() {
 		//break
 	}
 
-
 	exit := 0
 	if state.IsError() {
 		exit = 1
@@ -243,54 +235,54 @@ func main() {
 	os.Exit(exit)
 }
 
-func (me *Args) Help() {
-	for range only.Once {
-		exe := path.Base(os.Args[0])
-		exe = strings.TrimSuffix(exe, "-Darwin")
-		exe = strings.TrimSuffix(exe, "-Linux")
-		exe = strings.TrimSuffix(exe, "-Windows")
-
-		ux.PrintfCyan("\nGearbox: %s v%s:\n", exe, Version)
-		ux.PrintfWhite("\tLaunch an interactive container within the Gearbox environment.\n")
-		ux.PrintfWhite("\n")
-
-		// fmt.Printf("\n")
-		// fmt.Printf("-%s \n\t%s - %s\n", me.DockerHost.Name, me.DockerHost.Usage, me.DockerHost.DefValue)
-
-		flag.PrintDefaults()
-		ux.PrintfWhite("\n")
-		ux.PrintfWhite("Examples:\n")
-		ux.PrintfWhite("Run 'ls -l' within a terminus container.\n")
-		ux.PrintfGreen("\t%s -gb-name terminus -gb-shell -- ls -l\n", exe)
-
-		ux.PrintfWhite("Run an interactive shell within a terminus container.\n")
-		ux.PrintfGreen("\t%s -gb-name terminus -gb-shell\n", exe)
-
-		ux.PrintfWhite("Run 'terminus' command within a terminus container.\n")
-		ux.PrintfGreen("\t%s -gb-name terminus\n", exe)
-
-		ux.PrintfWhite("Run 'terminus auth:login' within a terminus container.\n")
-		ux.PrintfGreen("\t%s -gb-name terminus auth:login\n", exe)
-
-		ux.PrintfWhite("\n")
-		ux.PrintfWhite("If %s is symlinked to 'terminus', then you can drop the '-gb-name terminus' ...\n", exe)
-
-		ux.PrintfWhite("Run 'ls -l' within a terminus container.\n")
-		ux.PrintfGreen("\tterminus -gb-shell -- ls -l\n")
-
-		ux.PrintfWhite("Run an interactive shell within a terminus container.\n")
-		ux.PrintfGreen("\tterminus -gb-shell\n")
-
-		ux.PrintfWhite("Run 'terminus' command within a terminus container.\n")
-		ux.PrintfGreen("\tterminus\n")
-
-		ux.PrintfWhite("Run 'terminus auth:login' within a terminus container.\n")
-		ux.PrintfGreen("\tterminus auth:login\n")
-
-		ux.PrintfWhite("\t\n")
-	}
-}
-
+//func (me *Args) Help() {
+//	for range only.Once {
+//		exe := path.Base(os.Args[0])
+//		exe = strings.TrimSuffix(exe, "-Darwin")
+//		exe = strings.TrimSuffix(exe, "-Linux")
+//		exe = strings.TrimSuffix(exe, "-Windows")
+//
+//		ux.PrintfCyan("\nGearbox: %s v%s:\n", exe, Version)
+//		ux.PrintfWhite("\tLaunch an interactive container within the Gearbox environment.\n")
+//		ux.PrintfWhite("\n")
+//
+//		// fmt.Printf("\n")
+//		// fmt.Printf("-%s \n\t%s - %s\n", me.DockerHost.Name, me.DockerHost.Usage, me.DockerHost.DefValue)
+//
+//		flag.PrintDefaults()
+//		ux.PrintfWhite("\n")
+//		ux.PrintfWhite("Examples:\n")
+//		ux.PrintfWhite("Run 'ls -l' within a terminus container.\n")
+//		ux.PrintfGreen("\t%s -gb-name terminus -gb-shell -- ls -l\n", exe)
+//
+//		ux.PrintfWhite("Run an interactive shell within a terminus container.\n")
+//		ux.PrintfGreen("\t%s -gb-name terminus -gb-shell\n", exe)
+//
+//		ux.PrintfWhite("Run 'terminus' command within a terminus container.\n")
+//		ux.PrintfGreen("\t%s -gb-name terminus\n", exe)
+//
+//		ux.PrintfWhite("Run 'terminus auth:login' within a terminus container.\n")
+//		ux.PrintfGreen("\t%s -gb-name terminus auth:login\n", exe)
+//
+//		ux.PrintfWhite("\n")
+//		ux.PrintfWhite("If %s is symlinked to 'terminus', then you can drop the '-gb-name terminus' ...\n", exe)
+//
+//		ux.PrintfWhite("Run 'ls -l' within a terminus container.\n")
+//		ux.PrintfGreen("\tterminus -gb-shell -- ls -l\n")
+//
+//		ux.PrintfWhite("Run an interactive shell within a terminus container.\n")
+//		ux.PrintfGreen("\tterminus -gb-shell\n")
+//
+//		ux.PrintfWhite("Run 'terminus' command within a terminus container.\n")
+//		ux.PrintfGreen("\tterminus\n")
+//
+//		ux.PrintfWhite("Run 'terminus auth:login' within a terminus container.\n")
+//		ux.PrintfGreen("\tterminus auth:login\n")
+//
+//		ux.PrintfWhite("\t\n")
+//	}
+//}
+//
 // func HelpVariables() {
 // 	for range only.Once {
 // 		fmt.Printf("Keys accessible within your template file:\n")
@@ -361,206 +353,206 @@ func (me *Args) Help() {
 // 		fmt.Printf("\tJsonConfig -json config.json -create setup.sh.tmpl -shell\n")
 // 	}
 // }
-
-var Debug bool
-
-type Args struct {
-	Debug            *bool
-
-	DockerHost       *string
-	DockerPort       *string
-	DockerDaemon     *url.URL
-
-	//AltCommand       *bool
-	DockerMount      *string
-	ContainerName    *string
-	ContainerVersion *string
-	Shell            *bool
-	StatusLine       *bool
-
-	List             *bool
-	ListImages       *bool
-	ListContainers   *bool
-
-	ContainerStop    *bool
-	ContainerRemove  *bool
-	ImageRemove      *bool
-	ImageBuild       *bool
-}
-
-type Hargs struct {
-	DockerHost       *flag.Flag
-	DockerPort       *flag.Flag
-	DockerDaemon     *url.URL
-
-	Command          *flag.Flag
-	DockerMount      *flag.Flag
-	ContainerName    *flag.Flag
-	ContainerVersion *flag.Flag
-	Shell            *flag.Flag
-	StatusLine       *flag.Flag
-
-	List             *flag.Flag
-	ListImages       *flag.Flag
-	ListContainers   *flag.Flag
-
-	ContainerStop    *flag.Flag
-	ContainerRemove  *flag.Flag
-	ImageRemove      *flag.Flag
-	ImageBuild       *flag.Flag
-}
-
-type boolFlag struct {
-	set   bool
-	value bool
-}
-
-func (sf *boolFlag) Set(x bool) error {
-	sf.value = x
-	sf.set = true
-	return nil
-}
-
-func (sf *boolFlag) String() bool {
-	return sf.value
-}
-
-func ProcessArgs() (*Args, error) {
-	var err error
-	var args Args
-
-	for range only.Once {
-		//var hargs Hargs
-
-		//foo := ospaths.Split("C:\\\\Users\\\\mick\\\\Documents\\\\launch")
-		//foo := ospaths.Split("C:\\\\Users\\\\mick\\\\Documents\\\\launch-Darwin")
-		//foo := ospaths.Split("./bin/launch-Darwin")
-		//foo := ospaths.Split(os.Args[0])
-		//exe := foo.File.String()
-		////fmt.Printf("F2: %s %s\n", foo.File.String(), foo.Dir.String())
-		//var ok bool
-		//ok, err = regexp.MatchString("^" + defaults.BinaryName, exe)
-		//if !ok {
-		//	break
-		//}
-		//
-		//if ok {
-		//	exe = ""
-		//}
-		//
-		//err = cmd.Execute()
-		//if err != nil {
-		//	break
-		//}
-		//
-		//break
-
-		//help_all := flag.Bool("gb-help", false, "Show all help.")
-		//
-		//args.Debug = flag.Bool("gb-debug", false, "DEBUG")
-		//
-		//args.DockerHost = flag.String("gb-host", "", "Specify an alternative Docker host.")
-		//hargs.DockerHost = flag.Lookup("gb-host")
-		//
-		//args.DockerPort = flag.String("gb-docker-port", "", "Specify an alternative Docker port.")
-		//hargs.DockerPort = flag.Lookup("gb-docker-port")
-		//
-		//args.ContainerName = flag.String("gb-name", exe, "Specify container name.")
-		//hargs.ContainerName = flag.Lookup("gb-name")
-		//
-		//args.ContainerVersion = flag.String("gb-version", "latest", "Specify container version.")
-		//hargs.ContainerVersion = flag.Lookup("gb-version")
-		//
-		//args.Shell = flag.Bool("gb-shell", false, "Run a shell instead of the default container command.")
-		//hargs.Shell = flag.Lookup("gb-shell")
-		//
-		//args.StatusLine = flag.Bool("gb-status", false, "Include a Gearbox status line within the container shell.")
-		//hargs.StatusLine = flag.Lookup("gb-status")
-		//
-		//args.List = flag.Bool("gb-list", false, "List all images and containers.")
-		//hargs.List = flag.Lookup("gb-list")
-		//
-		//args.ListImages = flag.Bool("gb-images", false, "List all images downloaded.")
-		//hargs.ListImages = flag.Lookup("gb-images")
-		//
-		//args.ListContainers = flag.Bool("gb-containers", false, "List all containers created.")
-		//hargs.ListContainers = flag.Lookup("gb-containers")
-		//
-		//args.ContainerStop = flag.Bool("gb-stop", false, "Stop a created container.")
-		//hargs.ContainerStop = flag.Lookup("gb-stop")
-		//
-		//args.ContainerRemove = flag.Bool("gb-remove", false, "Remove a created container.")
-		//hargs.ContainerRemove = flag.Lookup("gb-remove")
-		//
-		//args.ImageRemove = flag.Bool("gb-clean", false, "Remove downloaded image.")
-		//hargs.ImageRemove = flag.Lookup("gb-clean")
-		//
-		//args.ImageBuild = flag.Bool("gb-build", false, "Build an image.")
-		//hargs.ImageBuild = flag.Lookup("gb-build")
-		//
-		//args.DockerMount = flag.String("gb-project", "", "Specify a project mount point.")
-		//hargs.DockerMount = flag.Lookup("gb-project")
-		//
-		//flag.Parse()
-		//
-		//Debug = *args.Debug
-
-		//if (*args.DockerHost != "") && (*args.DockerPort != "") {
-		//	args.DockerDaemon, err = client.ParseHostURL(fmt.Sprintf("tcp://%s:%s", *args.DockerHost, *args.DockerPort))
-		//	if err != nil {
-		//		break
-		//	}
-		//
-		//	err = os.Setenv("DOCKER_HOST", args.DockerDaemon.String())
-		//}
-		//
-		//ok, _ = regexp.MatchString("^" + defaults.BinaryName, *args.ContainerName)
-		//if ok {
-		//	*args.ContainerName = ""
-		//}
-		//
-		//// Show help.
-		////if *help_all {
-		////	args.Help()
-		////	os.Exit(0)
-		////}
-		//
-		//if *args.ListImages {
-		//	break
-		//}
-		//
-		//if *args.List {
-		//	break
-		//}
-		//
-		//if *args.ListContainers {
-		//	break
-		//}
-		//
-		//if *args.ContainerStop {
-		//	break
-		//}
-		//
-		//if *args.ContainerRemove {
-		//	break
-		//}
-		//
-		//if *args.ImageRemove {
-		//	break
-		//}
-		//
-		//if *args.Shell {
-		//	break
-		//}
-		//
-		// @TODO Need to figure this logic out.
-		//args.Help()
-		//os.Exit(0)
-	}
-
-	return &args, err
-}
-
+//
+//var Debug bool
+//
+//type Args struct {
+//	Debug            *bool
+//
+//	DockerHost       *string
+//	DockerPort       *string
+//	DockerDaemon     *url.URL
+//
+//	//AltCommand       *bool
+//	DockerMount      *string
+//	ContainerName    *string
+//	ContainerVersion *string
+//	Shell            *bool
+//	StatusLine       *bool
+//
+//	List             *bool
+//	ListImages       *bool
+//	ListContainers   *bool
+//
+//	ContainerStop    *bool
+//	ContainerRemove  *bool
+//	ImageRemove      *bool
+//	ImageBuild       *bool
+//}
+//
+//type Hargs struct {
+//	DockerHost       *flag.Flag
+//	DockerPort       *flag.Flag
+//	DockerDaemon     *url.URL
+//
+//	Command          *flag.Flag
+//	DockerMount      *flag.Flag
+//	ContainerName    *flag.Flag
+//	ContainerVersion *flag.Flag
+//	Shell            *flag.Flag
+//	StatusLine       *flag.Flag
+//
+//	List             *flag.Flag
+//	ListImages       *flag.Flag
+//	ListContainers   *flag.Flag
+//
+//	ContainerStop    *flag.Flag
+//	ContainerRemove  *flag.Flag
+//	ImageRemove      *flag.Flag
+//	ImageBuild       *flag.Flag
+//}
+//
+//type boolFlag struct {
+//	set   bool
+//	value bool
+//}
+//
+//func (sf *boolFlag) Set(x bool) error {
+//	sf.value = x
+//	sf.set = true
+//	return nil
+//}
+//
+//func (sf *boolFlag) String() bool {
+//	return sf.value
+//}
+//
+//func ProcessArgs() (*Args, error) {
+//	var err error
+//	var args Args
+//
+//	for range only.Once {
+//		//var hargs Hargs
+//
+//		//foo := ospaths.Split("C:\\\\Users\\\\mick\\\\Documents\\\\launch")
+//		//foo := ospaths.Split("C:\\\\Users\\\\mick\\\\Documents\\\\launch-Darwin")
+//		//foo := ospaths.Split("./bin/launch-Darwin")
+//		//foo := ospaths.Split(os.Args[0])
+//		//exe := foo.File.String()
+//		////fmt.Printf("F2: %s %s\n", foo.File.String(), foo.Dir.String())
+//		//var ok bool
+//		//ok, err = regexp.MatchString("^" + defaults.BinaryName, exe)
+//		//if !ok {
+//		//	break
+//		//}
+//		//
+//		//if ok {
+//		//	exe = ""
+//		//}
+//		//
+//		//err = cmd.Execute()
+//		//if err != nil {
+//		//	break
+//		//}
+//		//
+//		//break
+//
+//		//help_all := flag.Bool("gb-help", false, "Show all help.")
+//		//
+//		//args.Debug = flag.Bool("gb-debug", false, "DEBUG")
+//		//
+//		//args.DockerHost = flag.String("gb-host", "", "Specify an alternative Docker host.")
+//		//hargs.DockerHost = flag.Lookup("gb-host")
+//		//
+//		//args.DockerPort = flag.String("gb-docker-port", "", "Specify an alternative Docker port.")
+//		//hargs.DockerPort = flag.Lookup("gb-docker-port")
+//		//
+//		//args.ContainerName = flag.String("gb-name", exe, "Specify container name.")
+//		//hargs.ContainerName = flag.Lookup("gb-name")
+//		//
+//		//args.ContainerVersion = flag.String("gb-version", "latest", "Specify container version.")
+//		//hargs.ContainerVersion = flag.Lookup("gb-version")
+//		//
+//		//args.Shell = flag.Bool("gb-shell", false, "Run a shell instead of the default container command.")
+//		//hargs.Shell = flag.Lookup("gb-shell")
+//		//
+//		//args.StatusLine = flag.Bool("gb-status", false, "Include a Gearbox status line within the container shell.")
+//		//hargs.StatusLine = flag.Lookup("gb-status")
+//		//
+//		//args.List = flag.Bool("gb-list", false, "List all images and containers.")
+//		//hargs.List = flag.Lookup("gb-list")
+//		//
+//		//args.ListImages = flag.Bool("gb-images", false, "List all images downloaded.")
+//		//hargs.ListImages = flag.Lookup("gb-images")
+//		//
+//		//args.ListContainers = flag.Bool("gb-containers", false, "List all containers created.")
+//		//hargs.ListContainers = flag.Lookup("gb-containers")
+//		//
+//		//args.ContainerStop = flag.Bool("gb-stop", false, "Stop a created container.")
+//		//hargs.ContainerStop = flag.Lookup("gb-stop")
+//		//
+//		//args.ContainerRemove = flag.Bool("gb-remove", false, "Remove a created container.")
+//		//hargs.ContainerRemove = flag.Lookup("gb-remove")
+//		//
+//		//args.ImageRemove = flag.Bool("gb-clean", false, "Remove downloaded image.")
+//		//hargs.ImageRemove = flag.Lookup("gb-clean")
+//		//
+//		//args.ImageBuild = flag.Bool("gb-build", false, "Build an image.")
+//		//hargs.ImageBuild = flag.Lookup("gb-build")
+//		//
+//		//args.DockerMount = flag.String("gb-project", "", "Specify a project mount point.")
+//		//hargs.DockerMount = flag.Lookup("gb-project")
+//		//
+//		//flag.Parse()
+//		//
+//		//Debug = *args.Debug
+//
+//		//if (*args.DockerHost != "") && (*args.DockerPort != "") {
+//		//	args.DockerDaemon, err = client.ParseHostURL(fmt.Sprintf("tcp://%s:%s", *args.DockerHost, *args.DockerPort))
+//		//	if err != nil {
+//		//		break
+//		//	}
+//		//
+//		//	err = os.Setenv("DOCKER_HOST", args.DockerDaemon.String())
+//		//}
+//		//
+//		//ok, _ = regexp.MatchString("^" + defaults.BinaryName, *args.ContainerName)
+//		//if ok {
+//		//	*args.ContainerName = ""
+//		//}
+//		//
+//		//// Show help.
+//		////if *help_all {
+//		////	args.Help()
+//		////	os.Exit(0)
+//		////}
+//		//
+//		//if *args.ListImages {
+//		//	break
+//		//}
+//		//
+//		//if *args.List {
+//		//	break
+//		//}
+//		//
+//		//if *args.ListContainers {
+//		//	break
+//		//}
+//		//
+//		//if *args.ContainerStop {
+//		//	break
+//		//}
+//		//
+//		//if *args.ContainerRemove {
+//		//	break
+//		//}
+//		//
+//		//if *args.ImageRemove {
+//		//	break
+//		//}
+//		//
+//		//if *args.Shell {
+//		//	break
+//		//}
+//		//
+//		// @TODO Need to figure this logic out.
+//		//args.Help()
+//		//os.Exit(0)
+//	}
+//
+//	return &args, err
+//}
+//
 //type FileInfo struct {
 //	Dir string
 //	Name string

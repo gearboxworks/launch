@@ -181,7 +181,7 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 		if ok {
-			ux.Printf("version: %s\n", "1.4.2")
+			ux.Printf("%s: v%s\n", defaults.BinaryName, defaults.BinaryVersion)
 			cmdState.ClearAll()
 			break
 			//os.Exit(0)
@@ -233,7 +233,6 @@ func Execute() ux.State {
 
 		err := rootCmd.Execute()
 		if err != nil {
-			fmt.Printf("F4: %v\n", err)
 			cmdState.SetError("%s", err)
 			break
 		}
