@@ -1,10 +1,9 @@
 package cmd
 
 import (
+	"github.com/spf13/cobra"
 	"launch/only"
 	"launch/ux"
-
-	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -25,44 +24,40 @@ func init() {
 
 // gbBuildCmd represents the gbBuild command
 var gbBuildCmd = &cobra.Command {
-	Use:   "build",
+	Use:   "build <gear name>",
 	SuggestFor: []string{ "compile", "generate" },
 	Short: ux.SprintfBlue("Build a Gearbox gear"),
 	Long: ux.SprintfBlue("Allows building of arbitrary containers as a Gearbox container, (called gears)."),
-	//Example: "",
+	Example: ux.SprintfWhite("launch build golang"),
 	DisableFlagParsing: false,
 	Run: gbBuildFunc,
+	Args: cobra.ExactArgs(1),
 }
 
 func gbBuildFunc(cmd *cobra.Command, args []string) {
 	for range only.Once {
-		//var err error
+		// var err error
 		showArgs(cmd, args)
-
-		//var ok bool
-		//ok, err = cmd.Flags().GetBool("help")
-		//if err != nil {
-		//	break
-		//}
-		//if ok {
-		//	_ = cmd.Help()
-		//}
+		ux.PrintfWarning("Command not yet implemented.\n")
 	}
 }
 
 
 // gbPublishCmd represents the gbPublish command
 var gbPublishCmd = &cobra.Command{
-	Use:   "publish",
+	Use:   "publish <gear name>",
 	Short: ux.SprintfBlue("Publish a Gearbox gear"),
 	Long: ux.SprintfBlue("Publish a Gearbox gear to GitHub or DockerHub."),
+	Example: ux.SprintfWhite("launch publish golang"),
 	DisableFlagParsing: false,
 	Run: gbPublishFunc,
+	Args: cobra.ExactArgs(1),
 }
 
 func gbPublishFunc(cmd *cobra.Command, args []string) {
 	for range only.Once {
 		// var err error
 		showArgs(cmd, args)
+		ux.PrintfWarning("Command not yet implemented.\n")
 	}
 }

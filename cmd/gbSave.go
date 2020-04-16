@@ -1,10 +1,9 @@
 package cmd
 
 import (
+	"github.com/spf13/cobra"
 	"launch/only"
 	"launch/ux"
-
-	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -25,35 +24,41 @@ func init() {
 
 // gbSaveCmd represents the gbSave command
 var gbSaveCmd = &cobra.Command{
-	Use:   "export",
+	Use:   "export <gear name>",
 	Aliases: []string{"save"},
 	Short: ux.SprintfBlue("Save state of a Gearbox gear"),
 	Long: ux.SprintfBlue("Save state of a Gearbox gear."),
+	Example: ux.SprintfWhite("launch save golang"),
 	DisableFlagParsing: false,
 	Run: gbSaveFunc,
+	Args: cobra.ExactArgs(1),
 }
 
 func gbSaveFunc(cmd *cobra.Command, args []string) {
 	for range only.Once {
 		// var err error
 		showArgs(cmd, args)
+		ux.PrintfWarning("Command not yet implemented.\n")
 	}
 }
 
 
 // gbLoadCmd represents the gbLoad command
 var gbLoadCmd = &cobra.Command{
-	Use:   "import",
+	Use:   "import <gear name>",
 	Aliases: []string{"load"},
 	Short: ux.SprintfBlue("Load a Gearbox gear"),
 	Long: ux.SprintfBlue("Load a Gearbox gear."),
+	Example: ux.SprintfWhite("launch load golang"),
 	DisableFlagParsing: false,
 	Run: gbLoadFunc,
+	Args: cobra.ExactArgs(1),
 }
 
 func gbLoadFunc(cmd *cobra.Command, args []string) {
 	for range only.Once {
 		// var err error
 		showArgs(cmd, args)
+		ux.PrintfWarning("Command not yet implemented.\n")
 	}
 }

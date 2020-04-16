@@ -1,10 +1,10 @@
 package cmd
 
 import (
+	"github.com/spf13/cobra"
+	"launch/defaults"
 	"launch/only"
 	"launch/ux"
-
-	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -26,56 +26,162 @@ func init() {
 
 // gbInstallCmd represents the gbInstall command
 var gbInstallCmd = &cobra.Command{
-	Use:   "install",
+	Use:   "install <gear name>",
 	Aliases: []string{"add"},
 	SuggestFor: []string{"download"},
 	Short: ux.SprintfBlue("Install a Gearbox gear"),
 	Long: ux.SprintfBlue("Install a Gearbox gear."),
+	Example: ux.SprintfWhite("launch install golang"),
 	DisableFlagParsing: false,
 	Run: gbInstallFunc,
+	Args: cobra.ExactArgs(1),
 }
 
 func gbInstallFunc(cmd *cobra.Command, args []string) {
 	for range only.Once {
-		// var err error
-		showArgs(cmd, args)
+		var ga *gearArgs
+
+		ga, cmdState = getGearArgs(cmd, args)
+
+		gearRef, cmdState = provider.NewGear()
+		if cmdState.IsError() {
+			break
+		}
+
+		var found bool
+		found, cmdState = gearRef.Docker.FindContainer(ga.Name, ga.Version)
+		if cmdState.IsError() {
+			break
+		}
+		if found {
+			cmdState.SetOk("Gear '%s' already installed.", ga.Name)
+			break
+		}
+		cmdState.ClearAll()
+
+		cmdState = gearRef.Docker.NetworkCreate(defaults.GearboxNetwork)
+		if cmdState.IsError() {
+			break
+		}
+		cmdState.ClearAll()
+
+		if !quietFlag {
+			ux.Printf("Installing Gear '%s': ", ga.Name)
+		}
+		cmdState = gearRef.Docker.Container.ContainerCreate(ga.Name, ga.Version, ga.Mount)
+		if cmdState.IsError() {
+			if !quietFlag {
+				ux.PrintfRed("error installing - %s\n", cmdState.Error)
+			}
+			cmdState.SetError("Gear '%s' install error - %s", ga.Name, cmdState.Error)
+		} else if cmdState.IsCreated() {
+			if !quietFlag {
+				ux.PrintfGreen("OK\n")
+			}
+			cmdState.SetOk("Gear '%s' installed OK", ga.Name)
+		} else {
+			if !quietFlag {
+				ux.PrintfWarning("cannot be installed\n")
+			}
+			cmdState.SetWarning("Gear '%s' cannot be installed", ga.Name)
+		}
 	}
 }
 
 
 // gbInstallCmd represents the gbInstall command
 var gbUninstallCmd = &cobra.Command{
-	Use:   "uninstall",
+	Use:   "uninstall <gear name>",
 	Aliases: []string{"remove"},
 	SuggestFor: []string{"clean"},
 	Short: ux.SprintfBlue("Uninstall a Gearbox gear"),
 	Long: ux.SprintfBlue("Uninstall a Gearbox gear."),
+	Example: ux.SprintfWhite("launch uninstall golang"),
 	DisableFlagParsing: false,
 	Run: gbUninstallFunc,
+	Args: cobra.ExactArgs(1),
 }
 
 func gbUninstallFunc(cmd *cobra.Command, args []string) {
 	for range only.Once {
-		// var err error
-		showArgs(cmd, args)
+		var ga *gearArgs
+
+		ga, cmdState = getGearArgs(cmd, args)
+
+		gearRef, cmdState = provider.NewGear()
+		if cmdState.IsError() {
+			break
+		}
+
+		var found bool
+		found, cmdState = gearRef.Docker.FindContainer(ga.Name, ga.Version)
+		if cmdState.IsError() {
+			break
+		}
+		if !found {
+			cmdState.SetOk("Gear '%s' already removed.", ga.Name)
+			break
+		}
+		cmdState.ClearAll()
+
+		gbStopFunc(cmd, args)
+		if cmdState.IsError() {
+			break
+		}
+
+		if !quietFlag {
+			ux.Printf("Removing gear '%s': ", ga.Name)
+		}
+		cmdState = gearRef.Docker.Container.Remove()
+		if cmdState.IsError() {
+			if !quietFlag {
+				ux.PrintfRed("error removing - %s\n", cmdState.Error)
+			}
+			cmdState.SetError("Gear '%s' remove error - %s", ga.Name, cmdState.Error)
+		} else if cmdState.IsOk() {
+			if !quietFlag {
+				ux.PrintfGreen("OK\n")
+			}
+			cmdState.SetOk("Gear '%s' removed OK", ga.Name)
+		} else {
+			if !quietFlag {
+				ux.PrintfWarning("cannot be removed\n")
+			}
+			cmdState.SetWarning("Gear '%s' cannot be removed", ga.Name)
+		}
 	}
 }
 
 
 // gbReinstallCmd represents the gbInstall command
 var gbReinstallCmd = &cobra.Command{
-	Use:   "reinstall",
+	Use:   "reinstall <gear name>",
 	Aliases: []string{"update"},
 	SuggestFor: []string{""},
 	Short: ux.SprintfBlue("Update a Gearbox gear"),
 	Long: ux.SprintfBlue("Update a Gearbox gear."),
+	Example: ux.SprintfWhite("launch reinstall golang"),
 	DisableFlagParsing: false,
 	Run: gbReinstallFunc,
+	Args: cobra.ExactArgs(1),
 }
 
 func gbReinstallFunc(cmd *cobra.Command, args []string) {
 	for range only.Once {
-		// var err error
-		showArgs(cmd, args)
+		var ga *gearArgs
+
+		ga, cmdState = getGearArgs(cmd, args)
+
+		gbUninstallFunc(cmd, args)
+		if cmdState.IsError() {
+			break
+		}
+
+		gbInstallFunc(cmd, args)
+		if cmdState.IsError() {
+			break
+		}
+
+		cmdState.SetOk("Gear '%s' removed.", ga.Name)
 	}
 }

@@ -1,14 +1,14 @@
 package dockerClient
 
 import (
-	"launch/only"
 	"errors"
 	"fmt"
-	"launch/ux"
 	"github.com/fatih/color"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
+	"launch/only"
+	"launch/ux"
 	"net/url"
 	"os"
 	"regexp"
@@ -42,7 +42,7 @@ type Environment map[string]string
 
 type StatusLine struct {
 	Text          string
-	Disable       bool
+	Enable        bool
 	UpdateDelay   time.Duration
 	TermWidth     int
 	TermHeight    int
@@ -85,7 +85,7 @@ func (me *DockerGear) ContainerSsh(shell bool, status bool, cmdArgs ...string) u
 		me.Ssh = NewSSH(SshArgs {
 			Host: u.Hostname(),
 			Port: port,
-			StatusLine: StatusLine{Disable: status},
+			StatusLine: StatusLine{Enable: status},
 			Shell: shell,
 		})
 		//if shell {
@@ -417,17 +417,21 @@ func (me *SSH) Connect() error {
 // }
 
 func (me *SSH) getEnv() error {
-     var err error
+	var err error
 
-     for range only.Once {
-             me.Env = make(Environment)
-             for _, item := range os.Environ() {
-                     s := strings.SplitN(item, "=", 2)
-                     me.Env[s[0]] = s[1]
-             }
-     }
+	for range only.Once {
+		me.Env = make(Environment)
+		for _, item := range os.Environ() {
+			if strings.HasPrefix(item, "TMPDIR=") {
+				continue
+			}
 
-     return err
+			s := strings.SplitN(item, "=", 2)
+			me.Env[s[0]] = s[1]
+		}
+	}
+
+	return err
 }
 
 // StatusLineWorker() - handles the actual updates to the status line
@@ -468,7 +472,7 @@ func (me *SSH) displayStatusLine() {
 	bottomPos := fmt.Sprintf("\033[%d;0H", me.StatusLine.TermHeight)
 	// topPos := fmt.Sprintf("\033[0;0H")
 
-	if me.StatusLine.Disable == false {
+	if me.StatusLine.Enable {
 		fmt.Printf("%s%s%s%s", savePos, bottomPos, me.StatusLine.Text, restorePos)
 	}
 }
@@ -478,7 +482,7 @@ func (me *SSH) setView() {
 	scrollFixBottom := fmt.Sprintf("\033[1;%dr", me.StatusLine.TermHeight-1)
 	// scrollFixTop := fmt.Sprintf("\033[2;%dr", termHeight)
 
-	if me.StatusLine.Disable == false {
+	if me.StatusLine.Enable {
 		fmt.Printf(scrollFixBottom)
 		fmt.Printf(clearScreen)
 	}
@@ -490,7 +494,7 @@ func (me *SSH) resetView() {
 	scrollFixBottom := fmt.Sprintf("\033[1;%dr", me.StatusLine.TermHeight)
 	// scrollFixTop := fmt.Sprintf("\033[2;%dr", termHeight)
 
-	if me.StatusLine.Disable == false {
+	if me.StatusLine.Enable {
 		fmt.Printf(savePos)
 		fmt.Printf(scrollFixBottom)
 		fmt.Printf(restorePos)
@@ -501,7 +505,6 @@ func (me *SSH) resetView() {
 		}
 		me.displayStatusLine()
 	}
-
 }
 
 func stripAnsi(str string) string {

@@ -1,12 +1,12 @@
 package gear
 
 import (
+	"github.com/docker/docker/client"
 	"launch/dockerClient"
 	"launch/gear/gearJson"
 	"launch/githubClient"
 	"launch/only"
 	"launch/ux"
-	"github.com/docker/docker/client"
 )
 // DOCKER_HOST=tcp://macpro:2376
 
@@ -18,14 +18,14 @@ type Gear struct {
 }
 
 
-func NewGear(d bool) (*Gear, ux.State) {
+func (me *Provider) NewGear() (*Gear, ux.State) {
 	var cli Gear
 	var state ux.State
 
 	for range only.Once {
-		cli.Docker, state = dockerClient.New(d)
+		cli.Docker, state = dockerClient.New(me.Debug)
 		if state.IsError() {
-			state.SetError("can not connect to Docker service")
+			state.SetError("can not connect to Docker service provider")
 			break
 		}
 

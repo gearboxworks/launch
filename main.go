@@ -3,15 +3,11 @@ package main
 import (
 	"flag"
 	"launch/cmd"
-	"launch/defaults"
-	"launch/gear"
 	"launch/only"
-	"launch/ospaths"
 	"launch/ux"
 	"net/url"
 	"os"
 	"path"
-	"regexp"
 	"strings"
 )
 
@@ -26,20 +22,41 @@ func main() {
 	var state ux.State
 
 	for range only.Once {
-		var err error
-		var args *Args
-		args, err = ProcessArgs()
-		if err != nil {
-			ux.PrintError(err)
-			args.Help()
-			break
-		}
+		//var err error
 
-		var g *gear.Gear
-		g, state = gear.NewGear(Debug)
+		//foo := ospaths.Split(os.Args[0])
+		//exe := foo.File.String()
+		//ux.Printf("F2: %s %s\n", exe, foo.Dir.String())
+		//var ok bool
+		//ok, _ = regexp.MatchString("^" + defaults.BinaryName, exe)
+		//if !ok {
+		//	break
+		//}
+		//
+		//if ok {
+		//	exe = ""
+		//}
+
+		state = cmd.Execute()
 		if state.IsError() {
 			break
 		}
+
+		state = cmd.GetState()
+
+		//var args *Args
+		//args, err = ProcessArgs()
+		//if err != nil {
+		//	ux.PrintError(err)
+		//	args.Help()
+		//	break
+		//}
+
+		//var g *gear.Gear
+		//g, state = gear.NewGear(Debug)
+		//if state.IsError() {
+		//	break
+		//}
 
 		// @TODO - testing.
 		//ux.PrintfOk("OK - it works\n")
@@ -52,166 +69,165 @@ func main() {
 		//_ = ux.Draw4()
 		//_ = ux.Draw5()
 
+		//if *args.List {
+		//	state = g.Docker.ImageList(*args.ContainerName)
+		//	if state.IsError() {
+		//		break
+		//	}
+		//
+		//	state = g.Docker.ContainerList(*args.ContainerName)
+		//	if state.IsError() {
+		//		break
+		//	}
+		//
+		//	state = g.Docker.NetworkList(defaults.GearboxNetwork)
+		//	break
+		//}
+		//
+		//
+		//if *args.ListContainers {
+		//	state = g.Docker.ContainerList(*args.ContainerName)
+		//	break
+		//}
+		//
+		//
+		//if *args.ListImages {
+		//	state = g.Docker.ImageList(*args.ContainerName)
+		//	break
+		//}
+		//
+		//
+		//if *args.ContainerName == "" {
+		//	state.SetError("no container specified")
+		//	args.Help()
+		//	break
+		//}
 
-		if *args.List {
-			state = g.Docker.ImageList(*args.ContainerName)
-			if state.IsError() {
-				break
-			}
-
-			state = g.Docker.ContainerList(*args.ContainerName)
-			if state.IsError() {
-				break
-			}
-
-			state = g.Docker.NetworkList(defaults.GearboxNetwork)
-			break
-		}
-
-
-		if *args.ListContainers {
-			state = g.Docker.ContainerList(*args.ContainerName)
-			break
-		}
-
-
-		if *args.ListImages {
-			state = g.Docker.ImageList(*args.ContainerName)
-			break
-		}
-
-
-		if *args.ContainerName == "" {
-			state.SetError("no container specified")
-			args.Help()
-			break
-		}
-
-		var found bool
-		found, state = g.Docker.FindContainer(*args.ContainerName, "")
-		if state.IsError() {
-			break
-		}
-		state.ClearAll()
-
-		state = g.Docker.NetworkCreate(defaults.GearboxNetwork)
-		if state.IsError() {
-			break
-		}
-		state.ClearAll()
-
-		// Stop a container.
-		if *args.ContainerStop {
-			if found {
-				ux.Printf("Stopping gear '%s': ", *args.ContainerName)
-				state = g.Docker.Container.Stop()
-				if state.IsError() {
-					ux.PrintfRed("error stopping - %s\n", state.Error)
-				} else if state.IsExited() {
-					ux.PrintfGreen("OK\n")
-				} else {
-					ux.PrintfYellow("cannot be stopped\n")
-				}
-			} else {
-				ux.PrintfWarning("Gear '%s' doesn't exist.\n", *args.ContainerName)
-			}
-			break
-		}
-
-		// Remove a container.
-		if *args.ContainerRemove {
-			if found {
-				ux.Printf("Stopping gear '%s': ", *args.ContainerName)
-				state = g.Docker.Container.Stop()
-				if state.IsError() {
-					ux.PrintfRed("error stopping - %s\n", state.Error)
-					break
-				} else if state.IsExited() {
-					ux.PrintfGreen("OK\n")
-				} else {
-					ux.PrintfYellow("cannot be stopped\n")
-					break
-				}
-
-				ux.Printf("Removing gear '%s': ", *args.ContainerName)
-				state = g.Docker.Container.Remove()
-				if state.IsError() {
-					ux.PrintfRed("error removing - %s\n", state.Error)
-				} else {
-					ux.PrintfGreen("OK\n")
-				}
-			} else {
-				ux.PrintfWarning("Gear '%s' doesn't exist.\n", *args.ContainerName)
-			}
-			break
-		}
-
-		// Remove an image.
-		if *args.ImageRemove {
-			if found {
-				ux.Printf("Stopping gear '%s': ", *args.ContainerName)
-				state = g.Docker.Container.Stop()
-				if state.IsError() {
-					ux.PrintfRed("error stopping - %s\n", state.Error)
-					break
-				} else if state.IsExited() {
-					ux.PrintfGreen("OK\n")
-				} else {
-					ux.PrintfYellow("cannot be stopped\n")
-					break
-				}
-
-				ux.Printf("Removing gear '%s': ", *args.ContainerName)
-				state = g.Docker.Container.Remove()
-				if state.IsError() {
-					ux.PrintfRed("error removing - %s\n", state.Error)
-				} else {
-					ux.PrintfGreen("OK\n")
-				}
-			}
-
-			var ok bool
-			ok, state = g.Docker.FindImage(*args.ContainerName, *args.ContainerVersion)
-			if state.IsError() {
-				state.SetWarning("Gear image '%s' doesn't exist.\n", *args.ContainerName)
-				break
-			}
-			if !ok {
-				ux.PrintfYellow("Gear image '%s' doesn't exist.\n", *args.ContainerName)
-				break
-			}
-
-			ux.Printf("Removing gear image '%s': ", *args.ContainerName)
-			state = g.Docker.Image.Remove()
-			if state.IsError() {
-				ux.PrintfRed("error removing - '%s'\n", state.Error)
-			} else {
-				ux.PrintfGreen("OK\n")
-			}
-
-			break
-		}
-
-		// Default - run a shell.
-		if !found {
-			// state = g.ContainerCreate("golang", "", "/Users/mick/Documents/GitHub/containers/docker-golang")
-			state = g.Docker.Container.ContainerCreate(*args.ContainerName, "", *args.DockerMount)
-			if state.IsError() {
-				break
-			}
-		}
-
-		state = g.Docker.Container.Start()
-		if state.IsError() {
-			break
-		}
-		if !state.IsRunning() {
-			state.SetError("container not started")
-			break
-		}
-
-		state = g.Docker.ContainerSsh(*args.Shell, !*args.StatusLine, flag.Args()...)
-		break
+		//var found bool
+		//found, state = g.Docker.FindContainer(*args.ContainerName, "")
+		//if state.IsError() {
+		//	break
+		//}
+		//state.ClearAll()
+		//
+		//state = g.Docker.NetworkCreate(defaults.GearboxNetwork)
+		//if state.IsError() {
+		//	break
+		//}
+		//state.ClearAll()
+		//
+		//// Stop a container.
+		//if *args.ContainerStop {
+		//	if found {
+		//		ux.Printf("Stopping gear '%s': ", *args.ContainerName)
+		//		state = g.Docker.Container.Stop()
+		//		if state.IsError() {
+		//			ux.PrintfRed("error stopping - %s\n", state.Error)
+		//		} else if state.IsExited() {
+		//			ux.PrintfGreen("OK\n")
+		//		} else {
+		//			ux.PrintfYellow("cannot be stopped\n")
+		//		}
+		//	} else {
+		//		ux.PrintfWarning("Gear '%s' doesn't exist.\n", *args.ContainerName)
+		//	}
+		//	break
+		//}
+		//
+		//// Remove a container.
+		//if *args.ContainerRemove {
+		//	if found {
+		//		ux.Printf("Stopping gear '%s': ", *args.ContainerName)
+		//		state = g.Docker.Container.Stop()
+		//		if state.IsError() {
+		//			ux.PrintfRed("error stopping - %s\n", state.Error)
+		//			break
+		//		} else if state.IsExited() {
+		//			ux.PrintfGreen("OK\n")
+		//		} else {
+		//			ux.PrintfYellow("cannot be stopped\n")
+		//			break
+		//		}
+		//
+		//		ux.Printf("Removing gear '%s': ", *args.ContainerName)
+		//		state = g.Docker.Container.Remove()
+		//		if state.IsError() {
+		//			ux.PrintfRed("error removing - %s\n", state.Error)
+		//		} else {
+		//			ux.PrintfGreen("OK\n")
+		//		}
+		//	} else {
+		//		ux.PrintfWarning("Gear '%s' doesn't exist.\n", *args.ContainerName)
+		//	}
+		//	break
+		//}
+		//
+		//// Remove an image.
+		//if *args.ImageRemove {
+		//	if found {
+		//		ux.Printf("Stopping gear '%s': ", *args.ContainerName)
+		//		state = g.Docker.Container.Stop()
+		//		if state.IsError() {
+		//			ux.PrintfRed("error stopping - %s\n", state.Error)
+		//			break
+		//		} else if state.IsExited() {
+		//			ux.PrintfGreen("OK\n")
+		//		} else {
+		//			ux.PrintfYellow("cannot be stopped\n")
+		//			break
+		//		}
+		//
+		//		ux.Printf("Removing gear '%s': ", *args.ContainerName)
+		//		state = g.Docker.Container.Remove()
+		//		if state.IsError() {
+		//			ux.PrintfRed("error removing - %s\n", state.Error)
+		//		} else {
+		//			ux.PrintfGreen("OK\n")
+		//		}
+		//	}
+		//
+		//	var ok bool
+		//	ok, state = g.Docker.FindImage(*args.ContainerName, *args.ContainerVersion)
+		//	if state.IsError() {
+		//		state.SetWarning("Gear image '%s' doesn't exist.\n", *args.ContainerName)
+		//		break
+		//	}
+		//	if !ok {
+		//		ux.PrintfYellow("Gear image '%s' doesn't exist.\n", *args.ContainerName)
+		//		break
+		//	}
+		//
+		//	ux.Printf("Removing gear image '%s': ", *args.ContainerName)
+		//	state = g.Docker.Image.Remove()
+		//	if state.IsError() {
+		//		ux.PrintfRed("error removing - '%s'\n", state.Error)
+		//	} else {
+		//		ux.PrintfGreen("OK\n")
+		//	}
+		//
+		//	break
+		//}
+		//
+		//// Default - run a shell.
+		//if !found {
+		//	// state = g.ContainerCreate("golang", "", "/Users/mick/Documents/GitHub/containers/docker-golang")
+		//	state = g.Docker.Container.ContainerCreate(*args.ContainerName, "", *args.DockerMount)
+		//	if state.IsError() {
+		//		break
+		//	}
+		//}
+		//
+		//state = g.Docker.Container.Start()
+		//if state.IsError() {
+		//	break
+		//}
+		//if !state.IsRunning() {
+		//	state.SetError("container not started")
+		//	break
+		//}
+		//
+		//state = g.Docker.ContainerSsh(*args.Shell, !*args.StatusLine, flag.Args()...)
+		//break
 	}
 
 
@@ -419,25 +435,25 @@ func ProcessArgs() (*Args, error) {
 		//foo := ospaths.Split("C:\\\\Users\\\\mick\\\\Documents\\\\launch")
 		//foo := ospaths.Split("C:\\\\Users\\\\mick\\\\Documents\\\\launch-Darwin")
 		//foo := ospaths.Split("./bin/launch-Darwin")
-		foo := ospaths.Split(os.Args[0])
-		exe := foo.File.String()
-		//fmt.Printf("F2: %s %s\n", foo.File.String(), foo.Dir.String())
-		var ok bool
-		ok, err = regexp.MatchString("^" + defaults.BinaryName, exe)
-		if !ok {
-			break
-		}
-
-		if ok {
-			exe = ""
-		}
-
-		err = cmd.Execute()
-		if err != nil {
-			break
-		}
-
-		break
+		//foo := ospaths.Split(os.Args[0])
+		//exe := foo.File.String()
+		////fmt.Printf("F2: %s %s\n", foo.File.String(), foo.Dir.String())
+		//var ok bool
+		//ok, err = regexp.MatchString("^" + defaults.BinaryName, exe)
+		//if !ok {
+		//	break
+		//}
+		//
+		//if ok {
+		//	exe = ""
+		//}
+		//
+		//err = cmd.Execute()
+		//if err != nil {
+		//	break
+		//}
+		//
+		//break
 
 		//help_all := flag.Bool("gb-help", false, "Show all help.")
 		//

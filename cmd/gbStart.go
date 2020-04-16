@@ -1,10 +1,9 @@
 package cmd
 
 import (
+	"github.com/spf13/cobra"
 	"launch/only"
 	"launch/ux"
-
-	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -25,33 +24,118 @@ func init() {
 
 // gbStartCmd represents the gbStart command
 var gbStartCmd = &cobra.Command{
-	Use:   "start",
+	Use:   "start <gear name>",
 	Short: ux.SprintfBlue("Start a Gearbox gear"),
 	Long: ux.SprintfBlue("Start a Gearbox gear."),
+	Example: ux.SprintfWhite("launch start golang"),
 	DisableFlagParsing: false,
 	Run: gbStartFunc,
+	Args: cobra.ExactArgs(1),
 }
 
 func gbStartFunc(cmd *cobra.Command, args []string) {
 	for range only.Once {
-		// var err error
-		showArgs(cmd, args)
+		var ga *gearArgs
+
+		ga, cmdState = getGearArgs(cmd, args)
+
+		gearRef, cmdState = provider.NewGear()
+		if cmdState.IsError() {
+			break
+		}
+
+		var found bool
+		found, cmdState = gearRef.Docker.FindContainer(ga.Name, ga.Version)
+		if cmdState.IsError() {
+			break
+		}
+		cmdState.ClearAll()
+
+		// Default - run a shell.
+		if !found {
+			gbInstallFunc(cmd, args)
+			if cmdState.IsError() {
+				break
+			}
+			cmdState.ClearAll()
+		}
+
+		if !quietFlag {
+			ux.Printf("Starting gear '%s': ", ga.Name)
+		}
+		cmdState = gearRef.Docker.Container.Start()
+		if cmdState.IsError() {
+			if !quietFlag {
+				ux.PrintfRed("error starting - %s\n", cmdState.Error)
+			}
+			cmdState.SetError("Gear '%s' start error - %s", ga.Name, cmdState.Error)
+		} else if cmdState.IsRunning() {
+			if !quietFlag {
+				ux.PrintfGreen("OK\n")
+			}
+		} else {
+			if !quietFlag {
+				ux.PrintfWarning("cannot be started\n")
+			}
+			cmdState.SetWarning("Gear '%s' cannot be started", ga.Name)
+		}
 	}
 }
 
 
 // gbStatusCmd represents the gbStatus command
 var gbStopCmd = &cobra.Command{
-	Use:   "stop",
+	Use:   "stop <gear name>",
 	Short: ux.SprintfBlue("Stop a Gearbox gear"),
 	Long: ux.SprintfBlue("Stop a Gearbox gear."),
+	Example: ux.SprintfWhite("launch stop golang"),
 	DisableFlagParsing: false,
 	Run: gbStopFunc,
+	Args: cobra.ExactArgs(1),
 }
 
 func gbStopFunc(cmd *cobra.Command, args []string) {
 	for range only.Once {
-		// var err error
-		showArgs(cmd, args)
+		var ga *gearArgs
+
+		ga, cmdState = getGearArgs(cmd, args)
+
+		gearRef, cmdState = provider.NewGear()
+		if cmdState.IsError() {
+			break
+		}
+
+		var found bool
+		found, cmdState = gearRef.Docker.FindContainer(ga.Name, ga.Version)
+		if cmdState.IsError() {
+			break
+		}
+		cmdState.ClearAll()
+
+		// Stop a container.
+		if found {
+			if !quietFlag {
+				ux.Printf("Stopping gear '%s': ", ga.Name)
+			}
+			cmdState = gearRef.Docker.Container.Stop()
+			if cmdState.IsError() {
+				if !quietFlag {
+					ux.PrintfRed("error stopping - %s\n", cmdState.Error)
+				}
+				cmdState.SetError("Gear '%s' stop error - %s", ga.Name, cmdState.Error)
+			} else if cmdState.IsExited() {
+				if !quietFlag {
+					ux.PrintfGreen("OK\n")
+				}
+			} else {
+				if !quietFlag {
+					ux.PrintfWarning("cannot be stopped\n")
+				}
+				cmdState.SetWarning("Gear '%s' cannot be stopped", ga.Name)
+			}
+		} else {
+			cmdState.SetWarning("Gear '%s' doesn't exist.", ga.Name)
+		}
+		break
 	}
 }

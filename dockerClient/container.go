@@ -506,7 +506,8 @@ func (me *Container) Remove() ux.State {
 			break
 		}
 
-		state = me.State()
+		//state = me.State()
+		state.SetOk("OK")
 	}
 
 	return state
