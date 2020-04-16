@@ -2,13 +2,12 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"launch/cmd"
 	"launch/defaults"
 	"launch/gear"
 	"launch/only"
 	"launch/ospaths"
 	"launch/ux"
-	"github.com/docker/docker/client"
 	"net/url"
 	"os"
 	"path"
@@ -415,7 +414,7 @@ func ProcessArgs() (*Args, error) {
 	var args Args
 
 	for range only.Once {
-		var hargs Hargs
+		//var hargs Hargs
 
 		//foo := ospaths.Split("C:\\\\Users\\\\mick\\\\Documents\\\\launch")
 		//foo := ospaths.Split("C:\\\\Users\\\\mick\\\\Documents\\\\launch-Darwin")
@@ -424,111 +423,120 @@ func ProcessArgs() (*Args, error) {
 		exe := foo.File.String()
 		//fmt.Printf("F2: %s %s\n", foo.File.String(), foo.Dir.String())
 		var ok bool
-		ok, err = regexp.MatchString(`^gb.launch`, exe)
+		ok, err = regexp.MatchString("^" + defaults.BinaryName, exe)
+		if !ok {
+			break
+		}
+
 		if ok {
 			exe = ""
 		}
 
-		// cmd.Execute()
-
-		help_all := flag.Bool("gb-help", false, "Show all help.")
-
-		args.Debug = flag.Bool("gb-debug", false, "DEBUG")
-
-		args.DockerHost = flag.String("gb-docker-host", "", "Specify an alternative Docker host.")
-		hargs.DockerHost = flag.Lookup("gb-docker-host")
-
-		args.DockerPort = flag.String("gb-docker-port", "", "Specify an alternative Docker port.")
-		hargs.DockerPort = flag.Lookup("gb-docker-port")
-
-		args.ContainerName = flag.String("gb-name", exe, "Specify container name.")
-		hargs.ContainerName = flag.Lookup("gb-name")
-
-		args.ContainerVersion = flag.String("gb-version", "latest", "Specify container version.")
-		hargs.ContainerVersion = flag.Lookup("gb-version")
-
-		args.Shell = flag.Bool("gb-shell", false, "Run a shell instead of the default container command.")
-		hargs.Shell = flag.Lookup("gb-shell")
-
-		args.StatusLine = flag.Bool("gb-status", false, "Include a Gearbox status line within the container shell.")
-		hargs.StatusLine = flag.Lookup("gb-status")
-
-		args.List = flag.Bool("gb-list", false, "List all images and containers.")
-		hargs.List = flag.Lookup("gb-list")
-
-		args.ListImages = flag.Bool("gb-images", false, "List all images downloaded.")
-		hargs.ListImages = flag.Lookup("gb-images")
-
-		args.ListContainers = flag.Bool("gb-containers", false, "List all containers created.")
-		hargs.ListContainers = flag.Lookup("gb-containers")
-
-		args.ContainerStop = flag.Bool("gb-stop", false, "Stop a created container.")
-		hargs.ContainerStop = flag.Lookup("gb-stop")
-
-		args.ContainerRemove = flag.Bool("gb-remove", false, "Remove a created container.")
-		hargs.ContainerRemove = flag.Lookup("gb-remove")
-
-		args.ImageRemove = flag.Bool("gb-clean", false, "Remove downloaded image.")
-		hargs.ImageRemove = flag.Lookup("gb-clean")
-
-		args.ImageBuild = flag.Bool("gb-build", false, "Build an image.")
-		hargs.ImageBuild = flag.Lookup("gb-build")
-
-		args.DockerMount = flag.String("gb-project", "", "Specify a project mount point.")
-		hargs.DockerMount = flag.Lookup("gb-project")
-
-		flag.Parse()
-
-		Debug = *args.Debug
-
-		if (*args.DockerHost != "") && (*args.DockerPort != "") {
-			args.DockerDaemon, err = client.ParseHostURL(fmt.Sprintf("tcp://%s:%s", *args.DockerHost, *args.DockerPort))
-			if err != nil {
-				break
-			}
-
-			err = os.Setenv("DOCKER_HOST", args.DockerDaemon.String())
-		}
-
-		ok, _ = regexp.MatchString(`^gb.launch`, *args.ContainerName)
-		if ok {
-			*args.ContainerName = ""
-		}
-
-		// Show help.
-		if *help_all {
-			args.Help()
-			os.Exit(0)
-		}
-
-		if *args.ListImages {
+		err = cmd.Execute()
+		if err != nil {
 			break
 		}
 
-		if *args.List {
-			break
-		}
+		break
 
-		if *args.ListContainers {
-			break
-		}
+		//help_all := flag.Bool("gb-help", false, "Show all help.")
+		//
+		//args.Debug = flag.Bool("gb-debug", false, "DEBUG")
+		//
+		//args.DockerHost = flag.String("gb-host", "", "Specify an alternative Docker host.")
+		//hargs.DockerHost = flag.Lookup("gb-host")
+		//
+		//args.DockerPort = flag.String("gb-docker-port", "", "Specify an alternative Docker port.")
+		//hargs.DockerPort = flag.Lookup("gb-docker-port")
+		//
+		//args.ContainerName = flag.String("gb-name", exe, "Specify container name.")
+		//hargs.ContainerName = flag.Lookup("gb-name")
+		//
+		//args.ContainerVersion = flag.String("gb-version", "latest", "Specify container version.")
+		//hargs.ContainerVersion = flag.Lookup("gb-version")
+		//
+		//args.Shell = flag.Bool("gb-shell", false, "Run a shell instead of the default container command.")
+		//hargs.Shell = flag.Lookup("gb-shell")
+		//
+		//args.StatusLine = flag.Bool("gb-status", false, "Include a Gearbox status line within the container shell.")
+		//hargs.StatusLine = flag.Lookup("gb-status")
+		//
+		//args.List = flag.Bool("gb-list", false, "List all images and containers.")
+		//hargs.List = flag.Lookup("gb-list")
+		//
+		//args.ListImages = flag.Bool("gb-images", false, "List all images downloaded.")
+		//hargs.ListImages = flag.Lookup("gb-images")
+		//
+		//args.ListContainers = flag.Bool("gb-containers", false, "List all containers created.")
+		//hargs.ListContainers = flag.Lookup("gb-containers")
+		//
+		//args.ContainerStop = flag.Bool("gb-stop", false, "Stop a created container.")
+		//hargs.ContainerStop = flag.Lookup("gb-stop")
+		//
+		//args.ContainerRemove = flag.Bool("gb-remove", false, "Remove a created container.")
+		//hargs.ContainerRemove = flag.Lookup("gb-remove")
+		//
+		//args.ImageRemove = flag.Bool("gb-clean", false, "Remove downloaded image.")
+		//hargs.ImageRemove = flag.Lookup("gb-clean")
+		//
+		//args.ImageBuild = flag.Bool("gb-build", false, "Build an image.")
+		//hargs.ImageBuild = flag.Lookup("gb-build")
+		//
+		//args.DockerMount = flag.String("gb-project", "", "Specify a project mount point.")
+		//hargs.DockerMount = flag.Lookup("gb-project")
+		//
+		//flag.Parse()
+		//
+		//Debug = *args.Debug
 
-		if *args.ContainerStop {
-			break
-		}
-
-		if *args.ContainerRemove {
-			break
-		}
-
-		if *args.ImageRemove {
-			break
-		}
-
-		if *args.Shell {
-			break
-		}
-
+		//if (*args.DockerHost != "") && (*args.DockerPort != "") {
+		//	args.DockerDaemon, err = client.ParseHostURL(fmt.Sprintf("tcp://%s:%s", *args.DockerHost, *args.DockerPort))
+		//	if err != nil {
+		//		break
+		//	}
+		//
+		//	err = os.Setenv("DOCKER_HOST", args.DockerDaemon.String())
+		//}
+		//
+		//ok, _ = regexp.MatchString("^" + defaults.BinaryName, *args.ContainerName)
+		//if ok {
+		//	*args.ContainerName = ""
+		//}
+		//
+		//// Show help.
+		////if *help_all {
+		////	args.Help()
+		////	os.Exit(0)
+		////}
+		//
+		//if *args.ListImages {
+		//	break
+		//}
+		//
+		//if *args.List {
+		//	break
+		//}
+		//
+		//if *args.ListContainers {
+		//	break
+		//}
+		//
+		//if *args.ContainerStop {
+		//	break
+		//}
+		//
+		//if *args.ContainerRemove {
+		//	break
+		//}
+		//
+		//if *args.ImageRemove {
+		//	break
+		//}
+		//
+		//if *args.Shell {
+		//	break
+		//}
+		//
 		// @TODO Need to figure this logic out.
 		//args.Help()
 		//os.Exit(0)

@@ -1,0 +1,21 @@
+	tmplUsage += ux.SprintfBlue("\nUsage: ")
+	if c.Runnable() {
+		tmplUsage += ux.SprintfCyan("{{ .UseLine }}\n")
+	}
+
+	if c.HasAvailableSubCommands() {
+		tmplUsage += ux.SprintfCyan("{{ .CommandPath }} [command]\n")
+	}
+
+	if len(c.Aliases) > 0 {
+		tmplUsage += ux.SprintfCyan("Aliases: {{ .NameAndAliases }}\n")
+	}
+
+	if c.HasExample() {
+		tmplUsage += ux.SprintfCyan("Examples:\n\t{{ .Example }}\n")
+	}
+
+	if c.HasAvailableSubCommands() {
+		tmplUsage += ux.SprintfCyan("Available Commands:\n{{ range .Commands }}{{ if (or .IsAvailableCommand (eq .Name \"help\")) }}\n\t{{ rpad .Name .NamePadding}} {{ .Short }}{{ end }}{{ end }}\n")
+	}
+
