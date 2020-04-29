@@ -84,27 +84,36 @@ type GearRun struct {
 type GearCommands map[string]string
 
 func (me *GearConfig) GetCommand(cmd []string) []string {
+	var retCmd []string
 
 	for range only.Once {
+		var cmdExec string
 		switch {
 			case len(cmd) == 0:
-				cmd = []string{ defaults.DefaultCommandName }
+				cmdExec = defaults.DefaultCommandName
 
 			case cmd[0] == "":
-				cmd = []string{ defaults.DefaultCommandName }
+				cmdExec = defaults.DefaultCommandName
+
+			default:
+				//cmdExec = cmd[0]
+				cmdExec = defaults.DefaultCommandName
 		}
 
 		var c string
 		var ok bool
-		if c, ok = me.Run.Commands[cmd[0]]; !ok {
-			cmd = []string{ "" }
+		if c, ok = me.Run.Commands[cmdExec]; !ok {
 			break
 		}
 
-		cmd = append([]string{c}, cmd...)
+		if c == "" {
+			break
+		}
+
+		retCmd = append([]string{c}, cmd...)
 	}
 
-	return cmd
+	return retCmd
 }
 
 //func (me *GearCommands) Join() string {

@@ -89,11 +89,15 @@ func (me *DockerGear) ContainerSsh(shell bool, status bool, cmdArgs ...string) u
 			Shell: shell,
 		})
 
-		fmt.Printf("me.Image.GearConfig.Build: %s %s\n", me.Image.GearConfig.Build.Run, me.Image.GearConfig.Build.Args)
-		fmt.Printf("me.Container.GearConfig.Build: %s %s\n", me.Container.GearConfig.Build.Run, me.Container.GearConfig.Build.Args)
+		//fmt.Printf("me.Image.GearConfig.Build: %s %s\n", me.Image.GearConfig.Build.Run, me.Image.GearConfig.Build.Args)
+		//fmt.Printf("me.Container.GearConfig.Build: %s %s\n", me.Container.GearConfig.Build.Run, me.Container.GearConfig.Build.Args)
 
 		if !shell {
 			me.Ssh.CmdArgs = me.Container.GearConfig.GetCommand(cmdArgs)
+			if len(me.Ssh.CmdArgs) == 0 {
+				state.SetError("ERROR: no default command defined in gearbox.json")
+				break
+			}
 
 			//switch me.Container.GearConfig.GetName() {
 			//	case "golang":

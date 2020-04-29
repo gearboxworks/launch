@@ -52,6 +52,7 @@ func gbStartFunc(cmd *cobra.Command, args []string) {
 		//cmdState.ClearAll()
 
 		if !found {
+			quietFlag = false
 			if IsNoCreate(cmd) {
 				cmdState.SetError("Gear '%s:%s' doesn't exist.", ga.Name, ga.Version)
 				break
@@ -75,19 +76,15 @@ func gbStartFunc(cmd *cobra.Command, args []string) {
 		}
 		cmdState = gearRef.Docker.Container.Start()
 		if cmdState.IsError() {
-			if !quietFlag {
-				ux.PrintfRed("error starting - %s\n", cmdState.Error)
-			}
 			cmdState.SetError("Gear '%s:%s' start error - %s", ga.Name, ga.Version, cmdState.Error)
+			ux.PrintfRed("%s\n", cmdState.Error)
 		} else if cmdState.IsRunning() {
 			if !quietFlag {
 				ux.PrintfGreen("OK\n")
 			}
 		} else {
-			if !quietFlag {
-				ux.PrintfWarning("cannot be started\n")
-			}
 			cmdState.SetWarning("Gear '%s:%s' cannot be started", ga.Name, ga.Version)
+			ux.PrintfWarning("%s\n", cmdState.Warning)
 		}
 	}
 }

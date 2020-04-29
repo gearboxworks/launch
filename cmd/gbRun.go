@@ -45,6 +45,7 @@ func gbRunFunc(cmd *cobra.Command, args []string) {
 		//if err != nil {
 		//	quietFlag = false
 		//}
+		quietFlag = true
 
 		gbStartFunc(cmd, args)
 		if !cmdState.IsRunning() {

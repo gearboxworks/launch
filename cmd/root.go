@@ -209,12 +209,14 @@ func Execute() ux.State {
 	for range only.Once {
 		SetHelp(rootCmd)
 
-		foo := ospaths.Split(os.Args[0])
+		//foo := ospaths.Split(os.Args[0])
+		foo := ospaths.Split("/Users/mick/go/bin/composer-1.10.0")
 		cmdExec = foo.File.String()
 		ok, _ := regexp.MatchString("^" + defaults.BinaryName, cmdExec)
-		if ok {
-			cmdExec = ""
-		} else {
+		if !ok {
+		//	cmdExec = ""
+		//} else {
+			cmdExec = strings.ReplaceAll(cmdExec, "-", ":")
 			newArgs := []string{"run", cmdExec}
 			newArgs = append(newArgs, os.Args[1:]...)
 			rootCmd.SetArgs(newArgs)
