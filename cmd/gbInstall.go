@@ -54,7 +54,7 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 		if found {
-			cmdState.SetOk("Gear '%s' already installed.", ga.Name)
+			cmdState.SetOk("Gear '%s:%s' already installed.", ga.Name, ga.Version)
 			break
 		}
 		cmdState.ClearAll()
@@ -66,24 +66,24 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 		cmdState.ClearAll()
 
 		if !quietFlag {
-			ux.Printf("Installing Gear '%s': ", ga.Name)
+			ux.Printf("Installing Gear '%s:%s': ", ga.Name, ga.Version)
 		}
 		cmdState = gearRef.Docker.Container.ContainerCreate(ga.Name, ga.Version, ga.Mount)
 		if cmdState.IsError() {
 			if !quietFlag {
 				ux.PrintfRed("error installing - %s\n", cmdState.Error)
 			}
-			cmdState.SetError("Gear '%s' install error - %s", ga.Name, cmdState.Error)
+			cmdState.SetError("Gear '%s:%s' install error - %s", ga.Name, ga.Version, cmdState.Error)
 		} else if cmdState.IsCreated() {
 			if !quietFlag {
 				ux.PrintfGreen("OK\n")
 			}
-			cmdState.SetOk("Gear '%s' installed OK", ga.Name)
+			cmdState.SetOk("Gear '%s:%s' installed OK", ga.Name, ga.Version)
 		} else {
 			if !quietFlag {
 				ux.PrintfWarning("cannot be installed\n")
 			}
-			cmdState.SetWarning("Gear '%s' cannot be installed", ga.Name)
+			cmdState.SetWarning("Gear '%s:%s' cannot be installed", ga.Name, ga.Version)
 		}
 	}
 }
@@ -119,7 +119,7 @@ func gbUninstallFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 		if !found {
-			cmdState.SetOk("Gear '%s' already removed.", ga.Name)
+			cmdState.SetOk("Gear '%s:%s' already removed.", ga.Name, ga.Version)
 			break
 		}
 		cmdState.ClearAll()
@@ -130,24 +130,24 @@ func gbUninstallFunc(cmd *cobra.Command, args []string) {
 		}
 
 		if !quietFlag {
-			ux.Printf("Removing gear '%s': ", ga.Name)
+			ux.Printf("Removing gear '%s:%s': ", ga.Name, ga.Version)
 		}
 		cmdState = gearRef.Docker.Container.Remove()
 		if cmdState.IsError() {
 			if !quietFlag {
 				ux.PrintfRed("error removing - %s\n", cmdState.Error)
 			}
-			cmdState.SetError("Gear '%s' remove error - %s", ga.Name, cmdState.Error)
+			cmdState.SetError("Gear '%s:%s' remove error - %s", ga.Name, ga.Version, cmdState.Error)
 		} else if cmdState.IsOk() {
 			if !quietFlag {
 				ux.PrintfGreen("OK\n")
 			}
-			cmdState.SetOk("Gear '%s' removed OK", ga.Name)
+			cmdState.SetOk("Gear '%s:%s' removed OK", ga.Name, ga.Version)
 		} else {
 			if !quietFlag {
 				ux.PrintfWarning("cannot be removed\n")
 			}
-			cmdState.SetWarning("Gear '%s' cannot be removed", ga.Name)
+			cmdState.SetWarning("Gear '%s:%s' cannot be removed", ga.Name, ga.Version)
 		}
 	}
 }
@@ -182,6 +182,6 @@ func gbReinstallFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 
-		cmdState.SetOk("Gear '%s' removed.", ga.Name)
+		cmdState.SetOk("Gear '%s:%s' removed.", ga.Name, ga.Version)
 	}
 }

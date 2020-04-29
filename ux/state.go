@@ -86,7 +86,7 @@ func (me *State) ClearAll() {
 
 func (me *State) IsRunning() bool {
 	var ok bool
-	if me.String == "running" {
+	if me.String == StateRunning {
 		ok = true
 	}
 	return ok
@@ -94,7 +94,7 @@ func (me *State) IsRunning() bool {
 
 func (me *State) IsPaused() bool {
 	var ok bool
-	if me.String == "paused" {
+	if me.String == StatePaused {
 		ok = true
 	}
 	return ok
@@ -102,7 +102,7 @@ func (me *State) IsPaused() bool {
 
 func (me *State) IsCreated() bool {
 	var ok bool
-	if me.String == "created" {
+	if me.String == StateCreated {
 		ok = true
 	}
 	return ok
@@ -110,7 +110,7 @@ func (me *State) IsCreated() bool {
 
 func (me *State) IsRestarting() bool {
 	var ok bool
-	if me.String == "restarting" {
+	if me.String == StateRestarting {
 		ok = true
 	}
 	return ok
@@ -118,7 +118,7 @@ func (me *State) IsRestarting() bool {
 
 func (me *State) IsRemoving() bool {
 	var ok bool
-	if me.String == "removing" {
+	if me.String == StateRemoving {
 		ok = true
 	}
 	return ok
@@ -126,7 +126,7 @@ func (me *State) IsRemoving() bool {
 
 func (me *State) IsExited() bool {
 	var ok bool
-	if me.String == "exited" {
+	if me.String == StateExited {
 		ok = true
 	}
 	return ok
@@ -134,7 +134,7 @@ func (me *State) IsExited() bool {
 
 func (me *State) IsDead() bool {
 	var ok bool
-	if me.String == "dead" {
+	if me.String == StateDead {
 		ok = true
 	}
 	return ok

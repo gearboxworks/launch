@@ -38,7 +38,6 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"launch/defaults"
@@ -55,6 +54,7 @@ const (
 	argConfig = "config"
 	argHelp = "help"
 	argDebug = "debug"
+	argNoCreate = "no-create"
 	argExample = "example"
 	argProvider = "provider"
 	argHost = "host"
@@ -71,11 +71,12 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-	rootCmd.PersistentFlags().StringVar(&cfgFile, argConfig, "/Users/mick/.gearbox/launch.json", ux.SprintfBlue("Config file."))
+	rootCmd.PersistentFlags().StringVar(&cfgFile, argConfig, GetLaunchConfig(), ux.SprintfBlue("Config file."))
 
 	//rootCmd.PersistentFlags().BoolP(argHelp, "h", false, ux.SprintfBlue("Short help for command."))
 	rootCmd.PersistentFlags().BoolP(argExample, "e", false, ux.SprintfBlue("Help examples for command."))
 	rootCmd.PersistentFlags().BoolP(argDebug, "d", false, ux.SprintfBlue("Debug mode."))
+	rootCmd.PersistentFlags().BoolP(argNoCreate, "", false, ux.SprintfBlue("Don't create container."))
 
 	rootCmd.PersistentFlags().StringP(argProvider, "", "docker", ux.SprintfBlue("Set virtual provider"))
 	rootCmd.PersistentFlags().StringP(argHost, "", "", ux.SprintfBlue("Set virtual provider host."))
@@ -98,16 +99,8 @@ func initConfig() {
 			// Use config file from the flag.
 			viper.SetConfigFile(cfgFile)
 		} else {
-			// Find home directory.
-			var home string
-			home, err = homedir.Dir()
-			if err != nil {
-				ux.PrintError(err)
-				os.Exit(1)
-			}
-
 			// Search config in home directory with name "launch" (without extension).
-			viper.AddConfigPath(home + "/.gearbox")
+			viper.AddConfigPath(GetGearboxDir())
 			viper.SetConfigName("launch")
 		}
 
@@ -286,6 +279,7 @@ func _GetUsage(c *cobra.Command) string {
 
 	if c.HasAvailableSubCommands() {
 		str += ux.SprintfGreen("[command] ")
+		str += ux.SprintfCyan("<gear name> ")
 	}
 
 	//foo := c.Use
@@ -360,7 +354,7 @@ func SetHelp(c *cobra.Command) {
 {{- end }}
 
 {{- if .HasAvailableSubCommands }}
-{{ SprintfBlue "\nUse" }} {{ SprintfCyan .CommandPath }} {{ SprintfGreen "[command]" }} {{ SprintfCyan "--help" }} {{ SprintfBlue "for more information about a command." }}
+{{ SprintfBlue "\nUse" }} {{ SprintfCyan .CommandPath }} {{ SprintfCyan "help" }} {{ SprintfGreen "[command]" }} {{ SprintfBlue "for more information about a command." }}
 {{- end }}
 `
 

@@ -101,7 +101,7 @@ func (me *DockerGear) ContainerList(f string) ux.State {
 			}
 
 			var state string
-			if c.State == "running" {
+			if c.State == ux.StateRunning {
 				state = ux.SprintfGreen(c.State)
 			} else {
 				state = ux.SprintfYellow(c.State)

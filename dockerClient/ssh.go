@@ -88,26 +88,28 @@ func (me *DockerGear) ContainerSsh(shell bool, status bool, cmdArgs ...string) u
 			StatusLine: StatusLine{Enable: status},
 			Shell: shell,
 		})
-		//if shell {
-		//	err = me.SshClient.Connect()
-		//	if err != nil {
-		//		break
-		//	}
-		//
-		//	break
-		//}
+
+		fmt.Printf("me.Image.GearConfig.Build: %s %s\n", me.Image.GearConfig.Build.Run, me.Image.GearConfig.Build.Args)
+		fmt.Printf("me.Container.GearConfig.Build: %s %s\n", me.Container.GearConfig.Build.Run, me.Container.GearConfig.Build.Args)
 
 		if !shell {
-			switch me.Container.GearConfig.Meta.Name {
-				case "golang":
-					me.Ssh.CmdArgs = append([]string{"go"}, cmdArgs...)
-				case "terminus":
-					me.Ssh.CmdArgs = append([]string{"terminus"}, cmdArgs...)
-				default:
-					me.Ssh.CmdArgs = cmdArgs
-			}
+			me.Ssh.CmdArgs = me.Container.GearConfig.GetCommand(cmdArgs)
+
+			//switch me.Container.GearConfig.GetName() {
+			//	case "golang":
+			//		me.Ssh.CmdArgs = append([]string{"go"}, cmdArgs...)
+			//	case "composer":
+			//		me.Ssh.CmdArgs = append([]string{"composer"}, cmdArgs...)
+			//	case "terminus":
+			//		me.Ssh.CmdArgs = append([]string{"terminus"}, cmdArgs...)
+			//	default:
+			//		me.Ssh.CmdArgs = cmdArgs
+			//}
 		} else {
 			me.Ssh.CmdArgs = cmdArgs
+			//if len(me.Ssh.CmdArgs) == 0 {
+			//	me.Ssh.CmdArgs = append([]string{"shell"})
+			//}
 		}
 
 		err = me.Ssh.getEnv()
@@ -306,115 +308,9 @@ func (me *SSH) Connect() error {
 
 		me.resetView()
 	}
+
 	return err
 }
-
-// func (me *SSH) RunCommand(cmd string) error {
-// 	var err error
-//
-// 	for range only.Once {
-// 		err = me.EnsureNotNil()
-// 		if err != nil {
-// 			break
-// 		}
-//
-// 		sshConfig := &ssh.ClientConfig{}
-//
-// 		var auth []ssh.AuthMethod
-//
-// 		// Try SSH key file first.
-// 		var keyfile ssh.AuthMethod
-// 		keyfile, err = readPublicKeyFile(me.PublicKey)
-//
-// 		if err == nil && keyfile != nil {
-// 			// Authenticate using SSH key.
-// 			auth = []ssh.AuthMethod{keyfile}
-// 		} else {
-// 			// Authenticate using password
-// 			auth = []ssh.AuthMethod{ssh.Password(me.Password)}
-// 		}
-//
-// 		sshConfig = &ssh.ClientConfig{
-// 			User: me.Username,
-// 			Auth: auth,
-// 			// HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error { return nil },
-// 			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-// 			Timeout:         time.Second * 10,
-// 		}
-//
-// 		me.Instance, err = ssh.Dial("tcp", fmt.Sprintf("%s:%s", me.Host, me.Port), sshConfig)
-// 		if err != nil {
-// 			break
-// 		}
-//
-// 		me.Session, err = me.Instance.NewSession()
-// 		defer me.Session.Close()
-// 		defer me.Instance.Close()
-// 		if err != nil {
-// 			break
-// 		}
-//
-// 		// Set IO
-// 		me.Session.Stdout = os.Stdout
-// 		me.Session.Stderr = os.Stderr
-// 		me.Session.Stdin = os.Stdin
-//
-// 		// var stdin io.WriteCloser
-// 		// stdin, err = me.Session.StdinPipe()
-// 		// if err != nil {
-// 		// 	break
-// 		// }
-//
-// 		// Set up terminal modes
-// 		modes := ssh.TerminalModes{
-// 			ssh.ECHO:          1,
-// 			ssh.TTY_OP_ISPEED: 19200,
-// 			ssh.TTY_OP_OSPEED: 19200,
-// 		}
-//
-// 		// Request pseudo terminal
-// 		fileDescriptor := int(os.Stdin.Fd())
-// 		if terminal.IsTerminal(fileDescriptor) {
-// 			originalState, err := terminal.MakeRaw(fileDescriptor)
-// 			if err != nil {
-// 				break
-// 			}
-// 			defer terminal.Restore(fileDescriptor, originalState)
-//
-// 			me.StatusLine.TermWidth, me.StatusLine.TermHeight, err = terminal.GetSize(fileDescriptor)
-// 			if err != nil {
-// 				break
-// 			}
-//
-// 			// xterm-256color
-// 			err = me.Session.RequestPty("xterm-256color", me.StatusLine.TermHeight, me.StatusLine.TermWidth, modes)
-// 			if err != nil {
-// 				break
-// 			}
-// 		}
-//
-// 		// Start remote shell
-// 		err = me.Session.Run(cmd)
-// 		if err != nil {
-// 			break
-// 		}
-//
-// 		// _, err = fmt.Fprintf(stdin, "%s\n", cmd)
-//
-// 		/*
-// 			// Loop around input <-> output.
-// 			for {
-// 				reader := bufio.NewReader(os.Stdin)
-// 				str, _ := reader.ReadString('\n')
-// 				fmt.Fprint(in, str)
-// 			}
-// 		*/
-//
-// 		_ = me.Session.Wait()
-// 		me.resetView()
-// 	}
-// 	return err
-// }
 
 func (me *SSH) getEnv() error {
 	var err error

@@ -10,8 +10,8 @@ release:
 	@goreleaser --rm-dist
 
 sync:
-	@rsync -HvaxP dist/launch_darwin_amd64/launch mick@macpro:~/Documents/GitHub/containers/docker-template/bin/launch-Darwin
-	@rsync -HvaxP dist/launch_linux_amd64/launch mick@macpro:~/Documents/GitHub/containers/docker-template/bin/launch-Linux
+	@rsync -HvaxP dist/launch_darwin_amd64/launch mick@macpro:~/Documents/GitHub/containers/docker-template/bin/Darwin/launch
+	@rsync -HvaxP dist/launch_linux_amd64/launch mick@macpro:~/Documents/GitHub/containers/docker-template/bin/Linux/launch
 
 push:
 	@echo "Pushing to: $(shell git branch)"

@@ -3,6 +3,7 @@ package gearJson
 import (
 	"encoding/json"
 	"fmt"
+	"launch/defaults"
 	"launch/only"
 	"launch/ux"
 )
@@ -16,24 +17,13 @@ type GearConfig struct {
 	Versions   GearVersions   `json:"versions"`
 
 	Schema     string         `json:"schema"`
-
-	//Args         GearArgs     `json:"args"`
-	//Base         bool         `json:"base"`
-	//Class        string       `json:"class"`
-	//Env          GearEnv      `json:"env"`
-	//Maintainer   string       `json:"maintainer"`
-	//Name         string       `json:"name"`
-	//Network      string       `json:"network"`
-	//Organization string       `json:"organization"`
-	//Ports        GearPorts    `json:"ports"`
-	//Refurl       string       `json:"refurl"`
-	//Restart      string       `json:"restart"`
-	//Run          string       `json:"run"`
-	//State        string       `json:"state"`
-	//Versions     GearVersions `json:"versions"`
-	//Volumes      string       `json:"volumes"`
 }
 type GearConfigs map[string]GearConfig
+
+func (me *GearConfig) GetName() string {
+	return me.Meta.Name
+}
+
 
 type GearMeta struct {
 	State        string `json:"state"`
@@ -44,20 +34,89 @@ type GearMeta struct {
 	Refurl       string `json:"refurl"`
 }
 
+
+/*
+Command execution is complex and there's several steps to the logic.
+Essentially, the ENTRYPOINT image definition is converted to an S6 service.
+
+During build:
+1. The ENTRYPOINT definition within a Docker image needs to be pulled in to a Gearbox image.
+2. This is used to start any service that was defined with ENTRYPOINT within the original image.
+3. GearBuild.Run will contain index 0 of the ENTRYPOINT array.
+4. GearBuild.Args will contain slice [1:] of the ENTRYPOINT array.
+
+During runtime(boot):
+1. GEARBOX_ENTRYPOINT, (aka GearBuild.Run), will be checked and executed as part of an S6 service.
+2. GEARBOX_ENTRYPOINT_ARGS, (GearBuild.Args), will be appended and the whole service started.
+
+During runtime(interactive commands):
+1. ARG 1 of the command line will be checked against GearRun.Commands and
+
+
+GearBuild.Run
+	This will default to GEARBOX_ENTRYPOINT env from within the image build process.
+It is generated from the command: `docker inspect --format '{{ with .ContainerConfig.Entrypoint}} {{ index . 0 }}{{ end }}'`
+
+GearBuild.Args
+	This will default to GEARBOX_ENTRYPOINT_ARGS env from within the image build process.
+It is generated from the command: `docker inspect --format '{{ join .ContainerConfig.Entrypoint " " }}'`
+Any additional arguments provided by the user will be appended to this at runtime.
+*/
+
 type GearBuild struct {
 	Ports        GearPorts    `json:"ports"`
-	Run          string       `json:"run"`
-	Args         GearArgs     `json:"args"`
+	Run          string       `json:"run"`		//
+	Args         GearArgs     `json:"args"`		//
 	Env          GearEnv      `json:"env"`
 	Network      string       `json:"network"`
 }
+
 
 type GearRun struct {
 	Ports        GearPorts    `json:"ports"`
 	Env          GearEnv      `json:"env"`
 	Volumes      string       `json:"volumes"`
 	Network      string       `json:"network"`
+	Commands     GearCommands `json:"commands"`
 }
+//type GearCommand string
+//type GearCommands map[string]GearCommand
+type GearCommands map[string]string
+
+func (me *GearConfig) GetCommand(cmd []string) []string {
+
+	for range only.Once {
+		switch {
+			case len(cmd) == 0:
+				cmd = []string{ defaults.DefaultCommandName }
+
+			case cmd[0] == "":
+				cmd = []string{ defaults.DefaultCommandName }
+		}
+
+		var c string
+		var ok bool
+		if c, ok = me.Run.Commands[cmd[0]]; !ok {
+			cmd = []string{ "" }
+			break
+		}
+
+		cmd = append([]string{c}, cmd...)
+	}
+
+	return cmd
+}
+
+//func (me *GearCommands) Join() string {
+//	var c string
+//
+//	for range only.Once {
+//		c = strings.
+//	}
+//
+//	return c
+//}
+
 
 type GearProject struct {
 }

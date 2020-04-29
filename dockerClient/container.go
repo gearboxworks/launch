@@ -15,6 +15,7 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"io"
 	"os"
+	"time"
 )
 
 type Container struct {
@@ -140,6 +141,34 @@ func (me *Container) State() ux.State {
 }
 
 
+func (me *Container) WaitForState(s string, t time.Duration) ux.State {
+	var state ux.State
+
+	for range only.Once {
+		state = me.EnsureNotNil()
+		if state.IsError() {
+			break
+		}
+
+		until := time.Now()
+		until.Add(t)
+
+		for now := time.Now(); until.Before(now); now = time.Now() {
+			state = me.State()
+			if state.IsError() {
+				break
+			}
+
+			if state.String == s {
+				break
+			}
+		}
+	}
+
+	return state
+}
+
+
 // Run a container in the background
 // You can also run containers in the background, the equivalent of typing docker run -d bfirsh/reticulate-splines:
 func (me *Container) Start() ux.State {
@@ -192,7 +221,7 @@ func (me *Container) Start() ux.State {
 		// fmt.Printf("SC: %s\n", status)
 		// fmt.Printf("SC: %s\n", err)
 
-		state = me.State()
+		state = me.WaitForState(ux.StateRunning, defaults.Timeout)
 		if state.IsError() {
 			break
 		}

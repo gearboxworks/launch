@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"launch/defaults"
 	"launch/only"
 	"launch/ux"
 )
@@ -9,6 +10,7 @@ import (
 func init() {
 	rootCmd.AddCommand(gbRunCmd)
 	rootCmd.AddCommand(gbShellCmd)
+	rootCmd.AddCommand(gbUnitTestCmd)
 
 	// Here you will define your flags and configuration settings.
 
@@ -63,11 +65,12 @@ func gbRunFunc(cmd *cobra.Command, args []string) {
 
 // gbShellCmd represents the gbShell command
 var gbShellCmd = &cobra.Command{
-	Use:   "shell <gear name> [gear args]",
+	Use:   "shell <gear name> [command] [args]",
 	Short: ux.SprintfBlue("Execute shell in Gearbox gear"),
 	Long: ux.SprintfBlue("Execute shell in Gearbox gear."),
-	Example: ux.SprintfWhite("launch shell golang ps -eaf"),
+	Example: ux.SprintfWhite("launch shell mysql ps -eaf"),
 	DisableFlagParsing: true,
+	DisableFlagsInUseLine: true,
 	Run: gbShellFunc,
 	Args: cobra.MinimumNArgs(1),
 }
@@ -89,6 +92,39 @@ func gbShellFunc(cmd *cobra.Command, args []string) {
 		}
 
 		cmdState = gearRef.Docker.ContainerSsh(true, sshStatus, args[1:]...)
+		break
+	}
+}
+
+
+// gbShellCmd represents the gbShell command
+var gbUnitTestCmd = &cobra.Command{
+	Use:   "test <gear name>",
+	Short: ux.SprintfBlue("Execute unit tests in Gearbox gear"),
+	Long: ux.SprintfBlue("Execute unit tests in Gearbox gear."),
+	Example: ux.SprintfWhite("launch unit tests terminus"),
+	//DisableFlagParsing: true,
+	Run: gbUnitTestFunc,
+	Args: cobra.MinimumNArgs(1),
+}
+
+func gbUnitTestFunc(cmd *cobra.Command, args []string) {
+	for range only.Once {
+		var sshStatus bool
+		var err error
+
+		gbStartFunc(cmd, args)
+		if !cmdState.IsRunning() {
+			cmdState.SetError("container not started")
+			break
+		}
+
+		sshStatus, err = cmd.Flags().GetBool("status")
+		if err != nil {
+			sshStatus = false
+		}
+
+		cmdState = gearRef.Docker.ContainerSsh(false, sshStatus, defaults.DefaultUnitTestCmd)
 		break
 	}
 }

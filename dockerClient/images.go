@@ -67,6 +67,10 @@ func (me *DockerGear) ImageList(f string) ux.State {
 				continue
 			}
 
+			if len(i.RepoTags) == 0 {
+				continue
+			}
+
 			if i.RepoTags[0] == "<none>:<none>" {
 				continue
 			}
