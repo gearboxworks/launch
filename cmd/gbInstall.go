@@ -55,11 +55,6 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 		}
 
 		if found {
-			cmdState = gearRef.State()
-			if cmdState.IsError() {
-				break
-			}
-
 			// Create symlinks.
 			gearRef.GearConfig.CreateLinks(defaults.RunAs, ga.Name, ga.Version)
 
@@ -88,9 +83,16 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 			if !quietFlag {
 				ux.PrintfGreen("OK\n")
 			}
-			cmdState.SetOk("Gear '%s:%s' installed OK", ga.Name, ga.Version)
+
+			cmdState = gearRef.State()
+			if cmdState.IsError() {
+				break
+			}
+
 			// Create symlinks.
 			gearRef.GearConfig.CreateLinks(defaults.RunAs, ga.Name, ga.Version)
+
+			cmdState.SetOk("Gear '%s:%s' installed OK", ga.Name, ga.Version)
 
 		} else {
 			if !quietFlag {
@@ -132,9 +134,6 @@ func gbUninstallFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 		if !found {
-			// Remove symlinks.
-			gearRef.GearConfig.RemoveLinks(defaults.RunAs, ga.Name, ga.Version)
-
 			cmdState.SetOk("Gear '%s:%s' already removed.", ga.Name, ga.Version)
 			break
 		}

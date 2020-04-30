@@ -140,10 +140,17 @@ func gbStopFunc(cmd *cobra.Command, args []string) {
 				ux.PrintfRed("error stopping - %s\n", cmdState.Error)
 			}
 			cmdState.SetError("Gear '%s:%s' stop error - %s", ga.Name, ga.Version, cmdState.Error)
+
 		} else if cmdState.IsExited() {
+			if !quietFlag {
+				ux.PrintfGreen(" Already stopped.\n")
+			}
+
+		} else if cmdState.IsCreated() {
 			if !quietFlag {
 				ux.PrintfGreen("OK\n")
 			}
+
 		} else {
 			if !quietFlag {
 				ux.PrintfWarning("cannot be stopped\n")

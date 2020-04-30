@@ -428,48 +428,21 @@ func (me *Container) ContainerCreate(gearName string, gearVersion string, gearMo
 			break
 		}
 
-		if state.IsRunning() {
-			break
-		}
-
-		if state.IsPaused() {
-			break
-		}
-
-		if state.IsRestarting() {
-			break
-		}
-
 		if state.IsCreated() {
 			break
 		}
 
-		// url := fmt.Sprintf("docker.io/library/%s", image)
-		// reader, err := me.DockerClient.ImagePull(me.Ctx, url, types.ImagePullOptions{})
-		// if err != nil {
-		// 	break
-		// }
-		// _, _ = io.Copy(os.Stdout, reader)
+		//if state.IsRunning() {
+		//	break
+		//}
 		//
-		// if err := me.client.ContainerStart(*me.ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-		// 	break
-		// }
+		//if state.IsPaused() {
+		//	break
+		//}
 		//
-		// statusCh, errCh := me.client.ContainerWait(*me.ctx, resp.ID, container.WaitConditionNotRunning)
-		// select {
-		// 	case err := <-errCh:
-		// 		if err != nil {
-		// 			break
-		// 		}
-		// 	case <-statusCh:
-		// }
-		//
-		// out, err := me.client.ContainerLogs(*me.ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true})
-		// if err != nil {
-		// 	break
-		// }
-		//
-		// stdcopy.StdCopy(os.Stdout, os.Stderr, out)
+		//if state.IsRestarting() {
+		//	break
+		//}
 	}
 
 	if me._Parent.Debug {

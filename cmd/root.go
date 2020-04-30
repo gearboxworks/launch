@@ -213,6 +213,9 @@ func Execute() ux.State {
 
 		SetHelp(rootCmd)
 
+		// WARNING: Critical code area.
+
+		// Support for running launch via symlink.
 		defaults.RunAs.FullPath, err = filepath.Abs(os.Args[0])
 		if err != nil {
 			state.SetError("%s", err)
@@ -238,6 +241,7 @@ func Execute() ux.State {
 			quietFlag = true
 			rootCmd.DisableFlagParsing = true
 		}
+		// WARNING: Critical code area.
 
 		err = rootCmd.Execute()
 		if err != nil {

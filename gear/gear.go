@@ -56,7 +56,12 @@ func (gear *Gear) State() ux.State {
 		}
 
 		if gear.GearConfig == nil {
-			gear.GearConfig = gear.Docker.Container.GearConfig
+			if gear.Docker.Container.GearConfig != nil {
+				gear.GearConfig = gear.Docker.Container.GearConfig
+			} else if gear.Docker.Image.GearConfig != nil {
+				gear.GearConfig = gear.Docker.Image.GearConfig
+			}
+
 		}
 
 		if gear.Docker.Image.ID == "" {
@@ -88,6 +93,17 @@ func (gear *Gear) FindContainer(gearName string, gearVersion string) (bool, ux.S
 
 	for range only.Once {
 		found, state = gear.Docker.FindContainer(gearName, gearVersion)
+		if !found {
+			break
+		}
+		if state.IsError() {
+			break
+		}
+
+		state = gear.State()
+		if state.IsError() {
+			break
+		}
 	}
 
 	return found, state

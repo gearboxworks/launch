@@ -153,7 +153,7 @@ func (me *GearConfig) RemoveLinks(c defaults.ExecCommand, name string, version s
 			break
 		}
 
-		var created bool
+		var removed bool
 		for k, _ := range me.Run.Commands {
 			var err error
 			var dstFile string
@@ -169,45 +169,29 @@ func (me *GearConfig) RemoveLinks(c defaults.ExecCommand, name string, version s
 			}
 
 			linkStat, err = os.Lstat(dstFile)
+			if err != nil {
+				continue
+			}
+
 			if linkStat == nil {
-				created = true
-
-				// Symlink doesn't exist - create.
-				err = os.Symlink(c.File, dstFile)
-				if err != nil {
-					continue
-				}
-
-				//continue
-				linkStat, err = os.Lstat(dstFile)
-				if linkStat == nil {
-					continue
-				}
+				// Symlink doesn't exist.
+				continue
 			}
 
-			// Symlink exists - validate.
+			removed = true
+
 			l, _ := os.Readlink(dstFile)
-			//if !filepath.IsAbs(l) {
-			//	l, _ = filepath.Abs(fmt.Sprintf("%s%c%s", c.Dir, filepath.Separator, l))
-			//}
-			if l == "" {
-
+			if l == defaults.BinaryName {
+				// Symlink exists - remove.
+				//if !filepath.IsAbs(l) {
+				//	l, _ = filepath.Abs(fmt.Sprintf("%s%c%s", c.Dir, filepath.Separator, l))
+				//}
+				err = os.Remove(dstFile)
 			}
-
-			//fmt.Printf("'%s' (%s) => '%s'\n", k, dstFile, v)
-			//fmt.Printf("\tReadlink() => %s\n", l)
-			//fmt.Printf("\tLstat() => %s	%s	%s	%s	%d\n",
-			//	linkStat.Name(),
-			//	linkStat.IsDir(),
-			//	linkStat.Mode().String(),
-			//	linkStat.ModTime().String(),
-			//	linkStat.Size(),
-			//)
-			//fmt.Printf("\n")
 		}
 
-		if created {
-			ux.PrintfOk("Created application links.\n")
+		if removed {
+			ux.PrintfOk("Removed application links.\n")
 		}
 	}
 
