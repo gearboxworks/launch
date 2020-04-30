@@ -7,6 +7,7 @@ import (
 	"launch/githubClient"
 	"launch/only"
 	"launch/ux"
+	"strings"
 )
 // DOCKER_HOST=tcp://macpro:2376
 
@@ -37,6 +38,59 @@ func (me *Provider) NewGear() (*Gear, ux.State) {
 	}
 
 	return &cli, state
+}
+
+
+func (gear *Gear) State() ux.State {
+	var state ux.State
+
+	for range only.Once {
+		state = gear.EnsureNotNil()
+		if state.IsError() {
+			break
+		}
+
+		runState := gear.Docker.Container.State()
+		if state.IsError() {
+			break
+		}
+
+		if gear.GearConfig == nil {
+			gear.GearConfig = gear.Docker.Container.GearConfig
+		}
+
+		if gear.Docker.Image.ID == "" {
+			gear.Docker.Image.ID = strings.TrimPrefix(gear.Docker.Container.Details.Image, "sha256:")
+			gear.Docker.Image.Name = gear.Docker.Container.Name
+			gear.Docker.Image.Version = gear.Docker.Container.Version
+		}
+
+		state = gear.Docker.Image.State()
+		if state.IsError() {
+			break
+		}
+
+		state = runState
+
+		//state = gear.Docker.Image.State()
+		//if state.IsError() {
+		//	break
+		//}
+	}
+
+	return state
+}
+
+
+func (gear *Gear) FindContainer(gearName string, gearVersion string) (bool, ux.State) {
+	var found bool
+	var state ux.State
+
+	for range only.Once {
+		found, state = gear.Docker.FindContainer(gearName, gearVersion)
+	}
+
+	return found, state
 }
 
 

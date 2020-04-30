@@ -43,9 +43,9 @@ import (
 	"launch/defaults"
 	"launch/gear"
 	"launch/only"
-	"launch/ospaths"
 	"launch/ux"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -116,7 +116,9 @@ func initConfig() {
 	}
 }
 
-var cmdExec string
+//var cmdExecDir string
+//var cmdExecFile string
+//var cmdExecPath string
 var cmdState ux.State
 var debugFlag bool
 var quietFlag bool
@@ -207,17 +209,28 @@ func Execute() ux.State {
 	var state ux.State
 
 	for range only.Once {
+		var err error
+
 		SetHelp(rootCmd)
 
+		defaults.RunAs.FullPath, err = filepath.Abs(os.Args[0])
+		if err != nil {
+			state.SetError("%s", err)
+			break
+		}
+		//defaults.RunAs.FullPath = "/Users/mick/Documents/GitHub/gb-launch/bin/psql-9.4.26"
+		//defaults.RunAs.FullPath = "/Users/mick/Documents/GitHub/gb-launch/bin/postgresql-9.4.26"
+
 		//foo := ospaths.Split(os.Args[0])
-		foo := ospaths.Split("/Users/mick/go/bin/composer-1.10.0")
-		cmdExec = foo.File.String()
-		ok, _ := regexp.MatchString("^" + defaults.BinaryName, cmdExec)
+		//foo := ospaths.Split("/Users/mick/go/bin/composer-1.10.0")
+		//cmdExec = foo.File.String()
+		defaults.RunAs.Dir, defaults.RunAs.File = filepath.Split(defaults.RunAs.FullPath)
+
+		ok, _ := regexp.MatchString("^" + defaults.BinaryName, defaults.RunAs.File)
 		if !ok {
-		//	cmdExec = ""
-		//} else {
-			cmdExec = strings.ReplaceAll(cmdExec, "-", ":")
-			newArgs := []string{"run", cmdExec}
+			defaults.RunAs.AsLink = true
+			defaults.RunAs.File = strings.ReplaceAll(defaults.RunAs.File, "-", ":")
+			newArgs := []string{"run", defaults.RunAs.File}
 			newArgs = append(newArgs, os.Args[1:]...)
 			rootCmd.SetArgs(newArgs)
 
@@ -226,13 +239,9 @@ func Execute() ux.State {
 			rootCmd.DisableFlagParsing = true
 		}
 
-		err := rootCmd.Execute()
+		err = rootCmd.Execute()
 		if err != nil {
 			cmdState.SetError("%s", err)
-			break
-		}
-
-		if cmdExec == "" {
 			break
 		}
 	}

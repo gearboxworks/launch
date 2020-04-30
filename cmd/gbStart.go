@@ -45,7 +45,7 @@ func gbStartFunc(cmd *cobra.Command, args []string) {
 		}
 
 		var found bool
-		found, cmdState = gearRef.Docker.FindContainer(ga.Name, ga.Version)
+		found, cmdState = gearRef.FindContainer(ga.Name, ga.Version)
 		if cmdState.IsError() {
 			break
 		}
@@ -64,10 +64,16 @@ func gbStartFunc(cmd *cobra.Command, args []string) {
 			}
 			//cmdState.ClearAll()
 
-			found, cmdState = gearRef.Docker.FindContainer(ga.Name, ga.Version)
+			found, cmdState = gearRef.FindContainer(ga.Name, ga.Version)
 			if cmdState.IsError() {
 				break
 			}
+		}
+
+		cmdState = gearRef.State()
+
+		if cmdState.IsRunning() {
+			break
 		}
 
 
@@ -113,7 +119,7 @@ func gbStopFunc(cmd *cobra.Command, args []string) {
 		}
 
 		var found bool
-		found, cmdState = gearRef.Docker.FindContainer(ga.Name, ga.Version)
+		found, cmdState = gearRef.FindContainer(ga.Name, ga.Version)
 		if cmdState.IsError() {
 			break
 		}

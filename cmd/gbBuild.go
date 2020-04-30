@@ -46,6 +46,7 @@ func gbBuildFunc(cmd *cobra.Command, args []string) {
 // gbPublishCmd represents the gbPublish command
 var gbPublishCmd = &cobra.Command{
 	Use:   "publish <gear name>",
+	SuggestFor: []string{"upload"},
 	Short: ux.SprintfBlue("Publish a Gearbox gear"),
 	Long: ux.SprintfBlue("Publish a Gearbox gear to GitHub or DockerHub."),
 	Example: ux.SprintfWhite("launch publish golang"),

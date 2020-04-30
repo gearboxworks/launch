@@ -15,3 +15,11 @@ const (
 	LanguageContainerName = "Gear"
 	LanguageImageName = "Gear image"
 )
+
+type ExecCommand struct {
+	Dir string
+	File string
+	FullPath string
+	AsLink bool
+}
+var RunAs ExecCommand

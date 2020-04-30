@@ -26,6 +26,8 @@ func init() {
 // gbListCmd represents the gbList command
 var gbListCmd = &cobra.Command{
 	Use:   "list [gear name]",
+	Aliases: []string{"ls", "show"},
+	//SuggestFor: []string{"ls", "show"},
 	Short: ux.SprintfBlue("List a Gearbox gear"),
 	Long: ux.SprintfBlue("List a Gearbox gear."),
 	Example: ux.SprintfWhite("launch list golang"),

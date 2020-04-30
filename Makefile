@@ -12,6 +12,7 @@ release:
 sync:
 	@rsync -HvaxP dist/launch_darwin_amd64/launch mick@macpro:~/Documents/GitHub/containers/docker-template/bin/Darwin/launch
 	@rsync -HvaxP dist/launch_linux_amd64/launch mick@macpro:~/Documents/GitHub/containers/docker-template/bin/Linux/launch
+	@rsync -HvaxP dist/launch_windows_amd64/launch.exe mick@macpro:~/Documents/GitHub/containers/docker-template/bin/Windows/launch.exe
 
 push:
 	@echo "Pushing to: $(shell git branch)"

@@ -27,8 +27,8 @@ func init() {
 // gbInstallCmd represents the gbInstall command
 var gbInstallCmd = &cobra.Command{
 	Use:   "install <gear name>",
-	Aliases: []string{"add"},
-	SuggestFor: []string{"download"},
+	//Aliases: []string{"add"},
+	SuggestFor: []string{"download" ,"add"},
 	Short: ux.SprintfBlue("Install a Gearbox gear"),
 	Long: ux.SprintfBlue("Install a Gearbox gear."),
 	Example: ux.SprintfWhite("launch install golang"),
@@ -49,11 +49,20 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 		}
 
 		var found bool
-		found, cmdState = gearRef.Docker.FindContainer(ga.Name, ga.Version)
+		found, cmdState = gearRef.FindContainer(ga.Name, ga.Version)
 		if cmdState.IsError() {
 			break
 		}
+
 		if found {
+			cmdState = gearRef.State()
+			if cmdState.IsError() {
+				break
+			}
+
+			// Create symlinks.
+			gearRef.GearConfig.CreateLinks(defaults.RunAs, ga.Name, ga.Version)
+
 			cmdState.SetOk("Gear '%s:%s' already installed.", ga.Name, ga.Version)
 			break
 		}
@@ -74,11 +83,15 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 				ux.PrintfRed("error installing - %s\n", cmdState.Error)
 			}
 			cmdState.SetError("Gear '%s:%s' install error - %s", ga.Name, ga.Version, cmdState.Error)
+
 		} else if cmdState.IsCreated() {
 			if !quietFlag {
 				ux.PrintfGreen("OK\n")
 			}
 			cmdState.SetOk("Gear '%s:%s' installed OK", ga.Name, ga.Version)
+			// Create symlinks.
+			gearRef.GearConfig.CreateLinks(defaults.RunAs, ga.Name, ga.Version)
+
 		} else {
 			if !quietFlag {
 				ux.PrintfWarning("cannot be installed\n")
@@ -92,8 +105,8 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 // gbInstallCmd represents the gbInstall command
 var gbUninstallCmd = &cobra.Command{
 	Use:   "uninstall <gear name>",
-	Aliases: []string{"remove"},
-	SuggestFor: []string{"clean"},
+	//Aliases: []string{"remove"},
+	SuggestFor: []string{"clean", "remove"},
 	Short: ux.SprintfBlue("Uninstall a Gearbox gear"),
 	Long: ux.SprintfBlue("Uninstall a Gearbox gear."),
 	Example: ux.SprintfWhite("launch uninstall golang"),
@@ -114,11 +127,14 @@ func gbUninstallFunc(cmd *cobra.Command, args []string) {
 		}
 
 		var found bool
-		found, cmdState = gearRef.Docker.FindContainer(ga.Name, ga.Version)
+		found, cmdState = gearRef.FindContainer(ga.Name, ga.Version)
 		if cmdState.IsError() {
 			break
 		}
 		if !found {
+			// Remove symlinks.
+			gearRef.GearConfig.RemoveLinks(defaults.RunAs, ga.Name, ga.Version)
+
 			cmdState.SetOk("Gear '%s:%s' already removed.", ga.Name, ga.Version)
 			break
 		}
@@ -138,11 +154,16 @@ func gbUninstallFunc(cmd *cobra.Command, args []string) {
 				ux.PrintfRed("error removing - %s\n", cmdState.Error)
 			}
 			cmdState.SetError("Gear '%s:%s' remove error - %s", ga.Name, ga.Version, cmdState.Error)
+
 		} else if cmdState.IsOk() {
 			if !quietFlag {
 				ux.PrintfGreen("OK\n")
 			}
 			cmdState.SetOk("Gear '%s:%s' removed OK", ga.Name, ga.Version)
+
+			// Remove symlinks.
+			gearRef.GearConfig.RemoveLinks(defaults.RunAs, ga.Name, ga.Version)
+
 		} else {
 			if !quietFlag {
 				ux.PrintfWarning("cannot be removed\n")
@@ -156,8 +177,8 @@ func gbUninstallFunc(cmd *cobra.Command, args []string) {
 // gbReinstallCmd represents the gbInstall command
 var gbReinstallCmd = &cobra.Command{
 	Use:   "reinstall <gear name>",
-	Aliases: []string{"update"},
-	SuggestFor: []string{""},
+	//Aliases: []string{"update"},
+	SuggestFor: []string{"update"},
 	Short: ux.SprintfBlue("Update a Gearbox gear"),
 	Long: ux.SprintfBlue("Update a Gearbox gear."),
 	Example: ux.SprintfWhite("launch reinstall golang"),
@@ -182,6 +203,6 @@ func gbReinstallFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 
-		cmdState.SetOk("Gear '%s:%s' removed.", ga.Name, ga.Version)
+		cmdState.SetOk("Gear '%s:%s' reinstalled.", ga.Name, ga.Version)
 	}
 }

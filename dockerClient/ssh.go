@@ -59,7 +59,7 @@ const DefaultSshPort = "22"
 const DefaultStatusLineUpdateDelay = time.Second * 2
 
 
-func (me *DockerGear) ContainerSsh(shell bool, status bool, cmdArgs ...string) ux.State {
+func (me *DockerGear) ContainerSsh(interactive bool, status bool, cmdArgs ...string) ux.State {
 	var state ux.State
 
 	for range only.Once {
@@ -86,35 +86,36 @@ func (me *DockerGear) ContainerSsh(shell bool, status bool, cmdArgs ...string) u
 			Host: u.Hostname(),
 			Port: port,
 			StatusLine: StatusLine{Enable: status},
-			Shell: shell,
+			Shell: interactive,
 		})
 
 		//fmt.Printf("me.Image.GearConfig.Build: %s %s\n", me.Image.GearConfig.Build.Run, me.Image.GearConfig.Build.Args)
 		//fmt.Printf("me.Container.GearConfig.Build: %s %s\n", me.Container.GearConfig.Build.Run, me.Container.GearConfig.Build.Args)
 
-		if !shell {
-			me.Ssh.CmdArgs = me.Container.GearConfig.GetCommand(cmdArgs)
-			if len(me.Ssh.CmdArgs) == 0 {
-				state.SetError("ERROR: no default command defined in gearbox.json")
-				break
-			}
-
-			//switch me.Container.GearConfig.GetName() {
-			//	case "golang":
-			//		me.Ssh.CmdArgs = append([]string{"go"}, cmdArgs...)
-			//	case "composer":
-			//		me.Ssh.CmdArgs = append([]string{"composer"}, cmdArgs...)
-			//	case "terminus":
-			//		me.Ssh.CmdArgs = append([]string{"terminus"}, cmdArgs...)
-			//	default:
-			//		me.Ssh.CmdArgs = cmdArgs
-			//}
-		} else {
-			me.Ssh.CmdArgs = cmdArgs
-			//if len(me.Ssh.CmdArgs) == 0 {
-			//	me.Ssh.CmdArgs = append([]string{"shell"})
-			//}
-		}
+		//if !interactive {
+		//	me.Ssh.CmdArgs = me.Container.GearConfig.GetCommand(cmdArgs)
+		//	if len(me.Ssh.CmdArgs) == 0 {
+		//		state.SetError("ERROR: no default command defined in gearbox.json")
+		//		break
+		//	}
+		//
+		//	//switch me.Container.GearConfig.GetName() {
+		//	//	case "golang":
+		//	//		me.Ssh.CmdArgs = append([]string{"go"}, cmdArgs...)
+		//	//	case "composer":
+		//	//		me.Ssh.CmdArgs = append([]string{"composer"}, cmdArgs...)
+		//	//	case "terminus":
+		//	//		me.Ssh.CmdArgs = append([]string{"terminus"}, cmdArgs...)
+		//	//	default:
+		//	//		me.Ssh.CmdArgs = cmdArgs
+		//	//}
+		//} else {
+		//	me.Ssh.CmdArgs = cmdArgs
+		//	//if len(me.Ssh.CmdArgs) == 0 {
+		//	//	me.Ssh.CmdArgs = append([]string{"shell"})
+		//	//}
+		//}
+		me.Ssh.CmdArgs = cmdArgs
 
 		err = me.Ssh.getEnv()
 		if err != nil {

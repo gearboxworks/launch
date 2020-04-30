@@ -5,6 +5,7 @@ import (
 	"launch/defaults"
 	"launch/only"
 	"launch/ux"
+	"strings"
 )
 
 func init() {
@@ -58,7 +59,16 @@ func gbRunFunc(cmd *cobra.Command, args []string) {
 			sshStatus = false
 		}
 
-		cmdState = gearRef.Docker.ContainerSsh(false, sshStatus, args[1:]...)
+		// Yuck!
+		sp := strings.Split(args[0], ":")
+		args[0] = sp[0]
+		args = gearRef.Docker.Container.GearConfig.GetCommand(args)
+		if len(args) == 0 {
+			ux.PrintfError("ERROR: no default command defined in gearbox.json")
+			break
+		}
+
+		cmdState = gearRef.Docker.ContainerSsh(false, sshStatus, args...)
 		break
 	}
 }
@@ -104,7 +114,8 @@ var gbUnitTestCmd = &cobra.Command{
 	Short: ux.SprintfBlue("Execute unit tests in Gearbox gear"),
 	Long: ux.SprintfBlue("Execute unit tests in Gearbox gear."),
 	Example: ux.SprintfWhite("launch unit tests terminus"),
-	//DisableFlagParsing: true,
+	DisableFlagParsing: true,
+	DisableFlagsInUseLine: true,
 	Run: gbUnitTestFunc,
 	Args: cobra.MinimumNArgs(1),
 }
@@ -125,7 +136,7 @@ func gbUnitTestFunc(cmd *cobra.Command, args []string) {
 			sshStatus = false
 		}
 
-		cmdState = gearRef.Docker.ContainerSsh(false, sshStatus, defaults.DefaultUnitTestCmd)
+		cmdState = gearRef.Docker.ContainerSsh(true, sshStatus, defaults.DefaultUnitTestCmd)
 		break
 	}
 }

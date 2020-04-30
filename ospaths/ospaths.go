@@ -342,6 +342,12 @@ func (me *Path) String() string {
 }
 
 
+func (me *Path) Abs() string {
+
+	return filepath.FromSlash(me.Dir.String() + "/"+ me.File.String())
+}
+
+
 func Split(fn string) *Path {
 
 	var pn Path

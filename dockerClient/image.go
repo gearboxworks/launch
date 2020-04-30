@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/docker/docker/api/types/filters"
 	"launch/defaults"
 	"launch/gear/gearJson"
 	"launch/only"
@@ -22,7 +23,7 @@ type Image struct {
 	Version    string
 	Summary    *types.ImageSummary
 	Details    types.ImageInspect
-	GearConfig gearJson.GearConfig
+	GearConfig *gearJson.GearConfig
 
 	_Parent    *DockerGear
 }
@@ -51,6 +52,71 @@ func (me *Image) EnsureNotNil() ux.State {
 			state.SetError("version is nil")
 			break
 		}
+	}
+
+	return state
+}
+
+
+func (me *Image) State() ux.State {
+	var state ux.State
+
+	for range only.Once {
+		var err error
+
+		state = me.EnsureNotNil()
+		if state.IsError() {
+			break
+		}
+
+		if me.Summary == nil {
+			ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
+			defer cancel()
+
+			df := filters.NewArgs()
+			//df.Add("id", me.ID)
+			df.Add("reference", fmt.Sprintf("%s/%s:%s", defaults.Organization, me.Name, me.Version))
+
+			var images []types.ImageSummary
+			images, err = me._Parent.Client.ImageList(ctx, types.ImageListOptions{All: true, Filters: df})
+			if err != nil {
+				state.SetError("gear list error: %s", err)
+				break
+			}
+			if len(images) == 0 {
+				state.SetWarning("no gears found")
+				break
+			}
+
+			me.Summary = &images[0]
+			me.Summary.ID = me.ID
+
+			d := types.ImageInspect{}
+			d, _, err = me._Parent.Client.ImageInspectWithRaw(ctx, me.ID)
+			if err != nil {
+				state.SetError("gear inspect error: %s", err)
+				break
+			}
+			me.Details = d
+		}
+
+		if me.GearConfig == nil {
+			me.GearConfig, state = gearJson.New(me.Summary.Labels["gearbox.json"])
+			if state.IsError() {
+				break
+			}
+		}
+
+		if me.GearConfig.Meta.Organization != defaults.Organization {
+			state.SetError("not a Gearbox container")
+			break
+		}
+
+		//state.SetString("")
+	}
+
+	if state.IsError() {
+		me.Summary = nil
 	}
 
 	return state

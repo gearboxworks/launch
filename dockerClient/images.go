@@ -172,7 +172,7 @@ func (me *DockerGear) FindImage(gearName string, gearVersion string) (bool, ux.S
 
 			me.Image.Name = gearName
 			me.Image.Version = gearVersion
-			me.Image.GearConfig = *gc
+			me.Image.GearConfig = gc
 			me.Image.Summary = &i
 			me.Image.ID = i.ID
 			//me.Image.client = me.DockerClient

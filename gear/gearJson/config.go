@@ -6,6 +6,8 @@ import (
 	"launch/defaults"
 	"launch/only"
 	"launch/ux"
+	"os"
+	"path/filepath"
 )
 
 type GearConfig struct {
@@ -22,6 +24,194 @@ type GearConfigs map[string]GearConfig
 
 func (me *GearConfig) GetName() string {
 	return me.Meta.Name
+}
+
+func (me *GearConfig) GetCommand(cmd []string) []string {
+	var retCmd []string
+
+	for range only.Once {
+		var cmdExec string
+		switch {
+			case len(cmd) == 0:
+				cmdExec = defaults.DefaultCommandName
+
+			case cmd[0] == "":
+				cmdExec = defaults.DefaultCommandName
+
+			case cmd[0] == me.Meta.Name:
+				cmdExec = defaults.DefaultCommandName
+
+			case cmd[0] != "":
+				cmdExec = cmd[0]
+
+			default:
+				//cmdExec = cmd[0]
+				cmdExec = defaults.DefaultCommandName
+		}
+
+		c := me.MatchCommand(cmdExec)
+		if c == nil {
+			retCmd = []string{}
+			break
+		}
+
+		retCmd = append([]string{*c}, cmd[1:]...)
+	}
+
+	return retCmd
+}
+
+func (me *GearConfig) MatchCommand(cmd string) *string {
+	var c *string
+
+	for range only.Once {
+		if c2, ok := me.Run.Commands[cmd]; ok {
+			c = &c2
+			break
+		}
+	}
+
+	return c
+}
+
+func (me *GearConfig) CreateLinks(c defaults.ExecCommand, name string, version string) ux.State {
+	var state ux.State
+
+	for range only.Once {
+		state = me.ValidateGearConfig()
+		if state.IsError() {
+			break
+		}
+
+		var created bool
+		for k, _ := range me.Run.Commands {
+			var err error
+			var dstFile string
+			var linkStat os.FileInfo
+
+			if k == "default" {
+				continue
+			}
+
+			dstFile, err = filepath.Abs(fmt.Sprintf("%s%c%s-%s", c.Dir, filepath.Separator, k, version))
+			if err != nil {
+				continue
+			}
+
+			linkStat, err = os.Lstat(dstFile)
+			if linkStat == nil {
+				created = true
+
+				// Symlink doesn't exist - create.
+				err = os.Symlink(c.File, dstFile)
+				if err != nil {
+					continue
+				}
+
+				//continue
+				linkStat, err = os.Lstat(dstFile)
+				if linkStat == nil {
+					continue
+				}
+			}
+
+			// Symlink exists - validate.
+			l, _ := os.Readlink(dstFile)
+			//if !filepath.IsAbs(l) {
+			//	l, _ = filepath.Abs(fmt.Sprintf("%s%c%s", c.Dir, filepath.Separator, l))
+			//}
+			if l == "" {
+
+			}
+
+			//fmt.Printf("'%s' (%s) => '%s'\n", k, dstFile, v)
+			//fmt.Printf("\tReadlink() => %s\n", l)
+			//fmt.Printf("\tLstat() => %s	%s	%s	%s	%d\n",
+			//	linkStat.Name(),
+			//	linkStat.IsDir(),
+			//	linkStat.Mode().String(),
+			//	linkStat.ModTime().String(),
+			//	linkStat.Size(),
+			//)
+			//fmt.Printf("\n")
+		}
+
+		if created {
+			ux.PrintfOk("Created application links.\n")
+		}
+	}
+
+	return state
+}
+
+func (me *GearConfig) RemoveLinks(c defaults.ExecCommand, name string, version string) ux.State {
+	var state ux.State
+
+	for range only.Once {
+		state = me.ValidateGearConfig()
+		if state.IsError() {
+			break
+		}
+
+		var created bool
+		for k, _ := range me.Run.Commands {
+			var err error
+			var dstFile string
+			var linkStat os.FileInfo
+
+			if k == "default" {
+				continue
+			}
+
+			dstFile, err = filepath.Abs(fmt.Sprintf("%s%c%s-%s", c.Dir, filepath.Separator, k, version))
+			if err != nil {
+				continue
+			}
+
+			linkStat, err = os.Lstat(dstFile)
+			if linkStat == nil {
+				created = true
+
+				// Symlink doesn't exist - create.
+				err = os.Symlink(c.File, dstFile)
+				if err != nil {
+					continue
+				}
+
+				//continue
+				linkStat, err = os.Lstat(dstFile)
+				if linkStat == nil {
+					continue
+				}
+			}
+
+			// Symlink exists - validate.
+			l, _ := os.Readlink(dstFile)
+			//if !filepath.IsAbs(l) {
+			//	l, _ = filepath.Abs(fmt.Sprintf("%s%c%s", c.Dir, filepath.Separator, l))
+			//}
+			if l == "" {
+
+			}
+
+			//fmt.Printf("'%s' (%s) => '%s'\n", k, dstFile, v)
+			//fmt.Printf("\tReadlink() => %s\n", l)
+			//fmt.Printf("\tLstat() => %s	%s	%s	%s	%d\n",
+			//	linkStat.Name(),
+			//	linkStat.IsDir(),
+			//	linkStat.Mode().String(),
+			//	linkStat.ModTime().String(),
+			//	linkStat.Size(),
+			//)
+			//fmt.Printf("\n")
+		}
+
+		if created {
+			ux.PrintfOk("Created application links.\n")
+		}
+	}
+
+	return state
 }
 
 
@@ -49,8 +239,12 @@ During runtime(boot):
 1. GEARBOX_ENTRYPOINT, (aka GearBuild.Run), will be checked and executed as part of an S6 service.
 2. GEARBOX_ENTRYPOINT_ARGS, (GearBuild.Args), will be appended and the whole service started.
 
-During runtime(interactive commands):
-1. ARG 1 of the command line will be checked against GearRun.Commands and
+During runtime(interactive command via symlink):
+1. ARG 1 of the command line will be checked against GearRun.Commands for every container on the system.
+2. When found, will execute.
+
+During runtime(other interactive commands):
+1.
 
 
 GearBuild.Run
@@ -82,50 +276,6 @@ type GearRun struct {
 //type GearCommand string
 //type GearCommands map[string]GearCommand
 type GearCommands map[string]string
-
-func (me *GearConfig) GetCommand(cmd []string) []string {
-	var retCmd []string
-
-	for range only.Once {
-		var cmdExec string
-		switch {
-			case len(cmd) == 0:
-				cmdExec = defaults.DefaultCommandName
-
-			case cmd[0] == "":
-				cmdExec = defaults.DefaultCommandName
-
-			default:
-				//cmdExec = cmd[0]
-				cmdExec = defaults.DefaultCommandName
-		}
-
-		var c string
-		var ok bool
-		if c, ok = me.Run.Commands[cmdExec]; !ok {
-			break
-		}
-
-		if c == "" {
-			break
-		}
-
-		retCmd = append([]string{c}, cmd...)
-	}
-
-	return retCmd
-}
-
-//func (me *GearCommands) Join() string {
-//	var c string
-//
-//	for range only.Once {
-//		c = strings.
-//	}
-//
-//	return c
-//}
-
 
 type GearProject struct {
 }

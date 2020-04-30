@@ -175,7 +175,16 @@ func (me *DockerGear) FindContainer(gearName string, gearVersion string) (bool, 
 			}
 
 			if gc.Meta.Name != gearName {
-				continue
+				if !defaults.RunAs.AsLink {
+					continue
+				}
+
+				cs := gc.MatchCommand(gearName)
+				if cs == nil {
+					continue
+				}
+
+				gearName = gc.Meta.Name
 			}
 
 			if gearVersion == "latest" {
@@ -188,6 +197,10 @@ func (me *DockerGear) FindContainer(gearName string, gearVersion string) (bool, 
 				if !gc.Versions.HasVersion(gearVersion) {
 					continue
 				}
+			}
+
+			if c.Labels["gearbox.version"] != gearVersion {
+				continue
 			}
 
 			me.Container.Name = gearName

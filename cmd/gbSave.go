@@ -25,7 +25,8 @@ func init() {
 // gbSaveCmd represents the gbSave command
 var gbSaveCmd = &cobra.Command{
 	Use:   "export <gear name>",
-	Aliases: []string{"save"},
+	//Aliases: []string{"save"},
+	SuggestFor: []string{"save"},
 	Short: ux.SprintfBlue("Save state of a Gearbox gear"),
 	Long: ux.SprintfBlue("Save state of a Gearbox gear."),
 	Example: ux.SprintfWhite("launch save golang"),
@@ -46,7 +47,8 @@ func gbSaveFunc(cmd *cobra.Command, args []string) {
 // gbLoadCmd represents the gbLoad command
 var gbLoadCmd = &cobra.Command{
 	Use:   "import <gear name>",
-	Aliases: []string{"load"},
+	//Aliases: []string{"load"},
+	SuggestFor: []string{"load"},
 	Short: ux.SprintfBlue("Load a Gearbox gear"),
 	Long: ux.SprintfBlue("Load a Gearbox gear."),
 	Example: ux.SprintfWhite("launch load golang"),

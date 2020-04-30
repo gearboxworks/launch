@@ -12,6 +12,7 @@ import (
 type DockerGear struct {
 	Image     Image
 	Container Container
+	//RunAs     *defaults.ExecCommand
 
 	Client    *client.Client
 	Ssh       *SSH
