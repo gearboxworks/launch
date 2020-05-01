@@ -58,31 +58,31 @@ func Close() {
 
 func PrintfWhite(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	fmt.Printf("%s%s", aurora.BrightWhite(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stderr, "%s%s", aurora.BrightWhite(inline), aurora.Reset(""))
 }
 func PrintfCyan(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	fmt.Printf("%s%s", aurora.BrightCyan(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stderr, "%s%s", aurora.BrightCyan(inline), aurora.Reset(""))
 }
 func PrintfYellow(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	fmt.Printf("%s%s", aurora.BrightYellow(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stderr, "%s%s", aurora.BrightYellow(inline), aurora.Reset(""))
 }
 func PrintfRed(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	fmt.Printf("%s%s", aurora.BrightRed(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stderr, "%s%s", aurora.BrightRed(inline), aurora.Reset(""))
 }
 func PrintfGreen(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	fmt.Printf("%s%s", aurora.BrightGreen(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stderr, "%s%s", aurora.BrightGreen(inline), aurora.Reset(""))
 }
 func PrintfBlue(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	fmt.Printf("%s%s", aurora.BrightBlue(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stderr, "%s%s", aurora.BrightBlue(inline), aurora.Reset(""))
 }
 func PrintfMagenta(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	fmt.Printf("%s%s", aurora.BrightMagenta(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stderr, "%s%s", aurora.BrightMagenta(inline), aurora.Reset(""))
 }
 
 
@@ -119,7 +119,7 @@ func SprintfMagenta(format string, args ...interface{}) string {
 func Printf(format string, args ...interface{}) {
 	for range only.Once {
 		inline := fmt.Sprintf(format, args...)
-		fmt.Printf("%s%s%s", aurora.BrightCyan("Gearbox: ").Bold(), inline, aurora.Reset(""))
+		_, _ = fmt.Fprintf(os.Stderr, "%s%s%s", aurora.BrightCyan("Gearbox: ").Bold(), inline, aurora.Reset(""))
 	}
 }
 
