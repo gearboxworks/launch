@@ -290,6 +290,7 @@ func (me *Container) ContainerCreate(gearName string, gearVersion string, gearMo
 					break
 				}
 			}
+			state.ClearAll()
 
 			ok, state = me._Parent.FindContainer(gearName, gearVersion)
 			if state.IsError() {

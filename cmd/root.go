@@ -64,6 +64,8 @@ const (
 	argCompletion = "completion"
 	argVersion = "version"
 	argQuiet = "quiet"
+	argTemporary = "temporary"
+	argStatus = "status"
 )
 
 func init() {
@@ -77,18 +79,21 @@ func init() {
 	//rootCmd.PersistentFlags().BoolP(argHelp, "h", false, ux.SprintfBlue("Short help for command."))
 	rootCmd.PersistentFlags().BoolP(argExample, "e", false, ux.SprintfBlue("Help examples for command."))
 	rootCmd.PersistentFlags().BoolP(argDebug, "d", false, ux.SprintfBlue("Debug mode."))
-	rootCmd.PersistentFlags().BoolP(argNoCreate, "", false, ux.SprintfBlue("Don't create container."))
+	rootCmd.PersistentFlags().BoolP(argNoCreate, "n", false, ux.SprintfBlue("Don't create container."))
 
 	rootCmd.PersistentFlags().StringP(argProvider, "", "docker", ux.SprintfBlue("Set virtual provider"))
 	rootCmd.PersistentFlags().StringP(argHost, "", "", ux.SprintfBlue("Set virtual provider host."))
 	rootCmd.PersistentFlags().StringP(argPort, "", "", ux.SprintfBlue("Set virtual provider port."))
-	rootCmd.PersistentFlags().StringP(argProject, "p", "", ux.SprintfBlue("Mount project directory."))
+	rootCmd.PersistentFlags().StringP(argProject, "m", "", ux.SprintfBlue("Mount project directory."))
+
+	rootCmd.Flags().BoolP(argTemporary, "t", false, ux.SprintfBlue("Temporary container - remove after running command."))
+	rootCmd.Flags().BoolP(argStatus, "s", false, ux.SprintfBlue("Show shell status line."))
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP(argVersion, "v", false, ux.SprintfBlue("Display version of " + defaults.BinaryName))
-	rootCmd.Flags().BoolP(argCompletion, "", false, ux.SprintfBlue("Generate BASH completion script."))
-	rootCmd.Flags().BoolP(argQuiet, "", false, ux.SprintfBlue("Make everything quiet."))
+	rootCmd.Flags().BoolP(argCompletion, "b", false, ux.SprintfBlue("Generate BASH completion script."))
+	rootCmd.Flags().BoolP(argQuiet, "q", false, ux.SprintfBlue("Make everything quiet."))
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -122,6 +127,7 @@ func initConfig() {
 //var cmdExecPath string
 var cmdState ux.State
 var debugFlag bool
+var tempFlag bool
 var quietFlag bool
 var provider gear.Provider
 var gearRef *gear.Gear
@@ -137,6 +143,7 @@ var rootCmd = &cobra.Command {
 	//	Run: func(cmd *cobra.Command, args []string) { },
 	Run: gbRootFunc,
 	TraverseChildren: true,
+	ValidArgs: []string{"run", "shell", "test"},
 }
 
 func gbRootFunc(cmd *cobra.Command, args []string) {
@@ -156,6 +163,7 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 			ux.Printf("args: %s\n", strings.Join(args, " "))
 		}
 
+		tempFlag, _ = cmd.Flags().GetBool(argTemporary)
 
 		// Produce BASH completion script.
 		var ok bool
@@ -215,7 +223,6 @@ func Execute() ux.State {
 		SetHelp(rootCmd)
 
 		// WARNING: Critical code area.
-
 		// Support for running launch via symlink.
 		//defaults.RunAs.FullPath, err = filepath.Abs(os.Args[0])
 		defaults.RunAs.FullPath, err = osext.Executable()
@@ -226,9 +233,6 @@ func Execute() ux.State {
 		//defaults.RunAs.FullPath = "/Users/mick/Documents/GitHub/gb-launch/bin/psql-9.4.26"
 		//defaults.RunAs.FullPath = "/Users/mick/Documents/GitHub/gb-launch/bin/postgresql-9.4.26"
 
-		//foo := ospaths.Split(os.Args[0])
-		//foo := ospaths.Split("/Users/mick/go/bin/composer-1.10.0")
-		//cmdExec = foo.File.String()
 		defaults.RunAs.Dir, defaults.RunAs.File = filepath.Split(defaults.RunAs.FullPath)
 
 		ok, _ := regexp.MatchString("^" + defaults.BinaryName, defaults.RunAs.File)

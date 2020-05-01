@@ -21,7 +21,8 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	gbRunCmd.Flags().BoolP("status", "", false, "Show shell status line.")
+	//gbRunCmd.Flags().BoolP("status", "", false, "Show shell status line.")
+	//gbRunCmd.Flags().BoolP(argTemporary, "t", false, ux.SprintfBlue("Temporary container - remove after running command."))
 }
 
 
@@ -48,15 +49,20 @@ func gbRunFunc(cmd *cobra.Command, args []string) {
 		//}
 		quietFlag = true
 
+		tempFlag, err = cmd.Parent().Flags().GetBool(argTemporary)
+		if err != nil {
+			tempFlag = false
+		}
+
+		sshStatus, err = cmd.Parent().Flags().GetBool(argStatus)
+		if err != nil {
+			sshStatus = false
+		}
+
 		gbStartFunc(cmd, args)
 		if !cmdState.IsRunning() {
 			cmdState.SetError("container not started")
 			break
-		}
-
-		sshStatus, err = cmd.Flags().GetBool("status")
-		if err != nil {
-			sshStatus = false
 		}
 
 		// Yuck!
@@ -69,7 +75,10 @@ func gbRunFunc(cmd *cobra.Command, args []string) {
 		}
 
 		cmdState = gearRef.Docker.ContainerSsh(false, sshStatus, args...)
-		break
+
+		if tempFlag {
+			gbUninstallFunc(cmd, args)
+		}
 	}
 }
 
@@ -91,19 +100,27 @@ func gbShellFunc(cmd *cobra.Command, args []string) {
 		var sshStatus bool
 		var err error
 
+		tempFlag, err = cmd.Parent().Flags().GetBool(argTemporary)
+		if err != nil {
+			tempFlag = false
+		}
+
+		sshStatus, err = cmd.Parent().Flags().GetBool(argStatus)
+		if err != nil {
+			sshStatus = false
+		}
+
 		gbStartFunc(cmd, args)
 		if !cmdState.IsRunning() {
 			cmdState.SetError("container not started")
 			break
 		}
 
-		sshStatus, err = cmd.Flags().GetBool("status")
-		if err != nil {
-			sshStatus = false
-		}
-
 		cmdState = gearRef.Docker.ContainerSsh(true, sshStatus, args[1:]...)
-		break
+
+		if tempFlag {
+			gbUninstallFunc(cmd, args)
+		}
 	}
 }
 
@@ -125,18 +142,26 @@ func gbUnitTestFunc(cmd *cobra.Command, args []string) {
 		var sshStatus bool
 		var err error
 
+		tempFlag, err = cmd.Parent().Flags().GetBool(argTemporary)
+		if err != nil {
+			tempFlag = false
+		}
+
+		sshStatus, err = cmd.Parent().Flags().GetBool(argStatus)
+		if err != nil {
+			sshStatus = false
+		}
+
 		gbStartFunc(cmd, args)
 		if !cmdState.IsRunning() {
 			cmdState.SetError("container not started")
 			break
 		}
 
-		sshStatus, err = cmd.Flags().GetBool("status")
-		if err != nil {
-			sshStatus = false
-		}
-
 		cmdState = gearRef.Docker.ContainerSsh(true, sshStatus, defaults.DefaultUnitTestCmd)
-		break
+
+		if tempFlag {
+			gbUninstallFunc(cmd, args)
+		}
 	}
 }

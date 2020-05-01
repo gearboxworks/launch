@@ -55,13 +55,16 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 		}
 
 		if found {
-			// Create symlinks.
-			gearRef.GearConfig.CreateLinks(defaults.RunAs, ga.Name, ga.Version)
+			if !tempFlag {
+				// Create symlinks.
+				gearRef.GearConfig.CreateLinks(defaults.RunAs, ga.Name, ga.Version)
+			}
 
 			cmdState.SetOk("Gear '%s:%s' already installed.", ga.Name, ga.Version)
 			break
 		}
 		cmdState.ClearAll()
+
 
 		cmdState = gearRef.Docker.NetworkCreate(defaults.GearboxNetwork)
 		if cmdState.IsError() {
@@ -77,9 +80,12 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 			if !quietFlag {
 				ux.PrintfRed("error installing - %s\n", cmdState.Error)
 			}
-			cmdState.SetError("Gear '%s:%s' install error - %s", ga.Name, ga.Version, cmdState.Error)
 
-		} else if cmdState.IsCreated() {
+			cmdState.SetError("Gear '%s:%s' install error - %s", ga.Name, ga.Version, cmdState.Error)
+			break
+		}
+
+		if cmdState.IsCreated() {
 			if !quietFlag {
 				ux.PrintfGreen("OK\n")
 			}
@@ -89,17 +95,21 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 				break
 			}
 
+			if tempFlag {
+				cmdState.ClearAll()
+				break
+			}
+
 			// Create symlinks.
 			gearRef.GearConfig.CreateLinks(defaults.RunAs, ga.Name, ga.Version)
-
 			cmdState.SetOk("Gear '%s:%s' installed OK", ga.Name, ga.Version)
-
-		} else {
-			if !quietFlag {
-				ux.PrintfWarning("cannot be installed\n")
-			}
-			cmdState.SetWarning("Gear '%s:%s' cannot be installed", ga.Name, ga.Version)
+			break
 		}
+
+		if !quietFlag {
+			ux.PrintfWarning("cannot be installed\n")
+		}
+		cmdState.SetWarning("Gear '%s:%s' cannot be installed", ga.Name, ga.Version)
 	}
 }
 
@@ -152,23 +162,31 @@ func gbUninstallFunc(cmd *cobra.Command, args []string) {
 			if !quietFlag {
 				ux.PrintfRed("error removing - %s\n", cmdState.Error)
 			}
-			cmdState.SetError("Gear '%s:%s' remove error - %s", ga.Name, ga.Version, cmdState.Error)
 
-		} else if cmdState.IsOk() {
+			cmdState.SetError("Gear '%s:%s' remove error - %s", ga.Name, ga.Version, cmdState.Error)
+			break
+		}
+
+		if cmdState.IsOk() {
 			if !quietFlag {
 				ux.PrintfGreen("OK\n")
 			}
-			cmdState.SetOk("Gear '%s:%s' removed OK", ga.Name, ga.Version)
 
+			if tempFlag {
+				cmdState.ClearAll()
+				break
+			}
+
+			cmdState.SetOk("Gear '%s:%s' removed OK", ga.Name, ga.Version)
 			// Remove symlinks.
 			gearRef.GearConfig.RemoveLinks(defaults.RunAs, ga.Name, ga.Version)
-
-		} else {
-			if !quietFlag {
-				ux.PrintfWarning("cannot be removed\n")
-			}
-			cmdState.SetWarning("Gear '%s:%s' cannot be removed", ga.Name, ga.Version)
+			break
 		}
+
+		if !quietFlag {
+			ux.PrintfWarning("cannot be removed\n")
+		}
+		cmdState.SetWarning("Gear '%s:%s' cannot be removed", ga.Name, ga.Version)
 	}
 }
 

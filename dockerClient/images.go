@@ -139,6 +139,9 @@ func (me *DockerGear) FindImage(gearName string, gearVersion string) (bool, ux.S
 			break
 		}
 
+		// Start out with "not found". Will be cleared if found or error occurs.
+		state.SetWarning("Gear image '%s:%s' doesn't exist.", gearName, gearVersion)
+
 		for _, i := range images {
 			var gc *gearJson.GearConfig
 			gc, state = gearJson.New(i.Labels["gearbox.json"])

@@ -44,15 +44,17 @@ func gbStartFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 
+
 		var found bool
 		found, cmdState = gearRef.FindContainer(ga.Name, ga.Version)
 		if cmdState.IsError() {
 			break
 		}
-		//cmdState.ClearAll()
-
 		if !found {
-			quietFlag = false
+			if !tempFlag {
+				quietFlag = false
+			}
+
 			if IsNoCreate(cmd) {
 				cmdState.SetError("Gear '%s:%s' doesn't exist.", ga.Name, ga.Version)
 				break
@@ -62,7 +64,7 @@ func gbStartFunc(cmd *cobra.Command, args []string) {
 			if cmdState.IsError() {
 				break
 			}
-			//cmdState.ClearAll()
+			cmdState.ClearAll()
 
 			found, cmdState = gearRef.FindContainer(ga.Name, ga.Version)
 			if cmdState.IsError() {
@@ -70,9 +72,11 @@ func gbStartFunc(cmd *cobra.Command, args []string) {
 			}
 		}
 
-		cmdState = gearRef.State()
-
+		//cmdState = gearRef.State()
 		if cmdState.IsRunning() {
+			if !quietFlag {
+				ux.PrintfGreen("Gear '%s:%s' already started\n", ga.Name, ga.Version)
+			}
 			break
 		}
 
@@ -84,14 +88,18 @@ func gbStartFunc(cmd *cobra.Command, args []string) {
 		if cmdState.IsError() {
 			cmdState.SetError("Gear '%s:%s' start error - %s", ga.Name, ga.Version, cmdState.Error)
 			ux.PrintfRed("%s\n", cmdState.Error)
-		} else if cmdState.IsRunning() {
+			break
+		}
+
+		if cmdState.IsRunning() {
 			if !quietFlag {
 				ux.PrintfGreen("OK\n")
 			}
-		} else {
-			cmdState.SetWarning("Gear '%s:%s' cannot be started", ga.Name, ga.Version)
-			ux.PrintfWarning("%s\n", cmdState.Warning)
+			break
 		}
+
+		cmdState.SetWarning("Gear '%s:%s' cannot be started", ga.Name, ga.Version)
+		ux.PrintfWarning("%s\n", cmdState.Warning)
 	}
 }
 
@@ -118,15 +126,19 @@ func gbStopFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 
+
 		var found bool
 		found, cmdState = gearRef.FindContainer(ga.Name, ga.Version)
 		if cmdState.IsError() {
 			break
 		}
-		cmdState.ClearAll()
-
 		if !found {
-			cmdState.SetWarning("Gear '%s:%s' doesn't exist.", ga.Name, ga.Version)
+			break
+		}
+		if cmdState.IsExited() {
+			if !quietFlag {
+				ux.PrintfGreen("Gear '%s:%s' already stopped\n", ga.Name, ga.Version)
+			}
 			break
 		}
 
@@ -140,24 +152,26 @@ func gbStopFunc(cmd *cobra.Command, args []string) {
 				ux.PrintfRed("error stopping - %s\n", cmdState.Error)
 			}
 			cmdState.SetError("Gear '%s:%s' stop error - %s", ga.Name, ga.Version, cmdState.Error)
+			break
+		}
 
-		} else if cmdState.IsExited() {
-			if !quietFlag {
-				ux.PrintfGreen(" Already stopped.\n")
-			}
-
-		} else if cmdState.IsCreated() {
+		if cmdState.IsExited() {
 			if !quietFlag {
 				ux.PrintfGreen("OK\n")
 			}
-
-		} else {
-			if !quietFlag {
-				ux.PrintfWarning("cannot be stopped\n")
-			}
-			cmdState.SetWarning("Gear '%s:%s' cannot be stopped", ga.Name, ga.Version)
+			break
 		}
 
-		break
+		if cmdState.IsCreated() {
+			if !quietFlag {
+				ux.PrintfGreen("OK\n")
+			}
+			break
+		}
+
+		if !quietFlag {
+			ux.PrintfWarning("cannot be stopped\n")
+		}
+		cmdState.SetWarning("Gear '%s:%s' cannot be stopped", ga.Name, ga.Version)
 	}
 }

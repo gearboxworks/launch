@@ -163,6 +163,9 @@ func (me *DockerGear) FindContainer(gearName string, gearVersion string) (bool, 
 			break
 		}
 
+		// Start out with "not found". Will be cleared if found or error occurs.
+		state.SetWarning("Gear '%s:%s' doesn't exist.", gearName, gearVersion)
+
 		for _, c := range containers {
 			var gc *gearJson.GearConfig
 			gc, state = gearJson.New(c.Labels["gearbox.json"])
