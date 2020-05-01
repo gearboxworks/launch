@@ -29,6 +29,7 @@ require (
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gorilla/mux v1.7.4 // indirect
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
+	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/logrusorgru/aurora v0.0.0-20200102142835-e9ef32dff381
 	github.com/marcusolsson/tui-go v0.4.0
 	github.com/mattn/go-runewidth v0.0.8 // indirect

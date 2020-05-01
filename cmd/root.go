@@ -38,6 +38,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/kardianos/osext"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"launch/defaults"
@@ -216,7 +217,8 @@ func Execute() ux.State {
 		// WARNING: Critical code area.
 
 		// Support for running launch via symlink.
-		defaults.RunAs.FullPath, err = filepath.Abs(os.Args[0])
+		//defaults.RunAs.FullPath, err = filepath.Abs(os.Args[0])
+		defaults.RunAs.FullPath, err = osext.Executable()
 		if err != nil {
 			state.SetError("%s", err)
 			break

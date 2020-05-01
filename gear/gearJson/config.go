@@ -84,16 +84,20 @@ func (me *GearConfig) CreateLinks(c defaults.ExecCommand, name string, version s
 		}
 
 		var created bool
-		for k, _ := range me.Run.Commands {
+		for k, v := range me.Run.Commands {
 			var err error
 			var dstFile string
 			var linkStat os.FileInfo
 
 			if k == "default" {
-				continue
+				k = filepath.Base(v)
 			}
 
-			dstFile, err = filepath.Abs(fmt.Sprintf("%s%c%s-%s", c.Dir, filepath.Separator, k, version))
+			if version == "latest" {
+				dstFile, err = filepath.Abs(fmt.Sprintf("%s%c%s", c.Dir, filepath.Separator, k))
+			} else {
+				dstFile, err = filepath.Abs(fmt.Sprintf("%s%c%s-%s", c.Dir, filepath.Separator, k, version))
+			}
 			if err != nil {
 				continue
 			}
