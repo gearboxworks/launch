@@ -26,12 +26,14 @@ type SSH struct {
 	//	WaitRetries   int
 
 	// SSH related.
-	Username   string
-	Password   string
-	Host       string
-	Port       string
-	PublicKey  string
-	StatusLine StatusLine
+	Username    string
+	Password    string
+	Host        string
+	Port        string
+	PublicKey   string
+	StatusLine  StatusLine
+	GearName    string
+	GearVersion string
 
 	Shell      bool
 	Env        Environment
@@ -87,34 +89,13 @@ func (me *DockerGear) ContainerSsh(interactive bool, status bool, cmdArgs ...str
 			Port: port,
 			StatusLine: StatusLine{Enable: status},
 			Shell: interactive,
+			GearName: me.Container.Name,
+			GearVersion: me.Container.Version,
 		})
 
 		//fmt.Printf("me.Image.GearConfig.Build: %s %s\n", me.Image.GearConfig.Build.Run, me.Image.GearConfig.Build.Args)
 		//fmt.Printf("me.Container.GearConfig.Build: %s %s\n", me.Container.GearConfig.Build.Run, me.Container.GearConfig.Build.Args)
 
-		//if !interactive {
-		//	me.Ssh.CmdArgs = me.Container.GearConfig.GetCommand(cmdArgs)
-		//	if len(me.Ssh.CmdArgs) == 0 {
-		//		state.SetError("ERROR: no default command defined in gearbox.json")
-		//		break
-		//	}
-		//
-		//	//switch me.Container.GearConfig.GetName() {
-		//	//	case "golang":
-		//	//		me.Ssh.CmdArgs = append([]string{"go"}, cmdArgs...)
-		//	//	case "composer":
-		//	//		me.Ssh.CmdArgs = append([]string{"composer"}, cmdArgs...)
-		//	//	case "terminus":
-		//	//		me.Ssh.CmdArgs = append([]string{"terminus"}, cmdArgs...)
-		//	//	default:
-		//	//		me.Ssh.CmdArgs = cmdArgs
-		//	//}
-		//} else {
-		//	me.Ssh.CmdArgs = cmdArgs
-		//	//if len(me.Ssh.CmdArgs) == 0 {
-		//	//	me.Ssh.CmdArgs = append([]string{"shell"})
-		//	//}
-		//}
 		me.Ssh.CmdArgs = cmdArgs
 
 		err = me.Ssh.getEnv()
@@ -422,14 +403,14 @@ func (me *SSH) statusLineWorker() {
 	yellow := color.New(color.BgBlack, color.FgHiYellow).SprintFunc()
 	magenta := color.New(color.BgBlack, color.FgHiMagenta).SprintFunc()
 	green := color.New(color.BgBlack, color.FgHiGreen).SprintFunc()
-	normal := color.New(color.BgWhite, color.FgHiBlack).SprintFunc()
+	//normal := color.New(color.BgWhite, color.FgHiBlack).SprintFunc()
 
 	for me.StatusLine.TerminateFlag == false {
 		//now := time.Now()
 		//dateStr := normal("Date:") + " " + yellow(fmt.Sprintf("%.4d/%.2d/%.2d", now.Year(), now.Month(), now.Day()))
 		//timeStr := normal("Time:") + " " + magenta(fmt.Sprintf("%.2d:%.2d:%.2d", now.Hour(), now.Minute(), now.Second()))
-		statusStr := normal("Status:") + " " + green("OK")
-		infoStr := yellow("You are connected to") + " " + magenta("Gearbox OS")
+		statusStr := yellow("Status:") + " " + green("OK")
+		infoStr := yellow("Gearbox container:") + " " + magenta(me.GearName + ":" + me.GearVersion)
 
 		//line := fmt.Sprintf("%s	%s %s", statusStr, dateStr, timeStr)
 		line := fmt.Sprintf("%s - %s", infoStr, statusStr)
