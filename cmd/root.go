@@ -315,6 +315,16 @@ func _GetUsage(c *cobra.Command) string {
 	return str
 }
 
+func _GetVersion(c *cobra.Command) string {
+	var str string
+
+	if c.Parent() == nil {
+		str += ux.SprintfWhite("%s: v%s", defaults.BinaryName, defaults.BinaryVersion)
+	}
+
+	return str
+}
+
 func SetHelp(c *cobra.Command) {
 	var tmplHelp string
 	var tmplUsage string
@@ -323,6 +333,7 @@ func SetHelp(c *cobra.Command) {
 	//fmt.Printf("%s", rootCmd.HelpTemplate())
 
 	cobra.AddTemplateFunc("GetUsage", _GetUsage)
+	cobra.AddTemplateFunc("GetVersion", _GetVersion)
 
 	cobra.AddTemplateFunc("SprintfBlue", _SprintfBlue)
 	cobra.AddTemplateFunc("SprintfCyan", _SprintfCyan)
@@ -379,7 +390,8 @@ func SetHelp(c *cobra.Command) {
 {{- end }}
 `
 
-	tmplHelp = `
+	tmplHelp = `{{ GetVersion . }}
+
 {{ SprintfBlue "Description:" }} 
 	{{ SprintfBlue .Use }}{{- SprintfBlue " - " }}
 {{- with (or .Long .Short) }}
