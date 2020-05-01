@@ -48,16 +48,16 @@ func gbListFunc(cmd *cobra.Command, args []string) {
 		}
 
 		gearName := ""
-		if len(args) > 1 {
+		if len(args) > 0 {
 			gearName = args[0]
 		}
 
-		cmdState = g.Docker.ImageList(gearName)
+		_, cmdState = g.Docker.ImageList(gearName)
 		if cmdState.IsError() {
 			break
 		}
 
-		cmdState = g.Docker.ContainerList(gearName)
+		_, cmdState = g.Docker.ContainerList(gearName)
 		if cmdState.IsError() {
 			break
 		}

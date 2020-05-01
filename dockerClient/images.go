@@ -20,8 +20,9 @@ import (
 // List all images
 // List the images on your Engine, similar to docker image ls:
 // func ImageList(f types.ImageListOptions) error {
-func (me *DockerGear) ImageList(f string) ux.State {
+func (me *DockerGear) ImageList(f string) (int, ux.State) {
 	var state ux.State
+	var count int
 
 	for range only.Once {
 		var err error
@@ -50,10 +51,9 @@ func (me *DockerGear) ImageList(f string) ux.State {
 			break
 		}
 
-		ux.PrintfCyan("\nConfigured Gearbox images:\n")
+		ux.PrintfCyan("Downloaded Gearbox images: ")
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
-		//t.AppendHeader(table.Row{"Class", "State", "Image", "Ports", "Size"})
 		t.AppendHeader(table.Row{"Class", "Image", "Ports", "Size"})
 
 		for _, i := range images {
@@ -91,12 +91,19 @@ func (me *DockerGear) ImageList(f string) ux.State {
 			})
 		}
 
-		// t.AppendFooter(table.Row{"", "", "Total", 10000})
-		t.Render()
 		state.ClearError()
+		count = t.Length()
+		if count == 0 {
+			ux.PrintfYellow("None found\n")
+			break
+		}
+
+		ux.PrintfGreen("%d found\n", count)
+		t.Render()
+		ux.PrintfWhite("\n")
 	}
 
-	return state
+	return count, state
 }
 
 

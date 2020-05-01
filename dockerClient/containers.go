@@ -17,8 +17,9 @@ import (
 // List and manage containers
 // You can use the API to list containers that are running, just like using docker ps:
 // func ContainerList(f types.ContainerListOptions) error {
-func (me *DockerGear) ContainerList(f string) ux.State {
+func (me *DockerGear) ContainerList(f string) (int, ux.State) {
 	var state ux.State
+	var count int
 
 	for range only.Once {
 		var err error
@@ -37,7 +38,7 @@ func (me *DockerGear) ContainerList(f string) ux.State {
 			break
 		}
 
-		ux.PrintfCyan("\nConfigured Gearbox gears:\n")
+		ux.PrintfCyan("Installed Gearbox gears: ")
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
 		t.AppendHeader(table.Row{
@@ -120,11 +121,19 @@ func (me *DockerGear) ContainerList(f string) ux.State {
 			})
 		}
 
-		t.Render()
 		state.ClearError()
+		count = t.Length()
+		if count == 0 {
+			ux.PrintfYellow("None found\n")
+			break
+		}
+
+		ux.PrintfGreen("%d found\n", count)
+		t.Render()
+		ux.PrintfWhite("\n")
 	}
 
-	return state
+	return count, state
 }
 
 
