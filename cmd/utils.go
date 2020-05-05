@@ -62,7 +62,7 @@ func (me *GearArgs) ProcessArgs(cmd *cobra.Command, args []string) ux.State {
 
 		//showArgs(cmd, args)
 
-		if len(args) > 1 {
+		if len(args) > 0 {
 			me.Name = args[0]
 			if strings.Contains(me.Name, ":") {
 				spl := strings.Split(me.Name, ":")
