@@ -21,12 +21,12 @@ type DockerGear struct {
 }
 
 
-func New(d bool) (*DockerGear, ux.State) {
+func New() (*DockerGear, ux.State) {
 	var cli DockerGear
 	var state ux.State
 
 	for range only.Once {
-		cli.Debug = d
+		//cli.Debug = d
 
 		var err error
 		cli.Client, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())

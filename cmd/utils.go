@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"launch/defaults"
+	"launch/gear"
 	"launch/only"
 	"launch/ux"
 	"os"
@@ -16,9 +17,9 @@ func showArgs(cmd *cobra.Command, args []string) {
 	// var err error
 
 	for range only.Once {
-		if !debugFlag {
-			break
-		}
+		//if !debugFlag {
+		//	break
+		//}
 
 		flargs := cmd.Flags().Args()
 		if flargs != nil {
@@ -33,79 +34,134 @@ func showArgs(cmd *cobra.Command, args []string) {
 	fmt.Println("")
 }
 
-type gearArgs struct {
+type GearArgs struct {
+	Valid bool
+
 	Name string
 	Version string
 	Project string
 	Mount string
 	Temporary bool
 	SshStatus bool
+	Quiet bool
+	Debug bool
+	Provider gear.Provider
+	GearRef gear.Gear
 }
 
-func getGearArgs(cmd *cobra.Command, args []string) (*gearArgs, ux.State) {
-	var ga gearArgs
+func (me *GearArgs) ProcessArgs(cmd *cobra.Command, args []string) ux.State {
 	var state ux.State
 
 	for range only.Once {
+		if me.Valid {
+			break
+		}
+
 		var err error
+		fl := cmd.Flags()
 
-		showArgs(cmd, args)
+		//showArgs(cmd, args)
 
-		if len(args) == 0 {
-			state.SetError("no args")
-			break
+		if len(args) > 1 {
+			me.Name = args[0]
+			if strings.Contains(me.Name, ":") {
+				spl := strings.Split(me.Name, ":")
+				me.Name = spl[0]
+				me.Version = spl[1]
+				//} else if strings.Contains(me.Name, "-") {
+				//	spl := strings.Split(me.Name, "-")
+				//	me.Name = spl[0]
+				//	me.Version = spl[1]
+			}
+
+			if me.Version == "" {
+				me.Version = "latest"
+			}
 		}
 
-		ga.Name = args[0]
-		if strings.Contains(ga.Name, ":") {
-			spl := strings.Split(ga.Name, ":")
-			ga.Name = spl[0]
-			ga.Version = spl[1]
-		//} else if strings.Contains(ga.Name, "-") {
-		//	spl := strings.Split(ga.Name, "-")
-		//	ga.Name = spl[0]
-		//	ga.Version = spl[1]
-		}
 
-		if ga.Version == "" {
-			ga.Version = "latest"
-		}
-
-
-		ga.Project, err = cmd.Flags().GetString(argProject)
+		me.Project, err = fl.GetString(argProject)
 		if err != nil {
-			ga.Project = defaults.DefaultPathNone
-			break
+			me.Project = defaults.DefaultPathNone
+		} else {
+			me.Project = DeterminePath(me.Project)
 		}
-		ga.Project = DeterminePath(ga.Project)
 
 
-		ga.Mount, err = cmd.Flags().GetString(argMount)
+		me.Mount, err = fl.GetString(argMount)
 		if err != nil {
-			ga.Mount = defaults.DefaultPathNone
-			break
+			me.Mount = defaults.DefaultPathNone
+		} else {
+			me.Mount = DeterminePath(me.Mount)
 		}
-		ga.Mount = DeterminePath(ga.Mount)
 
 
-		ga.SshStatus, err = cmd.Flags().GetBool(argMount)
+		me.Debug, err = fl.GetBool(argDebug)
 		if err != nil {
-			ga.SshStatus = false
-			break
+			me.Debug = false
 		}
 
 
-		ga.Temporary, err = cmd.Flags().GetBool(argMount)
+		me.Quiet, err = fl.GetBool(argQuiet)
 		if err != nil {
-			ga.Temporary = false
+			me.Quiet = false
+		}
+
+
+		me.SshStatus, err = fl.GetBool(argStatus)
+		if err != nil {
+			me.SshStatus = false
+		}
+
+
+		me.Temporary, err = fl.GetBool(argTemporary)
+		if err != nil {
+			me.Temporary = false
+		}
+
+		me.Provider.Debug = me.Debug
+		me.Provider.Name, _ = fl.GetString(argProvider)
+		if err != nil {
+			me.Provider.Name = ""
+		}
+
+		me.Provider.Host, _ = fl.GetString(argHost)
+		if err != nil {
+			me.Provider.Host = ""
+		}
+
+		me.Provider.Port, _ = fl.GetString(argPort)
+		if err != nil {
+			me.Provider.Port = ""
+		}
+
+		me.Provider.Project, _ = fl.GetString(argProject)
+		if err != nil {
+			me.Provider.Project = ""
+		}
+
+		state = me.Provider.NewProvider()
+		if state.IsError() {
 			break
 		}
+
+		state = me.GearRef.NewGear()
+		//me.GearRef, state = me.Provider.NewGear()
+		if state.IsError() {
+			break
+		}
+
+
+		//if len(args) == 0 {
+		//	state.SetWarning("no args")
+		//	break
+		//}
+
+		me.Valid = true
 	}
 
-	return &ga, state
+	return state
 }
-
-
 
 func DeterminePath(mp string) string {
 	var ok bool

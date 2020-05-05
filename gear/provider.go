@@ -61,3 +61,26 @@ func (p *Provider) NewProvider() ux.State {
 
 	return state
 }
+
+
+//func (me *Provider) NewGear() (*Gear, ux.State) {
+//	var g Gear
+//	var state ux.State
+//
+//	for range only.Once {
+//		g.Docker, state = dockerClient.New()
+//		if state.IsError() {
+//			state.SetError("can not connect to Docker service provider")
+//			break
+//		}
+//		g.Docker.Debug = me.Debug
+//
+//		g.Repo, state = githubClient.New()
+//		state.ClearError()
+//		//if state.IsError() {
+//		//	break
+//		//}
+//	}
+//
+//	return &g, state
+//}

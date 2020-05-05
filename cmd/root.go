@@ -42,7 +42,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"launch/defaults"
-	"launch/gear"
 	"launch/only"
 	"launch/ux"
 	"os"
@@ -77,9 +76,7 @@ func init() {
 	// will be global for your application.
 	rootCmd.PersistentFlags().StringVar(&cfgFile, argConfig, GetLaunchConfig(), ux.SprintfBlue("Config file."))
 
-	//rootCmd.PersistentFlags().BoolP(argHelp, "h", false, ux.SprintfBlue("Short help for command."))
 	rootCmd.PersistentFlags().BoolP(argExample, "e", false, ux.SprintfBlue("Help examples for command."))
-	rootCmd.PersistentFlags().BoolP(argDebug, "d", false, ux.SprintfBlue("Debug mode."))
 	rootCmd.PersistentFlags().BoolP(argNoCreate, "n", false, ux.SprintfBlue("Don't create container."))
 
 	rootCmd.PersistentFlags().StringP(argProvider, "", "docker", ux.SprintfBlue("Set virtual provider"))
@@ -90,12 +87,13 @@ func init() {
 
 	rootCmd.Flags().BoolP(argTemporary, "t", false, ux.SprintfBlue("Temporary container - remove after running command."))
 	rootCmd.Flags().BoolP(argStatus, "s", false, ux.SprintfBlue("Show shell status line."))
+	rootCmd.Flags().BoolP(argDebug, "d", false, ux.SprintfBlue("Debug mode."))
+	rootCmd.Flags().BoolP(argQuiet, "q", false, ux.SprintfBlue("Silence all Gearbox messsages."))
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP(argVersion, "v", false, ux.SprintfBlue("Display version of " + defaults.BinaryName))
 	rootCmd.Flags().BoolP(argCompletion, "b", false, ux.SprintfBlue("Generate BASH completion script."))
-	rootCmd.Flags().BoolP(argQuiet, "q", false, ux.SprintfBlue("Make everything quiet."))
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -124,15 +122,8 @@ func initConfig() {
 	}
 }
 
-//var cmdExecDir string
-//var cmdExecFile string
-//var cmdExecPath string
+var gearArgs GearArgs
 var cmdState ux.State
-var debugFlag bool
-var tempFlag bool
-var quietFlag bool
-var provider gear.Provider
-var gearRef *gear.Gear
 var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
@@ -140,15 +131,14 @@ var rootCmd = &cobra.Command {
 	Use:   defaults.BinaryName,
 	Short: ux.SprintfBlue("Gearbox gear launcher"),
 	Long: ux.SprintfBlue(`Gearbox gear launcher.`),
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
 	Run: gbRootFunc,
 	TraverseChildren: true,
 	ValidArgs: []string{"run", "shell", "test"},
 }
 
 func gbRootFunc(cmd *cobra.Command, args []string) {
+	var state ux.State
+
 	for range only.Once {
 		var err error
 		fl := cmd.Flags()
@@ -157,6 +147,7 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 
 		//quietFlag, _ = fl.GetBool(argQuiet)
 
+		var debugFlag bool
 		debugFlag, _ = fl.GetBool(argDebug)
 		if debugFlag {
 			showArgs(cmd, args)
@@ -165,7 +156,7 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 			ux.Printf("args: %s\n", strings.Join(args, " "))
 		}
 
-		tempFlag, _ = cmd.Flags().GetBool(argTemporary)
+		//tempFlag, _ = cmd.Flags().GetBool(argTemporary)
 
 		// Produce BASH completion script.
 		var ok bool
@@ -174,7 +165,7 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 			var out bytes.Buffer
 			_ = cmd.GenBashCompletion(&out)
 			fmt.Printf("# Gearbox BASH completion:\n%s\n", out.String())
-			cmdState.ClearAll()
+			state.ClearAll()
 			break
 			//os.Exit(0)
 		}
@@ -183,34 +174,36 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 		// Show version.
 		ok, err = fl.GetBool("version")
 		if err != nil {
-			cmdState.SetError("%s", err)
+			state.SetError("%s", err)
 			break
 		}
 		if ok {
 			ux.Printf("%s: v%s\n", defaults.BinaryName, defaults.BinaryVersion)
-			cmdState.ClearAll()
+			state.ClearAll()
 			break
 			//os.Exit(0)
 		}
 
 
 		// Create new provider connection.
-		provider.Debug = debugFlag
-		provider.Name, _ = fl.GetString(argProvider)
-		provider.Host, _ = fl.GetString(argHost)
-		provider.Port, _ = fl.GetString(argPort)
-		provider.Project, _ = fl.GetString(argProject)
-		cmdState = provider.NewProvider()
+		//provider.Debug = debugFlag
+		//provider.Name, _ = fl.GetString(argProvider)
+		//provider.Host, _ = fl.GetString(argHost)
+		//provider.Port, _ = fl.GetString(argPort)
+		//provider.Project, _ = fl.GetString(argProject)
+		//state = provider.NewProvider()
 
 
 		// Show help if no commands specified.
 		if len(args) == 0 {
 			_ = cmd.Help()
-			cmdState.ClearAll()
+			state.ClearAll()
 			break
 			//os.Exit(0)
 		}
 	}
+
+	cmdState = state
 }
 
 
@@ -246,14 +239,13 @@ func Execute() ux.State {
 			rootCmd.SetArgs(newArgs)
 
 			_ = rootCmd.Flags().Set(argQuiet, "true")
-			quietFlag = true
 			rootCmd.DisableFlagParsing = true
 		}
 		// WARNING: Critical code area.
 
 		err = rootCmd.Execute()
 		if err != nil {
-			cmdState.SetError("%s", err)
+			state.SetError("%s", err)
 			break
 		}
 	}

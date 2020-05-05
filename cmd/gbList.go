@@ -3,7 +3,6 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"launch/defaults"
-	"launch/gear"
 	"launch/only"
 	"launch/ux"
 )
@@ -37,31 +36,26 @@ var gbListCmd = &cobra.Command{
 }
 
 func gbListFunc(cmd *cobra.Command, args []string) {
+	var state ux.State
+
 	for range only.Once {
-		// var err error
-		showArgs(cmd, args)
-
-		var g *gear.Gear
-		g, cmdState = provider.NewGear()
-		if cmdState.IsError() {
+		state = gearArgs.ProcessArgs(cmd, args)
+		if state.IsError() {
 			break
 		}
 
-		gearName := ""
-		if len(args) > 0 {
-			gearName = args[0]
-		}
-
-		_, cmdState = g.Docker.ImageList(gearName)
-		if cmdState.IsError() {
+		_, state = gearArgs.GearRef.Docker.ImageList(gearArgs.Name)
+		if state.IsError() {
 			break
 		}
 
-		_, cmdState = g.Docker.ContainerList(gearName)
-		if cmdState.IsError() {
+		_, state = gearArgs.GearRef.Docker.ContainerList(gearArgs.Name)
+		if state.IsError() {
 			break
 		}
 
-		cmdState = g.Docker.NetworkList(defaults.GearboxNetwork)
+		state = gearArgs.GearRef.Docker.NetworkList(defaults.GearboxNetwork)
 	}
+
+	cmdState = state
 }

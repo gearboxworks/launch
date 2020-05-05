@@ -2,6 +2,7 @@ package gear
 
 import (
 	"github.com/docker/docker/client"
+	//"github.com/docker/docker/integration-cli/cli"
 	"launch/dockerClient"
 	"launch/gear/gearJson"
 	"launch/githubClient"
@@ -16,28 +17,34 @@ type Gear struct {
 	Repo         *githubClient.GitHubRepo
 	Docker       *dockerClient.DockerGear
 	GearConfig   *gearJson.GearConfig
+	Debug        bool
 }
 
 
-func (me *Provider) NewGear() (*Gear, ux.State) {
-	var cli Gear
+func (me *Gear) NewGear() ux.State {
+	//var g Gear
 	var state ux.State
 
 	for range only.Once {
-		cli.Docker, state = dockerClient.New(me.Debug)
-		if state.IsError() {
-			state.SetError("can not connect to Docker service provider")
-			break
+		if me.Docker == nil {
+			me.Docker, state = dockerClient.New()
+			if state.IsError() {
+				state.SetError("can not connect to Docker service provider")
+				break
+			}
+			me.Docker.Debug = me.Debug
 		}
 
-		cli.Repo, state = githubClient.New()
-		state.ClearError()
-		//if state.IsError() {
-		//	break
-		//}
+		if me.Repo == nil {
+			me.Repo, state = githubClient.New()
+			state.ClearError()
+			//if state.IsError() {
+			//	break
+			//}
+		}
 	}
 
-	return &cli, state
+	return state
 }
 
 

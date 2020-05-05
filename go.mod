@@ -10,6 +10,7 @@ require (
 	github.com/docker/docker v1.13.1
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
+	github.com/docker/libnetwork v0.5.6 // indirect
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v1.9.0
 	github.com/gdamore/tcell v1.3.0
@@ -21,6 +22,7 @@ require (
 	github.com/getlantern/hidden v0.0.0-20190325191715-f02dbb02be55 // indirect
 	github.com/getlantern/ops v0.0.0-20190325191751-d70cb0d6f85f // indirect
 	github.com/gizak/termui/v3 v3.1.0
+	github.com/go-check/check v0.0.0-20200227125254-8fa46927fb4f // indirect
 	github.com/go-openapi/strfmt v0.19.5 // indirect
 	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/google/go-github v17.0.0+incompatible
@@ -31,8 +33,10 @@ require (
 	github.com/logrusorgru/aurora v0.0.0-20200102142835-e9ef32dff381
 	github.com/mitchellh/go-wordwrap v1.0.0 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
+	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
+	github.com/opencontainers/runc v0.1.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/sftp v1.11.0
 	github.com/rivo/tview v0.0.0-20200329194346-7cc182c5846e

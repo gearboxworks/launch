@@ -38,79 +38,79 @@ var gbInstallCmd = &cobra.Command{
 }
 
 func gbInstallFunc(cmd *cobra.Command, args []string) {
+	var state ux.State
+
 	for range only.Once {
-		var ga *gearArgs
-
-		ga, cmdState = getGearArgs(cmd, args)
-
-		gearRef, cmdState = provider.NewGear()
-		if cmdState.IsError() {
+		state = gearArgs.ProcessArgs(cmd, args)
+		if state.IsError() {
 			break
 		}
 
 		var found bool
-		found, cmdState = gearRef.FindContainer(ga.Name, ga.Version)
-		if cmdState.IsError() {
+		found, state = gearArgs.GearRef.FindContainer(gearArgs.Name, gearArgs.Version)
+		if state.IsError() {
 			break
 		}
 
 		if found {
-			if !tempFlag {
+			if !gearArgs.Temporary {
 				// Create symlinks.
-				gearRef.GearConfig.CreateLinks(defaults.RunAs, ga.Name, ga.Version)
+				gearArgs.GearRef.GearConfig.CreateLinks(defaults.RunAs, gearArgs.Name, gearArgs.Version)
 			}
 
-			cmdState.SetOk("Gear '%s:%s' already installed.", ga.Name, ga.Version)
+			state.SetOk("Gear '%s:%s' already installed.", gearArgs.Name, gearArgs.Version)
 			break
 		}
-		cmdState.ClearAll()
+		state.ClearAll()
 
 
-		cmdState = gearRef.Docker.NetworkCreate(defaults.GearboxNetwork)
-		if cmdState.IsError() {
+		state = gearArgs.GearRef.Docker.NetworkCreate(defaults.GearboxNetwork)
+		if state.IsError() {
 			break
 		}
-		cmdState.ClearAll()
+		state.ClearAll()
 
-		if !quietFlag {
-			ux.Printf("Installing Gear '%s:%s': ", ga.Name, ga.Version)
+		if !gearArgs.Quiet {
+			ux.Printf("Installing Gear '%s:%s': ", gearArgs.Name, gearArgs.Version)
 		}
-		cmdState = gearRef.Docker.Container.ContainerCreate(ga.Name, ga.Version, ga.Project)
-		if cmdState.IsError() {
-			if !quietFlag {
-				ux.PrintfRed("error installing - %s\n", cmdState.Error)
+		state = gearArgs.GearRef.Docker.Container.ContainerCreate(gearArgs.Name, gearArgs.Version, gearArgs.Project)
+		if state.IsError() {
+			if !gearArgs.Quiet {
+				ux.PrintfRed("error installing - %s\n", state.Error)
 			}
 
-			cmdState.SetError("Gear '%s:%s' install error - %s", ga.Name, ga.Version, cmdState.Error)
+			state.SetError("Gear '%s:%s' install error - %s", gearArgs.Name, gearArgs.Version, state.Error)
 			break
 		}
 
-		if cmdState.IsCreated() {
-			if !quietFlag {
+		if state.IsCreated() {
+			if !gearArgs.Quiet {
 				ux.PrintfGreen("OK\n")
 			}
 
-			cmdState = gearRef.State()
-			if cmdState.IsError() {
+			state = gearArgs.GearRef.State()
+			if state.IsError() {
 				break
 			}
 
-			if tempFlag {
-				cmdState.ClearAll()
+			if gearArgs.Temporary {
+				state.ClearAll()
 				break
 			}
 
 			// Create symlinks.
-			gearRef.GearConfig.CreateLinks(defaults.RunAs, ga.Name, ga.Version)
-			cmdState.SetOk("Gear '%s:%s' installed OK", ga.Name, ga.Version)
+			gearArgs.GearRef.GearConfig.CreateLinks(defaults.RunAs, gearArgs.Name, gearArgs.Version)
+			state.SetOk("Gear '%s:%s' installed OK", gearArgs.Name, gearArgs.Version)
 			break
 		}
 
-		if !quietFlag {
+		if !gearArgs.Quiet {
 			ux.PrintfWarning("cannot be installed\n")
 		}
-		cmdState.SetWarning("Gear '%s:%s' cannot be installed", ga.Name, ga.Version)
+		state.SetWarning("Gear '%s:%s' cannot be installed", gearArgs.Name, gearArgs.Version)
 	}
+
+	cmdState = state
 }
 
 
@@ -128,66 +128,67 @@ var gbUninstallCmd = &cobra.Command{
 }
 
 func gbUninstallFunc(cmd *cobra.Command, args []string) {
+	var state ux.State
+
 	for range only.Once {
-		var ga *gearArgs
-
-		ga, cmdState = getGearArgs(cmd, args)
-
-		gearRef, cmdState = provider.NewGear()
-		if cmdState.IsError() {
+		state = gearArgs.ProcessArgs(cmd, args)
+		if state.IsError() {
 			break
 		}
 
 		var found bool
-		found, cmdState = gearRef.FindContainer(ga.Name, ga.Version)
-		if cmdState.IsError() {
+		found, state = gearArgs.GearRef.FindContainer(gearArgs.Name, gearArgs.Version)
+		if state.IsError() {
 			break
 		}
 		if !found {
-			cmdState.SetOk("Gear '%s:%s' already removed.", ga.Name, ga.Version)
+			state.SetOk("Gear '%s:%s' already removed.", gearArgs.Name, gearArgs.Version)
 			break
 		}
-		cmdState.ClearAll()
+		state.ClearAll()
 
 		gbStopFunc(cmd, args)
 		if cmdState.IsError() {
+			state = cmdState
 			break
 		}
 
-		if !quietFlag {
-			ux.Printf("Removing gear '%s:%s': ", ga.Name, ga.Version)
+		if !gearArgs.Quiet {
+			ux.Printf("Removing gear '%s:%s': ", gearArgs.Name, gearArgs.Version)
 		}
-		cmdState = gearRef.Docker.Container.Remove()
-		if cmdState.IsError() {
-			if !quietFlag {
-				ux.PrintfRed("error removing - %s\n", cmdState.Error)
+		state = gearArgs.GearRef.Docker.Container.Remove()
+		if state.IsError() {
+			if !gearArgs.Quiet {
+				ux.PrintfRed("error removing - %s\n", state.Error)
 			}
 
-			cmdState.SetError("Gear '%s:%s' remove error - %s", ga.Name, ga.Version, cmdState.Error)
+			state.SetError("Gear '%s:%s' remove error - %s", gearArgs.Name, gearArgs.Version, state.Error)
 			break
 		}
 
-		if cmdState.IsOk() {
-			if !quietFlag {
+		if state.IsOk() {
+			if !gearArgs.Quiet {
 				ux.PrintfGreen("OK\n")
 			}
 
-			if tempFlag {
-				cmdState.ClearAll()
+			if gearArgs.Temporary {
+				state.ClearAll()
 				break
 			}
 
-			cmdState.SetOk("Gear '%s:%s' removed OK", ga.Name, ga.Version)
+			state.SetOk("Gear '%s:%s' removed OK", gearArgs.Name, gearArgs.Version)
 			// Remove symlinks.
-			gearRef.GearConfig.RemoveLinks(defaults.RunAs, ga.Name, ga.Version)
+			gearArgs.GearRef.GearConfig.RemoveLinks(defaults.RunAs, gearArgs.Name, gearArgs.Version)
 			break
 		}
 
-		if !quietFlag {
+		if !gearArgs.Quiet {
 			ux.PrintfWarning("cannot be removed\n")
 		}
-		cmdState.SetWarning("Gear '%s:%s' cannot be removed", ga.Name, ga.Version)
+		state.SetWarning("Gear '%s:%s' cannot be removed", gearArgs.Name, gearArgs.Version)
 	}
+
+	cmdState = state
 }
 
 
@@ -205,21 +206,28 @@ var gbReinstallCmd = &cobra.Command{
 }
 
 func gbReinstallFunc(cmd *cobra.Command, args []string) {
-	for range only.Once {
-		var ga *gearArgs
+	var state ux.State
 
-		ga, cmdState = getGearArgs(cmd, args)
+	for range only.Once {
+		state = gearArgs.ProcessArgs(cmd, args)
+		if state.IsError() {
+			break
+		}
 
 		gbUninstallFunc(cmd, args)
 		if cmdState.IsError() {
+			state = cmdState
 			break
 		}
 
 		gbInstallFunc(cmd, args)
 		if cmdState.IsError() {
+			state = cmdState
 			break
 		}
 
-		cmdState.SetOk("Gear '%s:%s' reinstalled.", ga.Name, ga.Version)
+		state.SetOk("Gear '%s:%s' reinstalled.", gearArgs.Name, gearArgs.Version)
 	}
+
+	cmdState = state
 }
