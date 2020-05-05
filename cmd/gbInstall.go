@@ -75,7 +75,7 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 		if !quietFlag {
 			ux.Printf("Installing Gear '%s:%s': ", ga.Name, ga.Version)
 		}
-		cmdState = gearRef.Docker.Container.ContainerCreate(ga.Name, ga.Version, ga.Mount)
+		cmdState = gearRef.Docker.Container.ContainerCreate(ga.Name, ga.Version, ga.Project)
 		if cmdState.IsError() {
 			if !quietFlag {
 				ux.PrintfRed("error installing - %s\n", cmdState.Error)

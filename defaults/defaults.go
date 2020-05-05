@@ -12,6 +12,11 @@ const (
 	DefaultUnitTestCmd = "/etc/gearbox/unit-tests/run.sh"
 	DefaultCommandName = "default"
 
+	DefaultPathNone = "none"
+	DefaultPathCwd = "cwd"
+	DefaultPathHome = "home"
+	DefaultPathEmpty = ""
+
 	LanguageContainerName = "Gear"
 	LanguageImageName = "Gear image"
 )

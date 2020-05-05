@@ -61,6 +61,7 @@ const (
 	argHost = "host"
 	argPort = "port"
 	argProject = "project"
+	argMount = "mount"
 	argCompletion = "completion"
 	argVersion = "version"
 	argQuiet = "quiet"
@@ -84,7 +85,8 @@ func init() {
 	rootCmd.PersistentFlags().StringP(argProvider, "", "docker", ux.SprintfBlue("Set virtual provider"))
 	rootCmd.PersistentFlags().StringP(argHost, "", "", ux.SprintfBlue("Set virtual provider host."))
 	rootCmd.PersistentFlags().StringP(argPort, "", "", ux.SprintfBlue("Set virtual provider port."))
-	rootCmd.PersistentFlags().StringP(argProject, "m", "", ux.SprintfBlue("Mount project directory."))
+	rootCmd.PersistentFlags().StringP(argProject, "p", defaults.DefaultPathNone, ux.SprintfBlue("Mount project directory."))
+	rootCmd.PersistentFlags().StringP(argMount, "m", defaults.DefaultPathNone, ux.SprintfBlue("Mount arbitrary directory via SSHFS."))
 
 	rootCmd.Flags().BoolP(argTemporary, "t", false, ux.SprintfBlue("Temporary container - remove after running command."))
 	rootCmd.Flags().BoolP(argStatus, "s", false, ux.SprintfBlue("Show shell status line."))

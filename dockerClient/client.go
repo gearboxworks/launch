@@ -15,7 +15,7 @@ type DockerGear struct {
 	//RunAs     *defaults.ExecCommand
 
 	Client    *client.Client
-	Ssh       *SSH
+	Ssh       *Ssh
 
 	Debug     bool
 }
@@ -71,4 +71,12 @@ func (gear *DockerGear) EnsureNotNil() ux.State {
 	}
 
 	return state
+}
+
+func (gear *DockerGear) SetSshStatusLine(s bool) {
+	gear.Ssh.StatusLine.Enable = s
+}
+
+func (gear *DockerGear) SetSshShell(s bool) {
+	gear.Ssh.Shell = s
 }

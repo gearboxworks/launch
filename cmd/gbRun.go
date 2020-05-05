@@ -40,24 +40,18 @@ var gbRunCmd = &cobra.Command{
 
 func gbRunFunc(cmd *cobra.Command, args []string) {
 	for range only.Once {
-		var sshStatus bool
-		var err error
+		//var mountPath string
+		//var sshStatus bool
+		//var err error
+		var ga *gearArgs
+
+		ga, cmdState = getGearArgs(cmd, args)
 
 		//quietFlag, err = cmd.Flags().GetBool(argQuiet)
 		//if err != nil {
 		//	quietFlag = false
 		//}
 		quietFlag = true
-
-		tempFlag, err = cmd.Parent().Flags().GetBool(argTemporary)
-		if err != nil {
-			tempFlag = false
-		}
-
-		sshStatus, err = cmd.Parent().Flags().GetBool(argStatus)
-		if err != nil {
-			sshStatus = false
-		}
 
 		gbStartFunc(cmd, args)
 		if !cmdState.IsRunning() {
@@ -74,9 +68,27 @@ func gbRunFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 
-		cmdState = gearRef.Docker.ContainerSsh(false, sshStatus, args...)
 
-		if tempFlag {
+		//tempFlag, err = cmd.Parent().Flags().GetBool(argTemporary)
+		//if err != nil {
+		//	tempFlag = false
+		//}
+		//
+		//sshStatus, err = cmd.Parent().Flags().GetBool(argStatus)
+		//if err != nil {
+		//	sshStatus = false
+		//}
+		//
+		//mountPath, err = cmd.Parent().Flags().GetString(argMount)
+		//if err != nil {
+		//	mountPath = ""
+		//}
+
+		//gearRef.Docker.SetSshStatusLine(sshStatus)
+		//gearRef.Docker.SetSshShell(false)
+		cmdState = gearRef.Docker.ContainerSsh(false, ga.SshStatus, ga.Mount, args)
+
+		if ga.Temporary {
 			gbUninstallFunc(cmd, args)
 		}
 	}
@@ -97,18 +109,12 @@ var gbShellCmd = &cobra.Command{
 
 func gbShellFunc(cmd *cobra.Command, args []string) {
 	for range only.Once {
-		var sshStatus bool
-		var err error
+		//var mountPath string
+		//var sshStatus bool
+		//var err error
+		var ga *gearArgs
 
-		tempFlag, err = cmd.Parent().Flags().GetBool(argTemporary)
-		if err != nil {
-			tempFlag = false
-		}
-
-		sshStatus, err = cmd.Parent().Flags().GetBool(argStatus)
-		if err != nil {
-			sshStatus = false
-		}
+		ga, cmdState = getGearArgs(cmd, args)
 
 		gbStartFunc(cmd, args)
 		if !cmdState.IsRunning() {
@@ -116,9 +122,26 @@ func gbShellFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 
-		cmdState = gearRef.Docker.ContainerSsh(true, sshStatus, args[1:]...)
+		//tempFlag, err = cmd.Parent().Flags().GetBool(argTemporary)
+		//if err != nil {
+		//	tempFlag = false
+		//}
+		//
+		//sshStatus, err = cmd.Parent().Flags().GetBool(argStatus)
+		//if err != nil {
+		//	sshStatus = false
+		//}
+		//
+		//mountPath, err = cmd.Parent().Flags().GetString(argMount)
+		//if err != nil {
+		//	mountPath = ""
+		//}
 
-		if tempFlag {
+		//gearRef.Docker.SetSshStatusLine(sshStatus)
+		//gearRef.Docker.SetSshShell(true)
+		cmdState = gearRef.Docker.ContainerSsh(true, ga.SshStatus, ga.Mount, args[1:])
+
+		if ga.Temporary {
 			gbUninstallFunc(cmd, args)
 		}
 	}
@@ -139,18 +162,12 @@ var gbUnitTestCmd = &cobra.Command{
 
 func gbUnitTestFunc(cmd *cobra.Command, args []string) {
 	for range only.Once {
-		var sshStatus bool
-		var err error
+		//var mountPath string
+		//var sshStatus bool
+		//var err error
+		var ga *gearArgs
 
-		tempFlag, err = cmd.Parent().Flags().GetBool(argTemporary)
-		if err != nil {
-			tempFlag = false
-		}
-
-		sshStatus, err = cmd.Parent().Flags().GetBool(argStatus)
-		if err != nil {
-			sshStatus = false
-		}
+		ga, cmdState = getGearArgs(cmd.Parent(), args)
 
 		gbStartFunc(cmd, args)
 		if !cmdState.IsRunning() {
@@ -158,9 +175,27 @@ func gbUnitTestFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 
-		cmdState = gearRef.Docker.ContainerSsh(true, sshStatus, defaults.DefaultUnitTestCmd)
+		//tempFlag, err = cmd.Parent().Flags().GetBool(argTemporary)
+		//if err != nil {
+		//	tempFlag = false
+		//}
+		//
+		//sshStatus, err = cmd.Parent().Flags().GetBool(argStatus)
+		//if err != nil {
+		//	sshStatus = false
+		//}
+		//
+		//mountPath, err = cmd.Parent().Flags().GetString(argMount)
+		//if err != nil {
+		//	mountPath = ""
+		//}
 
-		if tempFlag {
+		//gearRef.Docker.SetSshStatusLine(sshStatus)
+		//gearRef.Docker.SetSshShell(true)
+		args = []string{defaults.DefaultUnitTestCmd}
+		cmdState = gearRef.Docker.ContainerSsh(true, ga.SshStatus, ga.Mount, args)
+
+		if ga.Temporary {
 			gbUninstallFunc(cmd, args)
 		}
 	}

@@ -3,8 +3,10 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"launch/defaults"
 	"launch/only"
 	"launch/ux"
+	"os"
 	"os/user"
 	"path/filepath"
 	"strings"
@@ -34,7 +36,10 @@ func showArgs(cmd *cobra.Command, args []string) {
 type gearArgs struct {
 	Name string
 	Version string
+	Project string
 	Mount string
+	Temporary bool
+	SshStatus bool
 }
 
 func getGearArgs(cmd *cobra.Command, args []string) (*gearArgs, ux.State) {
@@ -66,30 +71,91 @@ func getGearArgs(cmd *cobra.Command, args []string) (*gearArgs, ux.State) {
 			ga.Version = "latest"
 		}
 
-		//ga.Version, err = cmd.Flags().GetString(argVersion)
-		//if err != nil {
-		//	ga.Version = "latest"
-		//}
 
-		ga.Mount, err = cmd.Flags().GetString(argProject)
+		ga.Project, err = cmd.Flags().GetString(argProject)
 		if err != nil {
-			ga.Mount = ""
+			ga.Project = defaults.DefaultPathNone
+			break
+		}
+		ga.Project = DeterminePath(ga.Project)
+
+
+		ga.Mount, err = cmd.Flags().GetString(argMount)
+		if err != nil {
+			ga.Mount = defaults.DefaultPathNone
+			break
+		}
+		ga.Mount = DeterminePath(ga.Mount)
+
+
+		ga.SshStatus, err = cmd.Flags().GetBool(argMount)
+		if err != nil {
+			ga.SshStatus = false
 			break
 		}
 
-		ga.Mount, err = filepath.Abs(ga.Mount)
+
+		ga.Temporary, err = cmd.Flags().GetBool(argMount)
 		if err != nil {
-			ga.Mount = ""
+			ga.Temporary = false
 			break
 		}
-
-		//gearRef, state = provider.NewGear()
-		//if state.IsError() {
-		//	break
-		//}
 	}
 
 	return &ga, state
+}
+
+
+
+func DeterminePath(mp string) string {
+	var ok bool
+
+	for range only.Once {
+		var err error
+		var cwd string
+
+		if mp == defaults.DefaultPathNone {
+			break
+		}
+
+		switch {
+			case mp == defaults.DefaultPathEmpty:
+				fallthrough
+			case mp == defaults.DefaultPathCwd:
+				cwd, err = os.Getwd()
+				if err != nil {
+					break
+				}
+				ok = true
+				mp = cwd
+
+			case mp == defaults.DefaultPathHome:
+				var u *user.User
+				u, err = user.Current()
+				if err != nil {
+					break
+				}
+				ok = true
+				mp = u.HomeDir
+
+			default:
+				mp, err = filepath.Abs(mp)
+				if err != nil {
+					break
+				}
+				ok = true
+		}
+
+		if err != nil {
+			break
+		}
+
+		if !ok {
+			mp = defaults.DefaultPathNone
+		}
+	}
+
+	return mp
 }
 
 func IsNoCreate(cmd *cobra.Command) bool {

@@ -1,3 +1,3 @@
 package defaults
 
-const BinaryVersion = "1.5.0"
+const BinaryVersion = "1.6.0"

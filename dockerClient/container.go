@@ -308,7 +308,7 @@ func (me *Container) ContainerCreate(gearName string, gearVersion string, gearMo
 		tag := fmt.Sprintf("gearboxworks/%s:%s", me.Name, me.Version)
 		gn := fmt.Sprintf("%s-%s", me.Name, me.Version)
 		var binds []string
-		if gearMount != "" {
+		if gearMount != defaults.DefaultPathNone {
 			binds = append(binds, fmt.Sprintf("%s:%s", gearMount, defaults.DefaultProject))
 		}
 
@@ -384,7 +384,7 @@ func (me *Container) ContainerCreate(gearName string, gearVersion string, gearMo
 			Links:           nil,
 			OomScoreAdj:     0,
 			PidMode:         "",
-			Privileged:      false,
+			Privileged:      true,
 			PublishAllPorts: true,
 			ReadonlyRootfs:  false,
 			SecurityOpt:     nil,
