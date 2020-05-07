@@ -186,6 +186,7 @@ func (me *DockerGear) FindContainer(gearName string, gearVersion string) (bool, 
 				continue
 			}
 
+			// @TODO - BEGIN - This needs to be refactored!!!
 			if gc.Meta.Name != gearName {
 				if !defaults.RunAs.AsLink {
 					continue
@@ -207,13 +208,21 @@ func (me *DockerGear) FindContainer(gearName string, gearVersion string) (bool, 
 				gearVersion = gl
 			} else {
 				if !gc.Versions.HasVersion(gearVersion) {
-					continue
+					// Finally compare container image name.
+					finalCheck := fmt.Sprintf("%s/%s:%s", defaults.Organization, gearName, gearVersion)
+					if finalCheck != c.Image {
+						continue
+					}
 				}
 			}
 
-			if c.Labels["gearbox.version"] != gearVersion {
+			//fmt.Printf("%s => F:%s:F:%s:F\n", gearVersion, c.Labels["gearbox.version"], c.Labels["container.majorversion"])
+			if (c.Labels["gearbox.version"] == gearVersion) {
+			} else if (c.Labels["container.majorversion"] == gearVersion) {
+			} else {
 				continue
 			}
+			// @TODO - END - This needs to be refactored!!!
 
 			me.Container.Name = gearName
 			me.Container.Version = gearVersion
