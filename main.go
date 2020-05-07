@@ -37,9 +37,14 @@ func main() {
 	if state.IsError() {
 		exit = 1
 	}
-	if state.IsWarning() {
-		exit = 2
+	if state.IsExitCodeError() {
+		exit = state.ExitCode
 	}
+
+	//if state.IsWarning() {
+	//	exit = 2
+	//}
+
 	state.Print()
 	ux.Close()
 	os.Exit(exit)

@@ -140,6 +140,15 @@ func (me *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPath 
 		// Connect to container.
 		err = me.Ssh.Connect()
 		if err != nil {
+			switch v := err.(type) {
+				case *ssh.ExitError:
+					state.SetExitCode(v.Waitmsg.ExitStatus())
+					if len(cmdArgs) == 0 {
+						state.SetError("Command exited with error code %d", v.Waitmsg.ExitStatus())
+					} else {
+						state.SetError("Command '%s' exited with error code %d", cmdArgs[0], v.Waitmsg.ExitStatus())
+					}
+			}
 			break
 		}
 	}

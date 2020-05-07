@@ -10,19 +10,30 @@ type State struct {
 	Warning error
 	Ok error
 	String string
+	ExitCode int
 }
 
 func (me *State) Print() {
 	switch {
 		case me.Error != nil:
-			PrintfError("%s", me.Error)
+			PrintfError("%s\n", me.Error)
 		case me.Warning != nil:
-			PrintfWarning("%s", me.Warning)
+			PrintfWarning("%s\n", me.Warning)
 		case me.Ok != nil:
-			PrintfOk("%s", me.Ok)
+			PrintfOk("%s\n", me.Ok)
 	}
 }
 
+
+func (me *State) IsExitCodeError() bool {
+	var ok bool
+
+	if me.ExitCode != 0 {
+		ok = true
+	}
+
+	return ok
+}
 
 func (me *State) IsError() bool {
 	var ok bool
@@ -54,6 +65,13 @@ func (me *State) IsOk() bool {
 	return ok
 }
 
+
+func (me *State) SetExitCode(exit int) {
+	me.Ok = nil
+	me.Warning = nil
+	me.Error = errors.New(fmt.Sprintf("EXIT CODE: %d", exit))
+	me.ExitCode = exit
+}
 
 func (me *State) SetError(format string, args ...interface{}) {
 	me.Ok = nil
