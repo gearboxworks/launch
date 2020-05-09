@@ -21,22 +21,22 @@ type Gear struct {
 }
 
 
-func (me *Gear) NewGear() ux.State {
+func (gear *Gear) NewGear() ux.State {
 	//var g Gear
 	var state ux.State
 
 	for range only.Once {
-		if me.Docker == nil {
-			me.Docker, state = dockerClient.New()
+		if gear.Docker == nil {
+			gear.Docker, state = dockerClient.New()
 			if state.IsError() {
 				state.SetError("can not connect to Docker service provider")
 				break
 			}
-			me.Docker.Debug = me.Debug
+			gear.Docker.Debug = gear.Debug
 		}
 
-		if me.Repo == nil {
-			me.Repo, state = githubClient.New()
+		if gear.Repo == nil {
+			gear.Repo, state = githubClient.New()
 			state.ClearError()
 			//if state.IsError() {
 			//	break

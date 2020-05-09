@@ -52,7 +52,7 @@ import (
 
 const (
 	argConfig = "config"
-	argHelp = "help"
+	//argHelp = "help"
 	argDebug = "debug"
 	argNoCreate = "no-create"
 	argExample = "example"
@@ -403,9 +403,9 @@ func SetHelp(c *cobra.Command) {
 	c.SetUsageTemplate(tmplUsage)
 }
 
-func PrintHelp(c *cobra.Command, args []string) {
-
-}
+//func PrintHelp(c *cobra.Command, args []string) {
+//
+//}
 
 func GetState() ux.State {
 	return cmdState

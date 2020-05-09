@@ -1,4 +1,3 @@
 package only
 
-var Once string = "1"
-
+var Once = "1"

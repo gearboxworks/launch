@@ -1,9 +1,9 @@
 package ux
 
+//noinspection GoRedundantImportAlias
 import (
 	"errors"
 	"fmt"
-	"launch/only"
 	"github.com/gdamore/tcell"
 	termui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
@@ -11,10 +11,12 @@ import (
 	"github.com/rivo/tview"
 	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
+	"launch/only"
 	"os"
 	"path/filepath"
 	"strings"
 )
+
 
 // Other possibilities:
 //
@@ -27,6 +29,8 @@ import (
 
 
 var _defined bool
+
+//noinspection GoUnusedGlobalVariable
 var Color aurora.Aurora
 
 
@@ -76,10 +80,13 @@ func PrintfGreen(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
 	_, _ = fmt.Fprintf(os.Stderr, "%s%s", aurora.BrightGreen(inline), aurora.Reset(""))
 }
+
+//noinspection GoUnusedExportedFunction
 func PrintfBlue(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
 	_, _ = fmt.Fprintf(os.Stderr, "%s%s", aurora.BrightBlue(inline), aurora.Reset(""))
 }
+//noinspection GoUnusedExportedFunction
 func PrintfMagenta(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
 	_, _ = fmt.Fprintf(os.Stderr, "%s%s", aurora.BrightMagenta(inline), aurora.Reset(""))
@@ -144,6 +151,7 @@ func PrintfError(format string, args ...interface{}) {
 	}
 }
 
+//noinspection GoUnusedExportedFunction
 func PrintError(err error) {
 	for range only.Once {
 		if err == nil {
@@ -171,6 +179,7 @@ func GetTerminalSize() (int, int, error) {
 }
 
 
+//noinspection GoUnusedExportedFunction
 func Printf2(format string, args ...interface{}) {
 
 	for range only.Once {
@@ -211,6 +220,7 @@ func Printf2(format string, args ...interface{}) {
 	}
 }
 
+//noinspection GoUnusedExportedFunction
 func Printf3(format string, args ...interface{}) {
 
 	for range only.Once {
@@ -235,6 +245,7 @@ func Printf3(format string, args ...interface{}) {
 	}
 }
 
+//noinspection GoUnusedExportedFunction
 func Draw2() error {
 	var err error
 
@@ -255,6 +266,7 @@ func Draw2() error {
 	return err
 }
 
+//noinspection GoUnusedExportedFunction
 func Draw3() {
 	l := widgets.NewList()
 	l.Title = "List"
@@ -315,6 +327,7 @@ func Draw3() {
 	}
 }
 
+//noinspection GoUnusedExportedFunction
 func Draw4() error {
 	var err error
 
@@ -374,6 +387,7 @@ func Draw4() error {
 	return err
 }
 
+//noinspection GoUnusedExportedFunction
 func Draw5() error {
 	var err error
 

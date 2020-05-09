@@ -55,7 +55,8 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 		if found {
 			if !gearArgs.Temporary {
 				// Create symlinks.
-				gearArgs.GearRef.GearConfig.CreateLinks(defaults.RunAs, gearArgs.Name, gearArgs.Version)
+				//gearArgs.GearRef.GearConfig.CreateLinks(defaults.RunAs, gearArgs.Name, gearArgs.Version)
+				gearArgs.GearRef.GearConfig.CreateLinks(defaults.RunAs, gearArgs.Version)
 			}
 
 			state.SetOk("Gear '%s:%s' already installed.", gearArgs.Name, gearArgs.Version)
@@ -99,7 +100,8 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 			}
 
 			// Create symlinks.
-			gearArgs.GearRef.GearConfig.CreateLinks(defaults.RunAs, gearArgs.Name, gearArgs.Version)
+			//gearArgs.GearRef.GearConfig.CreateLinks(defaults.RunAs, gearArgs.Name, gearArgs.Version)
+			gearArgs.GearRef.GearConfig.CreateLinks(defaults.RunAs, gearArgs.Version)
 			state.SetOk("Gear '%s:%s' installed OK", gearArgs.Name, gearArgs.Version)
 			break
 		}
@@ -178,7 +180,8 @@ func gbUninstallFunc(cmd *cobra.Command, args []string) {
 
 			state.SetOk("Gear '%s:%s' removed OK", gearArgs.Name, gearArgs.Version)
 			// Remove symlinks.
-			gearArgs.GearRef.GearConfig.RemoveLinks(defaults.RunAs, gearArgs.Name, gearArgs.Version)
+			gearArgs.GearRef.GearConfig.RemoveLinks(defaults.RunAs, gearArgs.Version)
+			//gearArgs.GearRef.GearConfig.RemoveLinks(defaults.RunAs, gearArgs.Name, gearArgs.Version)
 			break
 		}
 

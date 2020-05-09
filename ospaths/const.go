@@ -10,6 +10,7 @@ const (
 
 
 // UNIX file permission constants.
+//noinspection GoSnakeCaseUsage,GoUnusedConst
 const (
 	OS_READ = 04
 	OS_WRITE = 02

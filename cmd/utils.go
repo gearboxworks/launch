@@ -49,11 +49,11 @@ type GearArgs struct {
 	GearRef gear.Gear
 }
 
-func (me *GearArgs) ProcessArgs(cmd *cobra.Command, args []string) ux.State {
+func (gear *GearArgs) ProcessArgs(cmd *cobra.Command, args []string) ux.State {
 	var state ux.State
 
 	for range only.Once {
-		if me.Valid {
+		if gear.Valid {
 			break
 		}
 
@@ -63,90 +63,90 @@ func (me *GearArgs) ProcessArgs(cmd *cobra.Command, args []string) ux.State {
 		//showArgs(cmd, args)
 
 		if len(args) > 0 {
-			me.Name = args[0]
-			if strings.Contains(me.Name, ":") {
-				spl := strings.Split(me.Name, ":")
-				me.Name = spl[0]
-				me.Version = spl[1]
-				//} else if strings.Contains(me.Name, "-") {
-				//	spl := strings.Split(me.Name, "-")
-				//	me.Name = spl[0]
-				//	me.Version = spl[1]
+			gear.Name = args[0]
+			if strings.Contains(gear.Name, ":") {
+				spl := strings.Split(gear.Name, ":")
+				gear.Name = spl[0]
+				gear.Version = spl[1]
+				//} else if strings.Contains(gear.Name, "-") {
+				//	spl := strings.Split(gear.Name, "-")
+				//	gear.Name = spl[0]
+				//	gear.Version = spl[1]
 			}
 
-			if me.Version == "" {
-				me.Version = "latest"
+			if gear.Version == "" {
+				gear.Version = "latest"
 			}
 		}
 
 
-		me.Project, err = fl.GetString(argProject)
+		gear.Project, err = fl.GetString(argProject)
 		if err != nil {
-			me.Project = defaults.DefaultPathNone
+			gear.Project = defaults.DefaultPathNone
 		} else {
-			me.Project = DeterminePath(me.Project)
+			gear.Project = DeterminePath(gear.Project)
 		}
 
 
-		me.Mount, err = fl.GetString(argMount)
+		gear.Mount, err = fl.GetString(argMount)
 		if err != nil {
-			me.Mount = defaults.DefaultPathNone
+			gear.Mount = defaults.DefaultPathNone
 		} else {
-			me.Mount = DeterminePath(me.Mount)
+			gear.Mount = DeterminePath(gear.Mount)
 		}
 
 
-		me.Debug, err = fl.GetBool(argDebug)
+		gear.Debug, err = fl.GetBool(argDebug)
 		if err != nil {
-			me.Debug = false
+			gear.Debug = false
 		}
 
 
-		me.Quiet, err = fl.GetBool(argQuiet)
+		gear.Quiet, err = fl.GetBool(argQuiet)
 		if err != nil {
-			me.Quiet = false
+			gear.Quiet = false
 		}
 
 
-		me.SshStatus, err = fl.GetBool(argStatus)
+		gear.SshStatus, err = fl.GetBool(argStatus)
 		if err != nil {
-			me.SshStatus = false
+			gear.SshStatus = false
 		}
 
 
-		me.Temporary, err = fl.GetBool(argTemporary)
+		gear.Temporary, err = fl.GetBool(argTemporary)
 		if err != nil {
-			me.Temporary = false
+			gear.Temporary = false
 		}
 
-		me.Provider.Debug = me.Debug
-		me.Provider.Name, _ = fl.GetString(argProvider)
+		gear.Provider.Debug = gear.Debug
+		gear.Provider.Name, _ = fl.GetString(argProvider)
 		if err != nil {
-			me.Provider.Name = ""
+			gear.Provider.Name = ""
 		}
 
-		me.Provider.Host, _ = fl.GetString(argHost)
+		gear.Provider.Host, _ = fl.GetString(argHost)
 		if err != nil {
-			me.Provider.Host = ""
+			gear.Provider.Host = ""
 		}
 
-		me.Provider.Port, _ = fl.GetString(argPort)
+		gear.Provider.Port, _ = fl.GetString(argPort)
 		if err != nil {
-			me.Provider.Port = ""
+			gear.Provider.Port = ""
 		}
 
-		me.Provider.Project, _ = fl.GetString(argProject)
+		gear.Provider.Project, _ = fl.GetString(argProject)
 		if err != nil {
-			me.Provider.Project = ""
+			gear.Provider.Project = ""
 		}
 
-		state = me.Provider.NewProvider()
+		state = gear.Provider.NewProvider()
 		if state.IsError() {
 			break
 		}
 
-		state = me.GearRef.NewGear()
-		//me.GearRef, state = me.Provider.NewGear()
+		state = gear.GearRef.NewGear()
+		//gear.GearRef, state = gear.Provider.NewGear()
 		if state.IsError() {
 			break
 		}
@@ -157,7 +157,7 @@ func (me *GearArgs) ProcessArgs(cmd *cobra.Command, args []string) ux.State {
 		//	break
 		//}
 
-		me.Valid = true
+		gear.Valid = true
 	}
 
 	return state

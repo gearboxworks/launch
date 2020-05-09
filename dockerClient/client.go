@@ -2,10 +2,10 @@ package dockerClient
 
 import (
 	"context"
+	"github.com/docker/docker/client"
 	"launch/defaults"
 	"launch/only"
 	"launch/ux"
-	"github.com/docker/docker/client"
 )
 
 
@@ -19,7 +19,6 @@ type DockerGear struct {
 
 	Debug     bool
 }
-
 
 func New() (*DockerGear, ux.State) {
 	var cli DockerGear
@@ -37,6 +36,7 @@ func New() (*DockerGear, ux.State) {
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
+		//noinspection GoDeferInLoop
 		defer cancel()
 
 		//var result types.Ping

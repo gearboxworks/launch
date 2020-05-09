@@ -3,15 +3,15 @@ package dockerClient
 import (
 	"context"
 	"fmt"
-	"launch/defaults"
-	"launch/gear/gearJson"
-	"launch/only"
-	"launch/ux"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/registry"
 	"github.com/dustin/go-humanize"
 	"github.com/jedib0t/go-pretty/table"
+	"launch/defaults"
+	"launch/gear/gearJson"
+	"launch/only"
+	"launch/ux"
 	"os"
 	"strings"
 )
@@ -20,18 +20,18 @@ import (
 // List all images
 // List the images on your Engine, similar to docker image ls:
 // func ImageList(f types.ImageListOptions) error {
-func (me *DockerGear) ImageList(f string) (int, ux.State) {
+func (gear *DockerGear) ImageList(f string) (int, ux.State) {
 	var state ux.State
 	var count int
 
 	for range only.Once {
 		var err error
 
-		if me.Debug {
+		if gear.Debug {
 			fmt.Printf("DEBUG: ImageList(%s)\n", f)
 		}
 
-		state = me.EnsureNotNil()
+		state = gear.EnsureNotNil()
 		if state.IsError() {
 			break
 		}
@@ -42,10 +42,11 @@ func (me *DockerGear) ImageList(f string) (int, ux.State) {
 		//}
 
 		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
+		//noinspection GoDeferInLoop
 		defer cancel()
 
 		var images []types.ImageSummary
-		images, err = me.Client.ImageList(ctx, types.ImageListOptions{All: true, Filters: df})
+		images, err = gear.Client.ImageList(ctx, types.ImageListOptions{All: true, Filters: df})
 		if err != nil {
 			state.SetError("gear image list error: %s", err)
 			break
@@ -107,17 +108,17 @@ func (me *DockerGear) ImageList(f string) (int, ux.State) {
 }
 
 
-func (me *DockerGear) FindImage(gearName string, gearVersion string) (bool, ux.State) {
+func (gear *DockerGear) FindImage(gearName string, gearVersion string) (bool, ux.State) {
 	var ok bool
 	var state ux.State
 	//var err error
 
 	for range only.Once {
-		if me.Debug {
+		if gear.Debug {
 			fmt.Printf("DEBUG: FindImage(%s, %s)\n", gearName, gearVersion)
 		}
 
-		state = me.EnsureNotNil()
+		state = gear.EnsureNotNil()
 		if state.IsError() {
 			break
 		}
@@ -132,11 +133,12 @@ func (me *DockerGear) FindImage(gearName string, gearVersion string) (bool, ux.S
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
+		//noinspection GoDeferInLoop
 		defer cancel()
 
 		var images []types.ImageSummary
 		var err error
-		images, err = me.Client.ImageList(ctx, types.ImageListOptions{All: true})
+		images, err = gear.Client.ImageList(ctx, types.ImageListOptions{All: true})
 		if err != nil {
 			state.SetError("gear image list error: %s", err)
 			break
@@ -180,12 +182,12 @@ func (me *DockerGear) FindImage(gearName string, gearVersion string) (bool, ux.S
 				}
 			}
 
-			me.Image.Name = gearName
-			me.Image.Version = gearVersion
-			me.Image.GearConfig = gc
-			me.Image.Summary = &i
-			me.Image.ID = i.ID
-			//me.Image.client = me.DockerClient
+			gear.Image.Name = gearName
+			gear.Image.Version = gearVersion
+			gear.Image.GearConfig = gc
+			gear.Image.Summary = &i
+			gear.Image.ID = i.ID
+			//gear.Image.client = gear.DockerClient
 			ok = true
 
 			break
@@ -195,17 +197,17 @@ func (me *DockerGear) FindImage(gearName string, gearVersion string) (bool, ux.S
 			break
 		}
 
-		if me.Image.Summary == nil {
+		if gear.Image.Summary == nil {
 			break
 		}
 
-		me.Image.Details, _, err = me.Client.ImageInspectWithRaw(ctx, me.Image.ID)
+		gear.Image.Details, _, err = gear.Client.ImageInspectWithRaw(ctx, gear.Image.ID)
 		if err != nil {
 			state.SetError("error inspecting gear: %s", err)
 			break
 		}
 
-		state = me.Image.EnsureNotNil()
+		state = gear.Image.EnsureNotNil()
 		if state.IsError() {
 			break
 		}
@@ -218,11 +220,11 @@ func (me *DockerGear) FindImage(gearName string, gearVersion string) (bool, ux.S
 
 
 // Search for an image in remote registry.
-func (me *DockerGear) Search(gearName string, gearVersion string) ux.State {
+func (gear *DockerGear) Search(gearName string, gearVersion string) ux.State {
 	var state ux.State
 
 	for range only.Once {
-		state = me.EnsureNotNil()
+		state = gear.EnsureNotNil()
 		if state.IsError() {
 			break
 		}
@@ -244,7 +246,7 @@ func (me *DockerGear) Search(gearName string, gearVersion string) ux.State {
 
 		var images []registry.SearchResult
 		var err error
-		images, err = me.Client.ImageSearch(ctx, repo, types.ImageSearchOptions{Filters:df, Limit: 100})
+		images, err = gear.Client.ImageSearch(ctx, repo, types.ImageSearchOptions{Filters: df, Limit: 100})
 		if err != nil {
 			state.SetError("gear image search error: %s", err)
 			break

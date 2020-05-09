@@ -22,11 +22,11 @@ type GearConfig struct {
 }
 type GearConfigs map[string]GearConfig
 
-func (me *GearConfig) GetName() string {
-	return me.Meta.Name
+func (gc *GearConfig) GetName() string {
+	return gc.Meta.Name
 }
 
-func (me *GearConfig) GetCommand(cmd []string) []string {
+func (gc *GearConfig) GetCommand(cmd []string) []string {
 	var retCmd []string
 
 	for range only.Once {
@@ -38,7 +38,7 @@ func (me *GearConfig) GetCommand(cmd []string) []string {
 			case cmd[0] == "":
 				cmdExec = defaults.DefaultCommandName
 
-			case cmd[0] == me.Meta.Name:
+			case cmd[0] == gc.Meta.Name:
 				cmdExec = defaults.DefaultCommandName
 
 			case cmd[0] != "":
@@ -49,7 +49,7 @@ func (me *GearConfig) GetCommand(cmd []string) []string {
 				cmdExec = defaults.DefaultCommandName
 		}
 
-		c := me.MatchCommand(cmdExec)
+		c := gc.MatchCommand(cmdExec)
 		if c == nil {
 			retCmd = []string{}
 			break
@@ -61,11 +61,11 @@ func (me *GearConfig) GetCommand(cmd []string) []string {
 	return retCmd
 }
 
-func (me *GearConfig) MatchCommand(cmd string) *string {
+func (gc *GearConfig) MatchCommand(cmd string) *string {
 	var c *string
 
 	for range only.Once {
-		if c2, ok := me.Run.Commands[cmd]; ok {
+		if c2, ok := gc.Run.Commands[cmd]; ok {
 			c = &c2
 			break
 		}
@@ -74,17 +74,18 @@ func (me *GearConfig) MatchCommand(cmd string) *string {
 	return c
 }
 
-func (me *GearConfig) CreateLinks(c defaults.ExecCommand, name string, version string) ux.State {
+// func (gc *GearConfig) CreateLinks(c defaults.ExecCommand, name string, version string) ux.State {
+func (gc *GearConfig) CreateLinks(c defaults.ExecCommand, version string) ux.State {
 	var state ux.State
 
 	for range only.Once {
-		state = me.ValidateGearConfig()
+		state = gc.ValidateGearConfig()
 		if state.IsError() {
 			break
 		}
 
 		var created bool
-		for k, v := range me.Run.Commands {
+		for k, v := range gc.Run.Commands {
 			var err error
 			var dstFile string
 			var linkStat os.FileInfo
@@ -148,17 +149,18 @@ func (me *GearConfig) CreateLinks(c defaults.ExecCommand, name string, version s
 	return state
 }
 
-func (me *GearConfig) RemoveLinks(c defaults.ExecCommand, name string, version string) ux.State {
+// func (gc *GearConfig) RemoveLinks(c defaults.ExecCommand, name string, version string) ux.State {
+func (gc *GearConfig) RemoveLinks(c defaults.ExecCommand, version string) ux.State {
 	var state ux.State
 
 	for range only.Once {
-		state = me.ValidateGearConfig()
+		state = gc.ValidateGearConfig()
 		if state.IsError() {
 			break
 		}
 
 		var removed bool
-		for k, _ := range me.Run.Commands {
+		for k := range gc.Run.Commands {
 			var err error
 			var dstFile string
 			var linkStat os.FileInfo
@@ -351,11 +353,11 @@ func New(cs string) (*GearConfig, ux.State) {
 	return &gc, state
 }
 
-func (me *GearConfig) ValidateGearConfig() ux.State {
+func (gc *GearConfig) ValidateGearConfig() ux.State {
 	var state ux.State
 
 	for range only.Once {
-		if me == nil {
+		if gc == nil {
 			state.SetError("gear config is nil")
 			break
 		}

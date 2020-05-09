@@ -44,7 +44,7 @@ func FileExists(f string) (os.FileInfo, error) {
 	return stat, err
 }
 
-
+//noinspection GoUnusedExportedFunction
 func FileSetExecutePerms(f string) (os.FileInfo, error) {
 
 	var err error

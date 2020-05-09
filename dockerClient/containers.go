@@ -3,13 +3,13 @@ package dockerClient
 import (
 	"context"
 	"fmt"
+	"github.com/docker/docker/api/types"
+	"github.com/dustin/go-humanize"
+	"github.com/jedib0t/go-pretty/table"
 	"launch/defaults"
 	"launch/gear/gearJson"
 	"launch/only"
 	"launch/ux"
-	"github.com/docker/docker/api/types"
-	"github.com/dustin/go-humanize"
-	"github.com/jedib0t/go-pretty/table"
 	"os"
 	"strings"
 )
@@ -17,22 +17,23 @@ import (
 // List and manage containers
 // You can use the API to list containers that are running, just like using docker ps:
 // func ContainerList(f types.ContainerListOptions) error {
-func (me *DockerGear) ContainerList(f string) (int, ux.State) {
+func (gear *DockerGear) ContainerList(f string) (int, ux.State) {
 	var state ux.State
 	var count int
 
 	for range only.Once {
 		var err error
 
-		if me.Debug {
+		if gear.Debug {
 			fmt.Printf("DEBUG: ContainerList(%s)\n", f)
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
+		//noinspection GoDeferInLoop
 		defer cancel()
 
 		var containers []types.Container
-		containers, err = me.Client.ContainerList(ctx, types.ContainerListOptions{Size: true, All: true})
+		containers, err = gear.Client.ContainerList(ctx, types.ContainerListOptions{Size: true, All: true})
 		if err != nil {
 			state.SetError("gear list error: %s", err)
 			break
@@ -42,15 +43,15 @@ func (me *DockerGear) ContainerList(f string) (int, ux.State) {
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
 		t.AppendHeader(table.Row{
-			("Name"),
-			("Class"),
-			("State"),
-			("Image"),
-			("Ports"),
-			("SSH port"),
-			("IP Address"),
-			("Mounts"),
-			("Size"),
+			"Name",
+			"Class",
+			"State",
+			"Image",
+			"Ports",
+			"SSH port",
+			"IP Address",
+			"Mounts",
+			"Size",
 		})
 
 		for _, c := range containers {
@@ -136,19 +137,18 @@ func (me *DockerGear) ContainerList(f string) (int, ux.State) {
 	return count, state
 }
 
-
-func (me *DockerGear) FindContainer(gearName string, gearVersion string) (bool, ux.State) {
+func (gear *DockerGear) FindContainer(gearName string, gearVersion string) (bool, ux.State) {
 	var ok bool
 	var state ux.State
 
 	for range only.Once {
 		var err error
 
-		if me.Debug {
+		if gear.Debug {
 			fmt.Printf("DEBUG: FindContainer(%s, %s)\n", gearName, gearVersion)
 		}
 
-		state = me.EnsureNotNil()
+		state = gear.EnsureNotNil()
 		if state.IsError() {
 			break
 		}
@@ -163,10 +163,11 @@ func (me *DockerGear) FindContainer(gearName string, gearVersion string) (bool, 
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
+		//noinspection GoDeferInLoop
 		defer cancel()
 
 		var containers []types.Container
-		containers, err = me.Client.ContainerList(ctx, types.ContainerListOptions{All: true, Limit: 256})
+		containers, err = gear.Client.ContainerList(ctx, types.ContainerListOptions{All: true, Limit: 256})
 		if err != nil {
 			state.SetError("gear list error: %s", err)
 			break
@@ -217,19 +218,19 @@ func (me *DockerGear) FindContainer(gearName string, gearVersion string) (bool, 
 			}
 
 			//fmt.Printf("%s => F:%s:F:%s:F\n", gearVersion, c.Labels["gearbox.version"], c.Labels["container.majorversion"])
-			if (c.Labels["gearbox.version"] == gearVersion) {
-			} else if (c.Labels["container.majorversion"] == gearVersion) {
+			if c.Labels["gearbox.version"] == gearVersion {
+			} else if c.Labels["container.majorversion"] == gearVersion {
 			} else {
 				continue
 			}
 			// @TODO - END - This needs to be refactored!!!
 
-			me.Container.Name = gearName
-			me.Container.Version = gearVersion
-			me.Container.GearConfig = gc
-			me.Container.Summary = &c
-			me.Container.ID = c.ID
-			me.Container.Name = gc.Meta.Name
+			gear.Container.Name = gearName
+			gear.Container.Version = gearVersion
+			gear.Container.GearConfig = gc
+			gear.Container.Summary = &c
+			gear.Container.ID = c.ID
+			gear.Container.Name = gc.Meta.Name
 			ok = true
 			state.ClearAll()
 
@@ -241,25 +242,25 @@ func (me *DockerGear) FindContainer(gearName string, gearVersion string) (bool, 
 			break
 		}
 
-		if me.Container.Summary == nil {
+		if gear.Container.Summary == nil {
 			break
 		}
 
 		d := types.ContainerJSON{}
-		d, err = me.Client.ContainerInspect(ctx, me.Container.ID)
+		d, err = gear.Client.ContainerInspect(ctx, gear.Container.ID)
 		if err != nil {
 			state.SetError("gear inspect error: %s", err)
 			break
 		}
-		me.Container.Details = &d
+		gear.Container.Details = &d
 
-		state = me.Container.EnsureNotNil()
+		state = gear.Container.EnsureNotNil()
 		if state.IsError() {
 			break
 		}
 	}
 
-	if me.Debug {
+	if gear.Debug {
 		state.Print()
 	}
 

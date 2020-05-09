@@ -64,13 +64,13 @@ func NewSshAuth(args ...SshAuth) *SshAuth {
 }
 
 
-func (me *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPath string, cmdArgs []string) ux.State {
+func (gear *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPath string, cmdArgs []string) ux.State {
 	var state ux.State
 
 	for range only.Once {
 		// Get Docker container SSH port.
 		var clientPort string
-		clientPort, state = me.Container.GetContainerSsh()
+		clientPort, state = gear.Container.GetContainerSsh()
 		if state.IsError() {
 			break
 		}
@@ -81,7 +81,7 @@ func (me *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPath 
 
 		u := url.URL{}
 		var err error
-		err = u.UnmarshalBinary([]byte(me.Client.DaemonHost()))
+		err = u.UnmarshalBinary([]byte(gear.Client.DaemonHost()))
 		if err != nil {
 			state.SetError("error finding SSH port: %s", err)
 			break
@@ -90,7 +90,7 @@ func (me *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPath 
 
 		// Create SSH client config.
 		// fmt.Printf("Connect to %s:%s\n", u.Hostname(), port)
-		me.Ssh = NewSshClient(SshClientArgs {
+		gear.Ssh = NewSshClient(SshClientArgs {
 			ClientAuth: &SshAuth {
 				Host:      u.Hostname(),
 				Port:      clientPort,
@@ -100,45 +100,46 @@ func (me *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPath 
 			StatusLine: StatusLine {
 				Enable: statusLine,
 			},
-			Shell: interactive,
-			GearName: me.Container.Name,
-			GearVersion: me.Container.Version,
-			CmdArgs: cmdArgs,
+			Shell:       interactive,
+			GearName:    gear.Container.Name,
+			GearVersion: gear.Container.Version,
+			CmdArgs:     cmdArgs,
 		})
 
 
 		// Run server for SSHFS if required.
-		if me.SetMountPath(mountPath) {
-			err = me.Ssh.InitServer()
+		if gear.SetMountPath(mountPath) {
+			err = gear.Ssh.InitServer()
 			if err == nil {
-				go me.Ssh.StartServer()
+				//noinspection GoUnhandledErrorResult
+				go gear.Ssh.StartServer()
 
 				// GEARBOX_MOUNT_HOST=10.0.5.57
 				// GEARBOX_MOUNT_PATH=/Users/mick/.gearbox
 				// GEARBOX_MOUNT_PORT=49410
 				//time.Sleep(time.Second * 5)
-				//for ; me.Ssh.ServerAuth == nil; {
+				//for ; gear.Ssh.ServerAuth == nil; {
 				//	time.Sleep(time.Second)
 				//}
 
-				err = os.Setenv("GEARBOX_MOUNT_HOST", me.Ssh.ServerAuth.Host)
-				err = os.Setenv("GEARBOX_MOUNT_PORT", me.Ssh.ServerAuth.Port)
-				err = os.Setenv("GEARBOX_MOUNT_USER", me.Ssh.ServerAuth.Username)
-				err = os.Setenv("GEARBOX_MOUNT_PASSWORD", me.Ssh.ServerAuth.Password)
-				err = os.Setenv("GEARBOX_MOUNT_PATH", me.Ssh.FsMount)
+				err = os.Setenv("GEARBOX_MOUNT_HOST", gear.Ssh.ServerAuth.Host)
+				err = os.Setenv("GEARBOX_MOUNT_PORT", gear.Ssh.ServerAuth.Port)
+				err = os.Setenv("GEARBOX_MOUNT_USER", gear.Ssh.ServerAuth.Username)
+				err = os.Setenv("GEARBOX_MOUNT_PASSWORD", gear.Ssh.ServerAuth.Password)
+				err = os.Setenv("GEARBOX_MOUNT_PATH", gear.Ssh.FsMount)
 			}
 		}
 
 
 		// Process env
-		err = me.Ssh.getEnv()
+		err = gear.Ssh.getEnv()
 		if err != nil {
 			break
 		}
 
 
 		// Connect to container.
-		err = me.Ssh.Connect()
+		err = gear.Ssh.Connect()
 		if err != nil {
 			switch v := err.(type) {
 				case *ssh.ExitError:
@@ -157,7 +158,7 @@ func (me *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPath 
 }
 
 
-func (me *DockerGear) SetMountPath(mp string) bool {
+func (gear *DockerGear) SetMountPath(mp string) bool {
 	var ok bool
 
 	for range only.Once {
@@ -201,7 +202,7 @@ func (me *DockerGear) SetMountPath(mp string) bool {
 		}
 
 		if ok == true {
-			me.Ssh.FsMount = mp
+			gear.Ssh.FsMount = mp
 		}
 	}
 

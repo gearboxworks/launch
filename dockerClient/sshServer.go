@@ -103,13 +103,13 @@ func SshAuthenticate(c ssh.ConnMetadata, pass []byte) (*ssh.Permissions, error) 
 
 
 // Based on example server code from golang.org/x/crypto/ssh and server_standalone
-func (me *Ssh) InitServer() error {
+func (s *Ssh) InitServer() error {
 	var err error
 
 	for range only.Once {
 		// An SSH server is represented by a ServerConfig, which holds
 		// certificate details and handles authentication of ServerConns.
-		me.ServerConfig = &ssh.ServerConfig{
+		s.ServerConfig = &ssh.ServerConfig{
 			PasswordCallback: SshAuthenticate,
 		}
 
@@ -127,50 +127,50 @@ func (me *Ssh) InitServer() error {
 			break
 		}
 
-		me.ServerConfig.AddHostKey(private)
+		s.ServerConfig.AddHostKey(private)
 
 		// Once a ServerConfig has been configured, connections can be
 		// accepted.
-		me.ServerListener, err = net.Listen("tcp", "0.0.0.0:0")
+		s.ServerListener, err = net.Listen("tcp", "0.0.0.0:0")
 		if err != nil {
 			ux.PrintfRed("SSHFS SERVER: listener ERROR - %s\n", err)
 			break
 		}
-		if me.Debug {
-			ux.Printf("Listening on %v\n", me.ServerListener.Addr())
+		if s.Debug {
+			ux.Printf("Listening on %v\n", s.ServerListener.Addr())
 		}
 
-		//err = os.Setenv("SSHFS_HOST", me.ServerListener.Addr().String())
-		me.ServerAuth = NewSshAuth()
-		//hp := strings.Split(me.ServerListener.Addr().String(), ":")
-		switch addr := me.ServerListener.Addr().(type) {
+		//err = os.Setenv("SSHFS_HOST", s.ServerListener.Addr().String())
+		s.ServerAuth = NewSshAuth()
+		//hp := strings.Split(s.ServerListener.Addr().String(), ":")
+		switch addr := s.ServerListener.Addr().(type) {
 			case *net.UDPAddr:
-				me.ServerAuth.Host = "host.docker.internal"	// addr.IP.String()
-				me.ServerAuth.Port = fmt.Sprintf("%d", addr.Port)
+				s.ServerAuth.Host = "host.docker.internal" // addr.IP.String()
+				s.ServerAuth.Port = fmt.Sprintf("%d", addr.Port)
 				//p.DstPort = uint(localAddr.(*net.UDPAddr).Port)
 			case *net.TCPAddr:
-				me.ServerAuth.Host = "host.docker.internal"	// addr.IP.String()
-				me.ServerAuth.Port = fmt.Sprintf("%d", addr.Port)
+				s.ServerAuth.Host = "host.docker.internal" // addr.IP.String()
+				s.ServerAuth.Port = fmt.Sprintf("%d", addr.Port)
 				//p.DstPort = uint(localAddr.(*net.TCPAddr).Port)
 		}
-		me.ServerAuth.Username =  me.ClientAuth.Username
-		me.ServerAuth.Password =  me.ClientAuth.Password
-		me.ServerAuth.PublicKey = me.ClientAuth.PublicKey
+		s.ServerAuth.Username =  s.ClientAuth.Username
+		s.ServerAuth.Password =  s.ClientAuth.Password
+		s.ServerAuth.PublicKey = s.ClientAuth.PublicKey
 	}
 
 	return err
 }
 
-func (me *Ssh) StartServer() error {
+func (s *Ssh) StartServer() error {
 	var err error
 
 	for range only.Once {
 		debugStream := ioutil.Discard
-		if me.Debug {
+		if s.Debug {
 			debugStream = os.Stderr
 		}
 
-		me.ServerConnection, err = me.ServerListener.Accept()
+		s.ServerConnection, err = s.ServerListener.Accept()
 		if err != nil {
 			ux.PrintfRed("SSHFS SERVER: listener accept ERROR - %s\n", err)
 			break
@@ -180,12 +180,12 @@ func (me *Ssh) StartServer() error {
 		// net.Conn.
 		var chans <-chan ssh.NewChannel
 		var reqs <-chan *ssh.Request
-		_, chans, reqs, err = ssh.NewServerConn(me.ServerConnection, me.ServerConfig)
+		_, chans, reqs, err = ssh.NewServerConn(s.ServerConnection, s.ServerConfig)
 		if err != nil {
 			ux.PrintfRed("SSHFS SERVER: handshake ERROR - %s\n", err)
 			break
 		}
-		fmt.Fprintf(debugStream, "SSH server established\n")
+		_, _ = fmt.Fprintf(debugStream, "SSH server established\n")
 
 		// The incoming Request channel must be serviced.
 		go ssh.DiscardRequests(reqs)
@@ -195,10 +195,10 @@ func (me *Ssh) StartServer() error {
 			// Channels have a type, depending on the application level
 			// protocol intended. In the case of an SFTP session, this is "subsystem"
 			// with a payload string of "<length=4>sftp"
-			fmt.Fprintf(debugStream, "Incoming channel: %s\n", newChannel.ChannelType())
+			_, _ = fmt.Fprintf(debugStream, "Incoming channel: %s\n", newChannel.ChannelType())
 			if newChannel.ChannelType() != "session" {
-				newChannel.Reject(ssh.UnknownChannelType, "unknown channel type")
-				fmt.Fprintf(debugStream, "Unknown channel type: %s\n", newChannel.ChannelType())
+				_ = newChannel.Reject(ssh.UnknownChannelType, "unknown channel type")
+				_, _ = fmt.Fprintf(debugStream, "Unknown channel type: %s\n", newChannel.ChannelType())
 				continue
 			}
 
@@ -208,26 +208,26 @@ func (me *Ssh) StartServer() error {
 			if err != nil {
 				log.Fatal("could not accept channel.", err)
 			}
-			fmt.Fprintf(debugStream, "Channel accepted\n")
+			_, _ = fmt.Fprintf(debugStream, "Channel accepted\n")
 
 			// Sessions have out-of-band requests such as "shell",
 			// "pty-req" and "env".  Here we handle only the
 			// "subsystem" request.
 			go func(in <-chan *ssh.Request) {
 				for req := range in {
-					fmt.Fprintf(debugStream, "Request: %v\n", req.Type)
+					_, _ = fmt.Fprintf(debugStream, "Request: %v\n", req.Type)
 					ok := false
 
 					switch req.Type {
-					case "subsystem":
-						fmt.Fprintf(debugStream, "Subsystem: %s\n", req.Payload[4:])
-						if string(req.Payload[4:]) == "sftp" {
-							ok = true
-						}
+						case "subsystem":
+							_, _ = fmt.Fprintf(debugStream, "Subsystem: %s\n", req.Payload[4:])
+							if string(req.Payload[4:]) == "sftp" {
+								ok = true
+							}
 					}
 
-					fmt.Fprintf(debugStream, " - accepted: %v\n", ok)
-					req.Reply(ok, nil)
+					_, _ = fmt.Fprintf(debugStream, " - accepted: %v\n", ok)
+					_ = req.Reply(ok, nil)
 				}
 			}(requests)
 
@@ -235,11 +235,11 @@ func (me *Ssh) StartServer() error {
 				sftp.WithDebug(debugStream),
 			}
 
-			if me.FsReadOnly {
+			if s.FsReadOnly {
 				serverOptions = append(serverOptions, sftp.ReadOnly())
-				fmt.Fprintf(debugStream, "Read-only server\n")
+				_, _ = fmt.Fprintf(debugStream, "Read-only server\n")
 			} else {
-				fmt.Fprintf(debugStream, "Read write server\n")
+				_, _ = fmt.Fprintf(debugStream, "Read write server\n")
 			}
 
 			var server *sftp.Server
@@ -253,7 +253,7 @@ func (me *Ssh) StartServer() error {
 
 			err = server.Serve()
 			if err == io.EOF {
-				server.Close()
+				_ = server.Close()
 				ux.PrintfOk("SSHFS SERVER: exited OK\n")
 				break
 			} else if err != nil {
