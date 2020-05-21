@@ -38,10 +38,12 @@ var gbRunCmd = &cobra.Command{
 	Args: cobra.MinimumNArgs(1),
 }
 func gbRunFunc(cmd *cobra.Command, args []string) {
+	var state *ux.State
+
 	for range only.Once {
 		var ga GearArgs
 
-		state := ga.ProcessArgs(rootCmd, args)
+		state = ga.ProcessArgs(rootCmd, args)
 		if state.IsError() {
 			break
 		}
@@ -51,6 +53,8 @@ func gbRunFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 	}
+
+	_cmdState = state
 }
 
 
@@ -66,19 +70,29 @@ var gbShellCmd = &cobra.Command{
 	Args: cobra.MinimumNArgs(1),
 }
 func gbShellFunc(cmd *cobra.Command, args []string) {
+	var state *ux.State
+
 	for range only.Once {
 		var ga GearArgs
 
-		state := ga.ProcessArgs(rootCmd, args)
+		state = ga.ProcessArgs(rootCmd, args)
 		if state.IsError() {
+			if state.IsNotOk() {
+				state.PrintResponse()
+			}
 			break
 		}
 
 		state = ga.gbShellFunc()
 		if state.IsError() {
+			if state.IsNotOk() {
+				state.PrintResponse()
+			}
 			break
 		}
 	}
+
+	_cmdState = state
 }
 
 
@@ -94,19 +108,29 @@ var gbUnitTestCmd = &cobra.Command{
 	Args: cobra.MinimumNArgs(1),
 }
 func gbUnitTestFunc(cmd *cobra.Command, args []string) {
+	var state *ux.State
+
 	for range only.Once {
 		var ga GearArgs
 
-		state := ga.ProcessArgs(rootCmd, args)
+		state = ga.ProcessArgs(rootCmd, args)
 		if state.IsError() {
+			if state.IsNotOk() {
+				state.PrintResponse()
+			}
 			break
 		}
 
 		state = ga.gbUnitTestFunc()
 		if state.IsError() {
+			if state.IsNotOk() {
+				state.PrintResponse()
+			}
 			break
 		}
 	}
+
+	_cmdState = state
 }
 
 

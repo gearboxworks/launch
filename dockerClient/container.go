@@ -211,24 +211,24 @@ func (c *Container) Start() *ux.State {
 
 		err := c._Parent.Client.ContainerStart(ctx, c.ID, types.ContainerStartOptions{})
 		if err != nil {
-			c.State.SetError("gear start error: %s", err)
+			c.State.SetError("Gear '%s:%s' start error - %s", c.Name, c.Version, err)
 			break
 		}
 
-		statusCh, errCh := c._Parent.Client.ContainerWait(ctx, c.ID, "") // container.WaitConditionNotRunning
-		select {
-			case err := <-errCh:
-				if err != nil {
-					c.State.SetError("Docker client error: %s", err)
-					// fmt.Printf("SC: %s\n", response.Error)
-					// return false, err
-				}
-				break
-
-			case status := <-statusCh:
-				fmt.Printf("status.StatusCode: %#+v\n", status.StatusCode)
-				break
-		}
+		//statusCh, errCh := c._Parent.Client.ContainerWait(ctx, c.ID, "") // container.WaitConditionNotRunning
+		//select {
+		//	case err := <-errCh:
+		//		if err != nil {
+		//			c.State.SetError("Docker client error: %s", err)
+		//			// fmt.Printf("SC: %s\n", response.Error)
+		//			// return false, err
+		//		}
+		//		break
+		//
+		//	case status := <-statusCh:
+		//		fmt.Printf("status.StatusCode: %#+v\n", status.StatusCode)
+		//		break
+		//}
 		// fmt.Printf("SC: %s\n", status)
 		// fmt.Printf("SC: %s\n", err)
 
@@ -237,23 +237,9 @@ func (c *Container) Start() *ux.State {
 			break
 		}
 		if !c.State.IsRunning() {
-			c.State.SetError("cannot start gear")
+			c.State.SetError("Gear '%s:%s' failed to start.", c.Name, c.Version)
 			break
 		}
-
-		// "created", "running", "paused", "restarting", "removing", "exited", or "dead"
-		// out, err := c.DockerClient.ImagePull(c.Ctx, c.GearConfig.Name, types.ImagePullOptions{})
-		// if err != nil {
-		// 	break
-		// }
-		// _, _ = io.Copy(os.Stdout, out)
-		//
-		// _, err = c.DockerClient.ContainerCreate(c.Ctx, &container.Config{
-		// 	Image: c.GearConfig.Name,
-		// }, nil, nil, "")
-		// if err != nil {
-		// 	break
-		// }
 	}
 
 	return c.State

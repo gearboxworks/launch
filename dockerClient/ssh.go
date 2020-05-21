@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"time"
 )
 
 
@@ -135,9 +136,14 @@ func (gear *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPat
 		}
 
 
-		// Connect to container.
-		err = gear.Ssh.Connect()
-		if err != nil {
+		// Connect to container SSH - retry 5 times.
+		for i := 0; i < 5; i++ {
+			gear.State.ClearError()
+			err = gear.Ssh.Connect()
+			if err == nil {
+				break
+			}
+
 			switch v := err.(type) {
 				case *ssh.ExitError:
 					gear.State.SetExitCode(v.Waitmsg.ExitStatus())
@@ -146,8 +152,13 @@ func (gear *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPat
 					} else {
 						gear.State.SetError("Command '%s' exited with error code %d", cmdArgs[0], v.Waitmsg.ExitStatus())
 					}
+					i = 5
+					continue
+
+				default:
+					gear.State.SetError("SSH to Gear %s:%s failed.", gear.Container.Name, gear.Container.Version)
 			}
-			break
+			time.Sleep(time.Second)
 		}
 	}
 

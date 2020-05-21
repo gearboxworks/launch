@@ -14,6 +14,7 @@ import (
 	"launch/ux"
 	"os"
 	"strings"
+	"time"
 )
 
 type Image struct {
@@ -175,9 +176,10 @@ func (i *Image) Pull() *ux.State {
 			repo = fmt.Sprintf("gearboxworks/%s:%s", i.Name, i.Version)
 		}
 
-		ctx := context.Background()
-		//ctx, cancel := context.WithTimeout(context.Background(), Timeout * 1000)
-		//defer cancel()
+		//ctx := context.Background()
+		ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+		//noinspection GoDeferInLoop
+		defer cancel()
 
 		//df := filters.NewArgs()
 		//df.Add("name", "terminus")
@@ -191,14 +193,14 @@ func (i *Image) Pull() *ux.State {
 		var err error
 		out, err = i._Parent.Client.ImagePull(ctx, repo, types.ImagePullOptions{All: false})
 		if err != nil {
-			i.State.SetError("error pulling gear: %s", err)
+			i.State.SetError("Error pulling Gear %s:%s - %s", i.Name, i.Version, err)
 			break
 		}
 
 		//noinspection GoDeferInLoop
 		defer out.Close()
 
-		ux.PrintflnWhite("pulling Gearbox gear: %s", i.Name)
+		ux.PrintflnNormal("Pulling Gear %s:%s.", i.Name, i.Version)
 		d := json.NewDecoder(out)
 		var event *PullEvent
 		for {
@@ -208,7 +210,7 @@ func (i *Image) Pull() *ux.State {
 					break
 				}
 
-				i.State.SetError("error pulling gear: %s", err)
+				i.State.SetError("Error pulling Gear %s:%s - %s", i.Name, i.Version, err)
 				break
 			}
 
@@ -226,18 +228,18 @@ func (i *Image) Pull() *ux.State {
 		// Latest event for up-to-date i
 		// EVENT: {Status:Status: Image is up to date for busybox:latest Error: Progress: ProgressDetail:{Current:0 Total:0}}
 		if event != nil {
-			if strings.HasPrefix(event.Status, "Status: Downloaded newer i for") {
+			if strings.HasPrefix(event.Status, "Status: Downloaded newer") {
 				// new
-				ux.PrintfOk("pulling Gearbox gear %s - OK\n", i.Name)
+				ux.PrintfOk("Pulling Gear %s:%s - OK.\n", i.Name, i.Version)
 			} else if strings.HasPrefix(event.Status, "Status: Image is up to date for") {
 				// up-to-date
-				ux.PrintfOk("pulling Gearbox gear %s - i up to date\n", i.Name)
+				ux.PrintfOk("Pulling Gear %s:%s - updated.\n", i.Name, i.Version)
 			} else {
-				ux.PrintfWarning("pulling Gearbox gear %s - unknown\n", i.Name)
+				ux.PrintfWarning("Pulling Gear %s:%s - unknown state.\n", i.Name, i.Version)
 			}
 		}
 		//ux.Printf("\nGear i pull OK: %+v\n", event)
-		ux.Printf("%s\n", event.Status)
+		//ux.Printf("%s\n", event.Status)
 
 		//buf := new(bytes.Buffer)
 		//_, err = buf.ReadFrom(out)

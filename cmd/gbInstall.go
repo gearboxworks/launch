@@ -38,19 +38,29 @@ var gbInstallCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 func gbInstallFunc(cmd *cobra.Command, args []string) {
+	var state *ux.State
+
 	for range only.Once {
 		var ga GearArgs
 
-		state := ga.ProcessArgs(rootCmd, args)
+		state = ga.ProcessArgs(rootCmd, args)
 		if state.IsError() {
+			if state.IsNotOk() {
+				state.PrintResponse()
+			}
 			break
 		}
 
 		state = ga.gbInstallFunc()
 		if state.IsError() {
+			if state.IsNotOk() {
+				state.PrintResponse()
+			}
 			break
 		}
 	}
+
+	_cmdState = state
 }
 
 
@@ -67,19 +77,29 @@ var gbUninstallCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 func gbUninstallFunc(cmd *cobra.Command, args []string) {
+	var state *ux.State
+
 	for range only.Once {
 		var ga GearArgs
 
-		state := ga.ProcessArgs(rootCmd, args)
+		state = ga.ProcessArgs(rootCmd, args)
 		if state.IsError() {
+			if state.IsNotOk() {
+				state.PrintResponse()
+			}
 			break
 		}
 
 		state = ga.gbUninstallFunc()
 		if state.IsError() {
+			if state.IsNotOk() {
+				state.PrintResponse()
+			}
 			break
 		}
 	}
+
+	_cmdState = state
 }
 
 
@@ -96,19 +116,29 @@ var gbReinstallCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 func gbReinstallFunc(cmd *cobra.Command, args []string) {
+	var state *ux.State
+
 	for range only.Once {
 		var ga GearArgs
 
-		state := ga.ProcessArgs(rootCmd, args)
+		state = ga.ProcessArgs(rootCmd, args)
 		if state.IsError() {
+			if state.IsNotOk() {
+				state.PrintResponse()
+			}
 			break
 		}
 
 		state = ga.gbReinstallFunc()
 		if state.IsError() {
+			if state.IsNotOk() {
+				state.PrintResponse()
+			}
 			break
 		}
 	}
+
+	_cmdState = state
 }
 
 
@@ -125,19 +155,29 @@ var gbCleanCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 func gbCleanFunc(cmd *cobra.Command, args []string) {
+	var state *ux.State
+
 	for range only.Once {
 		var ga GearArgs
 
-		state := ga.ProcessArgs(rootCmd, args)
+		state = ga.ProcessArgs(rootCmd, args)
 		if state.IsError() {
+			if state.IsNotOk() {
+				state.PrintResponse()
+			}
 			break
 		}
 
 		state = ga.gbCleanFunc()
 		if state.IsError() {
+			if state.IsNotOk() {
+				state.PrintResponse()
+			}
 			break
 		}
 	}
+
+	_cmdState = state
 }
 
 

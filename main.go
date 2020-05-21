@@ -2,7 +2,6 @@ package main
 
 import (
 	"launch/cmd"
-	"launch/only"
 	"launch/ux"
 	"os"
 )
@@ -12,50 +11,12 @@ func init() {
 }
 
 func main() {
-	state := ux.NewState(false)
-
-	for range only.Once {
-		state = cmd.Execute()
-		if state.IsError() {
-			break
-		}
-		//state = cmd.GetState()
-
-		// @TODO - testing.
-		//ux.PrintfOk("OK - it works\n")
-		//ux.PrintfWarning("WARNING - it may or may not have worked... sort of\n")
-		//ux.PrintfError("ERROR - oops, no beer in the fridge\n")
-		//err = errors.New("what? no beer!")
-		//ux.PrintError(err)
-		//_ = ux.Draw2()
-		//ux.Draw3()
-		//_ = ux.Draw4()
-		//_ = ux.Draw5()
-	}
-
-	if state.IsError() {
-		state.SetExitCode(1)
-	}
-
-	//if state.IsWarning() {
-	//	exit = 2
-	//}
-
-	if state.IsNotOk() {
-		state.PrintResponse()
-	}
-
+	state := cmd.Execute()
 	ux.Close()
 	os.Exit(state.ExitCode)
 }
 
 // @TODO - Add '--strict' flag to fail early, (fail as soon as something isn't right EG: don't create or install).
-
-// @TODO - Add 'wait for' code to get around delays in an image/container appearing within docker just after a creation.
-
-// @TODO - Add '--update' flag to 'version' command OR add 'self-update' command.
-
-// @TODO - Considering setting '-m' flag automatically when running as a symlink.
 
 // @TODO - When piping, don't print ANSI codes.
 
@@ -80,10 +41,16 @@ func main() {
 // @TODO -		'--release' OR 'build release'	- .
 // @TODO -		'--release' OR 'build release'	- .
 
-// @TODO - Add several sub-commands to 'uninstall' or have them as flags.
-// @TODO -		'--image'	OR 'uninstall image'	- remove the image as well as the container.
-
 // @TODO - Add several sub-commands to 'version' or have them as flags.
 // @TODO -		'--update'	OR 'version update'	- update the current launch binary.
+// @TODO - Add '--update' flag to 'version' command OR add 'self-update' command.
 
-// @TODO - Needs to be a better way to determine correct image/container validity. The current method works, but is a little fragile.
+// @DONE - Needs to be a better way to determine correct image/container validity. The current method works, but is a little fragile.
+
+// @DONE - Add 'wait for' code to get around delays in an image/container appearing within docker just after a creation.
+// @DONE - Seeing errors: "Docker client error: context deadline exceeded"
+
+// @DONE - Considering setting '-m' flag automatically when running as a symlink.
+
+// @DONE - Add several sub-commands to 'uninstall' or have them as flags.
+// @DONE -		'--image'	OR 'uninstall image'	- remove the image as well as the container.

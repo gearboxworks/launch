@@ -33,19 +33,29 @@ var gbStartCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 func gbStartFunc(cmd *cobra.Command, args []string) {
+	var state *ux.State
+
 	for range only.Once {
 		var ga GearArgs
 
-		state := ga.ProcessArgs(rootCmd, args)
+		state = ga.ProcessArgs(rootCmd, args)
 		if state.IsError() {
+			if state.IsNotOk() {
+				state.PrintResponse()
+			}
 			break
 		}
 
 		state = ga.gbStartFunc()
 		if state.IsError() {
+			if state.IsNotOk() {
+				state.PrintResponse()
+			}
 			break
 		}
 	}
+
+	_cmdState = state
 }
 
 
@@ -60,19 +70,29 @@ var gbStopCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 func gbStopFunc(cmd *cobra.Command, args []string) {
+	var state *ux.State
+
 	for range only.Once {
 		var ga GearArgs
 
-		state := ga.ProcessArgs(rootCmd, args)
+		state = ga.ProcessArgs(rootCmd, args)
 		if state.IsError() {
+			if state.IsNotOk() {
+				state.PrintResponse()
+			}
 			break
 		}
 
 		state = ga.gbStopFunc()
 		if state.IsError() {
+			if state.IsNotOk() {
+				state.PrintResponse()
+			}
 			break
 		}
 	}
+
+	_cmdState = state
 }
 
 
@@ -103,10 +123,7 @@ func (ga *GearArgs) gbStartFunc() *ux.State {
 				break
 			}
 
-			//found, ga.State = ga.GearRef.FindContainer(ga.Name, ga.Version)
-			//if ga.State.IsError() {
-			//	break
-			//}
+			// Need a better way to handle the "Docker client error: context deadline exceeded" errors.
 		}
 
 		if ga.State.IsRunning() {
