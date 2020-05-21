@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
-	"launch/only"
 	"launch/ux"
 	"net"
 	"os"
@@ -84,7 +83,7 @@ func (s *Ssh) IsValid() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		s.State = s.State.EnsureNotNil()
 
 		if s.GearName == "" {
@@ -108,7 +107,7 @@ func (s *Ssh) Connect() error {
 		return state.GetError()
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		sshConfig := &ssh.ClientConfig{}
 
 		var auth []ssh.AuthMethod
@@ -238,7 +237,7 @@ func (s *Ssh) getEnv() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		s.Env = make(Environment)
 		for _, item := range os.Environ() {
 			if strings.HasPrefix(item, "TMPDIR=") {

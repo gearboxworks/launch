@@ -7,7 +7,6 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"github.com/jedib0t/go-pretty/table"
 	"launch/defaults"
-	"launch/only"
 	"launch/ux"
 	"os"
 )
@@ -20,7 +19,7 @@ func (gear *DockerGear) NetworkList(f string) *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
@@ -68,7 +67,7 @@ func (gear *DockerGear) FindNetwork(netName string) *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		if netName == "" {
 			gear.State.SetError("empty gear name")
 			break
@@ -104,7 +103,7 @@ func (gear *DockerGear) NetworkCreate(netName string) *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		gear.State = gear.FindNetwork(netName)
 		if gear.State.IsError() {
 			break

@@ -5,7 +5,6 @@ import (
 	"github.com/cavaliercoder/grab"
 	"github.com/google/go-github/github"
 	"golang.org/x/net/context"
-	"launch/only"
 	"launch/ospaths"
 	"launch/ux"
 	"os"
@@ -13,8 +12,8 @@ import (
 	"time"
 )
 
-
 const (
+	OnlyOnce = "1"
 	Brandname = "Gearbox"
 )
 
@@ -58,7 +57,7 @@ type ReleaseSelector struct {
 func New(debugMode bool) *GitHubRepo {
 	var ret GitHubRepo
 
-	for range only.Once {
+	for range OnlyOnce {
 		ret.State = ret.State.EnsureNotNil()
 		ret.State.DebugSet(debugMode)
 		ret.Debug = debugMode
@@ -79,7 +78,7 @@ func (ghr *GitHubRepo) ShowReleases() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		ux.Printf("Latest release: %v\n\n", ghr.Latest)
 		for _, release := range ghr.Map {
 			ux.Printf("Assets for release:	%v\n", release.Instance.GetName())
@@ -118,7 +117,7 @@ func (r *Release) ShowRelease() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		if r.Instance.Name == nil {
 			r.State.SetError("no release version specified")
 			break
@@ -151,7 +150,7 @@ func (ghr *GitHubRepo) UpdateReleases() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		if ghr.BaseDir == nil {
 			p := ospaths.New("")
 			ghr.BaseDir = p.UserConfigDir.AddToPath("iso")
@@ -233,7 +232,7 @@ func (ghr *GitHubRepo) SelectRelease(selector ReleaseSelector) *Release {
 		return &Release{ State: state }
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		//err = ghr.UpdateReleases()
 		//if err != nil {
 		//	break
@@ -253,7 +252,7 @@ func (r *Release) GetIso() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		if r.File.String() == "" {
 			r.State.SetError(fmt.Sprintf("no Gearbox OS iso file defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String()))
 			break
@@ -352,7 +351,7 @@ func (r *Release) IsIsoFilePresent() (int, *ux.State) {
 		return 0, state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		if r.File.String() == "" {
 			r.State.SetError( fmt.Sprintf("no Gearbox OS iso file defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String()))
 			break
@@ -405,7 +404,7 @@ func (ghr *GitHubRepo) IsValid() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		ghr.State = ghr.State.EnsureNotNil()
 	}
 
@@ -427,7 +426,7 @@ func (r *Release) IsValid() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		r.State = r.State.EnsureNotNil()
 	}
 

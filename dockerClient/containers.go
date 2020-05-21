@@ -8,7 +8,6 @@ import (
 	"github.com/jedib0t/go-pretty/table"
 	"launch/defaults"
 	"launch/gear/gearJson"
-	"launch/only"
 	"launch/ux"
 	"os"
 	"strings"
@@ -23,7 +22,7 @@ func (gear *DockerGear) ContainerList(f string) (int, *ux.State) {
 		return 0, state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
@@ -140,7 +139,7 @@ func (gear *DockerGear) FindContainer(gearName string, gearVersion string) (bool
 		return false, state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		if gearName == "" {
 			gear.State.SetError("empty gearname")
 			break
@@ -216,7 +215,7 @@ func MatchContainer(m *types.Container, gearOrg string, gearName string, gearVer
 	var ok bool
 	var gc *gearJson.GearConfig
 
-	for range only.Once {
+	for range OnlyOnce {
 		if MatchTag("<none>:<none>", m.Names) {
 			ok = false
 			break
@@ -265,7 +264,7 @@ func MatchContainer(m *types.Container, gearOrg string, gearName string, gearVer
 				gearVersion = gl
 			}
 		}
-		for range only.Once {
+		for range OnlyOnce {
 			if m.Labels["gearbox.version"] == gearVersion {
 				ok = true
 				break

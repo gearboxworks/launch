@@ -3,7 +3,6 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"launch/defaults"
-	"launch/only"
 	"launch/ux"
 )
 
@@ -40,7 +39,7 @@ var gbInstallCmd = &cobra.Command{
 func gbInstallFunc(cmd *cobra.Command, args []string) {
 	var state *ux.State
 
-	for range only.Once {
+	for range OnlyOnce {
 		var ga GearArgs
 
 		state = ga.ProcessArgs(rootCmd, args)
@@ -79,7 +78,7 @@ var gbUninstallCmd = &cobra.Command{
 func gbUninstallFunc(cmd *cobra.Command, args []string) {
 	var state *ux.State
 
-	for range only.Once {
+	for range OnlyOnce {
 		var ga GearArgs
 
 		state = ga.ProcessArgs(rootCmd, args)
@@ -118,7 +117,7 @@ var gbReinstallCmd = &cobra.Command{
 func gbReinstallFunc(cmd *cobra.Command, args []string) {
 	var state *ux.State
 
-	for range only.Once {
+	for range OnlyOnce {
 		var ga GearArgs
 
 		state = ga.ProcessArgs(rootCmd, args)
@@ -157,7 +156,7 @@ var gbCleanCmd = &cobra.Command{
 func gbCleanFunc(cmd *cobra.Command, args []string) {
 	var state *ux.State
 
-	for range only.Once {
+	for range OnlyOnce {
 		var ga GearArgs
 
 		state = ga.ProcessArgs(rootCmd, args)
@@ -186,7 +185,7 @@ func (ga *GearArgs) gbInstallFunc() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		var found bool
 		found, ga.State = ga.GearRef.FindContainer(ga.Name, ga.Version)
 		if ga.State.IsError() {
@@ -256,7 +255,7 @@ func (ga *GearArgs) gbUninstallFunc() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		var found bool
 		found, ga.State = ga.GearRef.FindContainer(ga.Name, ga.Version)
 		if ga.State.IsError() {
@@ -312,7 +311,7 @@ func (ga *GearArgs) gbReinstallFunc() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		ga.State = ga.gbUninstallFunc()
 		if ga.State.IsError() {
 			break
@@ -336,7 +335,7 @@ func (ga *GearArgs) gbCleanFunc() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		ga.State = ga.gbUninstallFunc()
 		if ga.State.IsError() {
 			break

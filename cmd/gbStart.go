@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"launch/only"
 	"launch/ux"
 )
 
@@ -35,7 +34,7 @@ var gbStartCmd = &cobra.Command{
 func gbStartFunc(cmd *cobra.Command, args []string) {
 	var state *ux.State
 
-	for range only.Once {
+	for range OnlyOnce {
 		var ga GearArgs
 
 		state = ga.ProcessArgs(rootCmd, args)
@@ -72,7 +71,7 @@ var gbStopCmd = &cobra.Command{
 func gbStopFunc(cmd *cobra.Command, args []string) {
 	var state *ux.State
 
-	for range only.Once {
+	for range OnlyOnce {
 		var ga GearArgs
 
 		state = ga.ProcessArgs(rootCmd, args)
@@ -101,7 +100,7 @@ func (ga *GearArgs) gbStartFunc() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		var found bool
 		found, ga.State = ga.GearRef.FindContainer(ga.Name, ga.Version)
 		if ga.State.IsError() {
@@ -162,7 +161,7 @@ func (ga *GearArgs) gbStopFunc() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		var found bool
 		found, ga.State = ga.GearRef.FindContainer(ga.Name, ga.Version)
 		if ga.State.IsError() {

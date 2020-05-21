@@ -4,7 +4,6 @@ import (
 	"golang.org/x/crypto/ssh"
 	"io/ioutil"
 	"launch/defaults"
-	"launch/only"
 	"launch/ux"
 	"net/url"
 	"os"
@@ -63,7 +62,7 @@ func (gear *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPat
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		// Get Docker container SSH port.
 		var clientPort string
 		clientPort, gear.State = gear.Container.GetContainerSsh()
@@ -171,7 +170,7 @@ func (gear *DockerGear) SetMountPath(mp string) *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		var err error
 		var cwd string
 

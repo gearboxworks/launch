@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"launch/only"
 	"launch/ux"
 	"log"
 	"net"
@@ -39,7 +38,7 @@ import (
 //	var err error
 //	me := &SshServer{}
 //
-//	for range only.Once {
+//	for range OnlyOnce {
 //		var _args SshServerArgs
 //		if len(args) > 0 {
 //			_args = args[0]
@@ -106,7 +105,7 @@ func SshAuthenticate(c ssh.ConnMetadata, pass []byte) (*ssh.Permissions, error) 
 func (s *Ssh) InitServer() error {
 	var err error
 
-	for range only.Once {
+	for range OnlyOnce {
 		// An SSH server is represented by a ServerConfig, which holds
 		// certificate details and handles authentication of ServerConns.
 		s.ServerConfig = &ssh.ServerConfig{
@@ -164,7 +163,7 @@ func (s *Ssh) InitServer() error {
 func (s *Ssh) StartServer() error {
 	var err error
 
-	for range only.Once {
+	for range OnlyOnce {
 		debugStream := ioutil.Discard
 		if s.Debug {
 			debugStream = os.Stderr

@@ -6,7 +6,6 @@ import (
 	"launch/dockerClient"
 	"launch/gear/gearJson"
 	"launch/githubClient"
-	"launch/only"
 	"launch/ux"
 	"strings"
 )
@@ -24,7 +23,7 @@ type Gear struct {
 
 
 func (gear *Gear) NewGear(debugMode bool) *ux.State {
-	for range only.Once {
+	for range OnlyOnce {
 		gear.State = ux.NewState(debugMode)
 		gear.State.DebugSet(debugMode)
 		gear.Debug = debugMode
@@ -59,7 +58,7 @@ func (gear *Gear) Status() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		gear.State = gear.Docker.Container.Status()
 		if gear.State.IsError() {
 			break
@@ -103,7 +102,7 @@ func (gear *Gear) FindContainer(gearName string, gearVersion string) (bool, *ux.
 		return false, state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		found, gear.State = gear.Docker.FindContainer(gearName, gearVersion)
 		if !found {
 			break
@@ -128,7 +127,7 @@ func (gear *Gear) FindImage(gearName string, gearVersion string) (bool, *ux.Stat
 		return false, state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		found, gear.State = gear.Docker.FindImage(gearName, gearVersion)
 		if !found {
 			//state.ClearError()
@@ -155,7 +154,7 @@ func (gear *Gear) DecodeError(err error) (bool, *ux.State) {
 		return false, state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		switch {
 			case err != nil:
 				ok = true
@@ -177,7 +176,7 @@ func (gear *Gear) IsNil() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		gear.State = gear.State.EnsureNotNil()
 
 		gear.State = gear.Docker.IsNil()
@@ -199,7 +198,7 @@ func (gear *Gear) IsValid() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		gear.State = gear.State.EnsureNotNil()
 	}
 

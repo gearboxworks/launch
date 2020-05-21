@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"launch/only"
 	"launch/ux"
 )
 
@@ -36,7 +35,7 @@ var gbBuildCmd = &cobra.Command {
 func gbBuildFunc(cmd *cobra.Command, args []string) {
 	var state *ux.State
 
-	for range only.Once {
+	for range OnlyOnce {
 		var ga GearArgs
 
 		state = ga.ProcessArgs(rootCmd, args)
@@ -69,7 +68,7 @@ var gbPublishCmd = &cobra.Command{
 func gbPublishFunc(cmd *cobra.Command, args []string) {
 	var state *ux.State
 
-	for range only.Once {
+	for range OnlyOnce {
 		var ga GearArgs
 
 		state = ga.ProcessArgs(rootCmd, args)

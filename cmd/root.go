@@ -42,7 +42,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"launch/defaults"
-	"launch/only"
 	"launch/ux"
 	"os"
 	"path/filepath"
@@ -103,7 +102,7 @@ func init() {
 func initConfig() {
 	var err error
 
-	for range only.Once {
+	for range OnlyOnce {
 		if cfgFile != "" {
 			// Use config file from the flag.
 			viper.SetConfigFile(cfgFile)
@@ -142,7 +141,7 @@ var rootCmd = &cobra.Command {
 func gbRootFunc(cmd *cobra.Command, args []string) {
 	_cmdState = ux.NewState(false)
 
-	for range only.Once {
+	for range OnlyOnce {
 		var err error
 		fl := cmd.Flags()
 		//ux.Printf("F5: %v\n", fl.Args())
@@ -218,7 +217,7 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 func Execute() *ux.State {
 	_cmdState = _cmdState.EnsureNotNil()
 
-	for range only.Once {
+	for range OnlyOnce {
 		var err error
 
 		SetHelp(rootCmd)

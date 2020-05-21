@@ -3,7 +3,6 @@ package ospaths
 import (
 	"errors"
 	"fmt"
-	"github.com/gearboxworks/go-status/only"
 	"os"
 )
 
@@ -13,7 +12,7 @@ func FileExists(f string) (os.FileInfo, error) {
 	var err error
 	var stat os.FileInfo
 
-	for range only.Once {
+	for range OnlyOnce {
 		if f == "" {
 			err = errors.New("file is nil")
 			break
@@ -50,7 +49,7 @@ func FileSetExecutePerms(f string) (os.FileInfo, error) {
 	var err error
 	var stat os.FileInfo
 
-	for range only.Once {
+	for range OnlyOnce {
 		// Read in current permissions so we can add +x.
 		stat, err = FileExists(f)
 		if err != nil {

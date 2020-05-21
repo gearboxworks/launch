@@ -10,7 +10,6 @@ import (
 	"io"
 	"launch/defaults"
 	"launch/gear/gearJson"
-	"launch/only"
 	"launch/ux"
 	"os"
 	"strings"
@@ -50,7 +49,7 @@ func NewImage(debugMode bool) *Image {
 }
 
 func (i *Image) EnsureNotNil() *Image {
-	for range only.Once {
+	for range OnlyOnce {
 		if i == nil {
 			i = NewImage(false)
 		}
@@ -72,7 +71,7 @@ func (i *Image) IsValid() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		i.State = i.State.EnsureNotNil()
 
 		if i.ID == "" {
@@ -105,7 +104,7 @@ func (i *Image) Status() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		if i.Summary == nil {
 			ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
 			//noinspection GoDeferInLoop
@@ -168,7 +167,7 @@ func (i *Image) Pull() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		var repo string
 		if i.Version == "" {
 			repo = fmt.Sprintf("gearboxworks/%s", i.Name)
@@ -268,7 +267,7 @@ func (i *Image) ImageAuthPull() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		authConfig := types.AuthConfig{
 			Username: "username",
 			Password: "password",
@@ -309,7 +308,7 @@ func (i *Image) Remove() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()

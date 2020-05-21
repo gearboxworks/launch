@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"launch/defaults"
-	"launch/only"
 	"launch/ux"
 	"os"
 	"path/filepath"
 )
+
+const OnlyOnce = "1"
 
 type GearConfig struct {
 	Meta       GearMeta       `json:"meta"`
@@ -31,7 +32,7 @@ func (gc *GearConfig) GetName() string {
 func (gc *GearConfig) GetCommand(cmd []string) []string {
 	var retCmd []string
 
-	for range only.Once {
+	for range OnlyOnce {
 		var cmdExec string
 		switch {
 			case len(cmd) == 0:
@@ -66,7 +67,7 @@ func (gc *GearConfig) GetCommand(cmd []string) []string {
 func (gc *GearConfig) MatchCommand(cmd string) *string {
 	var c *string
 
-	for range only.Once {
+	for range OnlyOnce {
 		if c2, ok := gc.Run.Commands[cmd]; ok {
 			c = &c2
 			break
@@ -81,7 +82,7 @@ func (gc *GearConfig) CreateLinks(c defaults.ExecCommand, version string) *ux.St
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		links := make(map[string]string)
 		var failed bool
 		for k, v := range gc.Run.Commands {
@@ -161,7 +162,7 @@ func (gc *GearConfig) RemoveLinks(c defaults.ExecCommand, version string) *ux.St
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		var removed bool
 		for k := range gc.Run.Commands {
 			var err error
@@ -302,7 +303,7 @@ type GearVersions map[string]GearVersion
 func New(cs string) *GearConfig {
 	var gc GearConfig
 
-	for range only.Once {
+	for range OnlyOnce {
 		gc.State = gc.State.EnsureNotNil()
 
 		if cs == "" {
@@ -344,7 +345,7 @@ func (vers *GearVersions) GetLatest() string {
 func (vers *GearVersions) HasVersion(gearVersion string) bool {
 	var ok bool
 
-	for range only.Once {
+	for range OnlyOnce {
 		//if gearVersion == "latest" {
 		//	gl := vers.GetLatest()
 		//	if gl == "" {
@@ -387,7 +388,7 @@ func (gc *GearConfig) IsValid() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		gc.State = gc.State.EnsureNotNil()
 
 		//if gc == nil {
@@ -403,7 +404,7 @@ func (gc *GearConfig) IsValid() *ux.State {
 func (gc *GearConfig) IsMatchedGear(gearName string, gearVersion string, tagVersions []string) bool {
 	var ok bool
 
-	for range only.Once {
+	for range OnlyOnce {
 		if gc.Meta.Organization != defaults.Organization {
 			break
 		}

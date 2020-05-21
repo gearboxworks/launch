@@ -3,7 +3,6 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"launch/defaults"
-	"launch/only"
 	"launch/ux"
 )
 
@@ -37,7 +36,7 @@ var gbListCmd = &cobra.Command{
 func gbListFunc(cmd *cobra.Command, args []string) {
 	var state *ux.State
 
-	for range only.Once {
+	for range OnlyOnce {
 		var ga GearArgs
 
 		state = ga.ProcessArgs(rootCmd, args)
@@ -66,7 +65,7 @@ func (ga *GearArgs) gbListFunc() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		_, ga.State = ga.GearRef.Docker.ImageList(ga.Name)
 		if ga.State.IsError() {
 			break

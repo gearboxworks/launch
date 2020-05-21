@@ -3,7 +3,6 @@ package gear
 import (
 	"fmt"
 	"github.com/docker/docker/client"
-	"launch/only"
 	"launch/ux"
 	"net/url"
 	"os"
@@ -26,7 +25,7 @@ type Provider struct {
 
 
 func (p *Provider) NewProvider(debugMode bool) *ux.State {
-	for range only.Once {
+	for range OnlyOnce {
 		var err error
 		p.State = p.State.EnsureNotNil()
 		p.State.DebugSet(debugMode)
@@ -37,7 +36,7 @@ func (p *Provider) NewProvider(debugMode bool) *ux.State {
 		}
 
 		if p.Name == ProviderDocker {
-			for range only.Once {
+			for range OnlyOnce {
 				if p.Host == "" {
 					break
 				}

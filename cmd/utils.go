@@ -5,7 +5,6 @@ import (
 	"github.com/spf13/cobra"
 	"launch/defaults"
 	"launch/gear"
-	"launch/only"
 	"launch/ux"
 	"os"
 	"os/user"
@@ -16,7 +15,7 @@ import (
 func showArgs(cmd *cobra.Command, args []string) {
 	// var err error
 
-	for range only.Once {
+	for range OnlyOnce {
 		//if !debugFlag {
 		//	break
 		//}
@@ -68,7 +67,7 @@ func (ga *GearArgs) IsValid() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		if !ga.Valid {
 			ga.State.SetError("gear args is not valid")
 			break
@@ -82,7 +81,7 @@ func (ga *GearArgs) IsValid() *ux.State {
 
 
 func (ga *GearArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
-	for range only.Once {
+	for range OnlyOnce {
 		ga.State = ux.NewState(false)
 
 		if ga.Valid {
@@ -208,7 +207,7 @@ func (ga *GearArgs) CreateLinks(c defaults.ExecCommand, version string) *ux.Stat
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		ga.State = ga.GearRef.GearConfig.CreateLinks(c, version)
 	}
 
@@ -219,7 +218,7 @@ func (ga *GearArgs) CreateLinks(c defaults.ExecCommand, version string) *ux.Stat
 func DeterminePath(mp string) string {
 	var ok bool
 
-	for range only.Once {
+	for range OnlyOnce {
 		var err error
 		var cwd string
 
@@ -270,7 +269,7 @@ func DeterminePath(mp string) string {
 func IsNoCreate(cmd *cobra.Command) bool {
 	var ok bool
 
-	for range only.Once {
+	for range OnlyOnce {
 		var err error
 
 		ok, err = cmd.Flags().GetBool(argNoCreate)
@@ -286,7 +285,7 @@ func IsNoCreate(cmd *cobra.Command) bool {
 func GetGearboxDir() string {
 	var d string
 
-	for range only.Once {
+	for range OnlyOnce {
 		u, _ := user.Current()
 		d = filepath.Join(u.HomeDir, ".gearbox")
 	}
@@ -297,7 +296,7 @@ func GetGearboxDir() string {
 func GetLaunchConfig() string {
 	var d string
 
-	for range only.Once {
+	for range OnlyOnce {
 		u, _ := user.Current()
 		d = filepath.Join(u.HomeDir, ".gearbox", "launch.json")
 	}

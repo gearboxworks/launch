@@ -1,5 +1,7 @@
 package ospaths
 
+const OnlyOnce = "1"
+
 const (
 	WindowsProjectBaseDir   Dir  = "Gearbox Sites"
 	WindowsAdminPath        Dir = "admin\\dist"

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"launch/only"
 	"launch/ux"
 )
 
@@ -37,7 +36,7 @@ var gbSaveCmd = &cobra.Command{
 func gbSaveFunc(cmd *cobra.Command, args []string) {
 	var state *ux.State
 
-	for range only.Once {
+	for range OnlyOnce {
 		var ga GearArgs
 
 		state = ga.ProcessArgs(rootCmd, args)
@@ -71,7 +70,7 @@ var gbLoadCmd = &cobra.Command{
 func gbLoadFunc(cmd *cobra.Command, args []string) {
 	var state *ux.State
 
-	for range only.Once {
+	for range OnlyOnce {
 		var ga GearArgs
 
 		state = ga.ProcessArgs(rootCmd, args)

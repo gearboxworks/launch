@@ -3,7 +3,6 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"launch/defaults"
-	"launch/only"
 	"launch/ux"
 	"strings"
 )
@@ -40,7 +39,7 @@ var gbRunCmd = &cobra.Command{
 func gbRunFunc(cmd *cobra.Command, args []string) {
 	var state *ux.State
 
-	for range only.Once {
+	for range OnlyOnce {
 		var ga GearArgs
 
 		state = ga.ProcessArgs(rootCmd, args)
@@ -72,7 +71,7 @@ var gbShellCmd = &cobra.Command{
 func gbShellFunc(cmd *cobra.Command, args []string) {
 	var state *ux.State
 
-	for range only.Once {
+	for range OnlyOnce {
 		var ga GearArgs
 
 		state = ga.ProcessArgs(rootCmd, args)
@@ -110,7 +109,7 @@ var gbUnitTestCmd = &cobra.Command{
 func gbUnitTestFunc(cmd *cobra.Command, args []string) {
 	var state *ux.State
 
-	for range only.Once {
+	for range OnlyOnce {
 		var ga GearArgs
 
 		state = ga.ProcessArgs(rootCmd, args)
@@ -140,7 +139,7 @@ func (ga *GearArgs) gbRunFunc() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		ga.Quiet = true
 
 		ga.State = ga.gbStartFunc()
@@ -181,7 +180,7 @@ func (ga *GearArgs) gbShellFunc() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		ga.State = ga.gbStartFunc()
 		if !ga.State.IsRunning() {
 			ga.State.SetError("Cannot shell out to Gear '%s:%s.'", ga.Name, ga.Version)
@@ -206,7 +205,7 @@ func (ga *GearArgs) gbUnitTestFunc() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		ga.State = ga.gbStartFunc()
 		if !ga.State.IsRunning() {
 			ga.State.SetError("container not started")

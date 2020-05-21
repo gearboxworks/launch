@@ -9,7 +9,6 @@ import (
 	"github.com/jedib0t/go-pretty/table"
 	"launch/defaults"
 	"launch/gear/gearJson"
-	"launch/only"
 	"launch/ux"
 	"os"
 	"strings"
@@ -25,7 +24,7 @@ func (gear *DockerGear) ImageList(f string) (int, *ux.State) {
 		return 0, state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		df := filters.NewArgs()
 		//if f != "" {
 		//	df.Add("label", f)
@@ -103,7 +102,7 @@ func (gear *DockerGear) FindImage(gearName string, gearVersion string) (bool, *u
 		return false, state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		if gearName == "" {
 			gear.State.SetError("empty gear name")
 			break
@@ -182,7 +181,7 @@ func (gear *DockerGear) Search(gearName string, gearVersion string) *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		var repo string
 		if gearVersion == "" {
 			repo = fmt.Sprintf("gearboxworks/%s", gearName)
@@ -220,7 +219,7 @@ func MatchImage(m *types.ImageSummary, gearOrg string, gearName string, gearVers
 	var ok bool
 	var gc *gearJson.GearConfig
 
-	for range only.Once {
+	for range OnlyOnce {
 		if MatchTag("<none>:<none>", m.RepoTags) {
 			ok = false
 			break
@@ -269,7 +268,7 @@ func MatchImage(m *types.ImageSummary, gearOrg string, gearName string, gearVers
 				gearVersion = gl
 			}
 		}
-		for range only.Once {
+		for range OnlyOnce {
 			if m.Labels["gearbox.version"] == gearVersion {
 				ok = true
 				break

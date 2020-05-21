@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/docker/docker/client"
 	"launch/defaults"
-	"launch/only"
 	"launch/ux"
 )
 
@@ -24,7 +23,7 @@ type DockerGear struct {
 func New(debugMode bool) (*DockerGear, *ux.State) {
 	var gear DockerGear
 
-	for range only.Once {
+	for range OnlyOnce {
 		gear.State = gear.State.EnsureNotNil()
 		gear.State.DebugSet(debugMode)
 		gear.Debug = debugMode
@@ -76,7 +75,7 @@ func (gear *DockerGear) IsValid() *ux.State {
 		return state
 	}
 
-	for range only.Once {
+	for range OnlyOnce {
 		gear.State = gear.State.EnsureNotNil()
 
 		if gear.Client == nil {

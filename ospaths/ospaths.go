@@ -5,7 +5,6 @@ package ospaths
 import (
 	"fmt"
 	"github.com/gearboxworks/go-osbridge"
-	"github.com/gearboxworks/go-status/only"
 	"github.com/getlantern/errors"
 	"launch/defaults"
 	"os"
@@ -244,7 +243,7 @@ func (p *Paths) AppendDir(dir ...string) *Paths {
 func (p *BasePaths) IsNil() error {
 	var err error
 
-	for range only.Once {
+	for range OnlyOnce {
 		if p == nil {
 			err = errors.New("basepaths is nil")
 			break
@@ -258,7 +257,7 @@ func (p *BasePaths) IsNil() error {
 func (p *BasePaths) CreateIfNotExists() error {
 	var err error
 
-	for range only.Once {
+	for range OnlyOnce {
 		_, err = p.EventBrokerDir.CreateIfNotExists()
 		if err != nil {
 			break
