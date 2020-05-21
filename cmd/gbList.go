@@ -34,28 +34,41 @@ var gbListCmd = &cobra.Command{
 	Run: gbListFunc,
 	Args: cobra.RangeArgs(0, 1),
 }
-
 func gbListFunc(cmd *cobra.Command, args []string) {
-	var state ux.State
-
 	for range only.Once {
-		state = gearArgs.ProcessArgs(cmd, args)
+		var ga GearArgs
+
+		state := ga.ProcessArgs(rootCmd, args)
 		if state.IsError() {
 			break
 		}
 
-		_, state = gearArgs.GearRef.Docker.ImageList(gearArgs.Name)
-		if state.IsError() {
-			break
-		}
+		state = ga.gbListFunc()
+	}
+}
 
-		_, state = gearArgs.GearRef.Docker.ContainerList(gearArgs.Name)
-		if state.IsError() {
-			break
-		}
 
-		state = gearArgs.GearRef.Docker.NetworkList(defaults.GearboxNetwork)
+func (ga *GearArgs) gbListFunc() *ux.State {
+	if state := ga.IsNil(); state.IsError() {
+		return state
 	}
 
-	cmdState = state
+	for range only.Once {
+		_, ga.State = ga.GearRef.Docker.ImageList(ga.Name)
+		if ga.State.IsError() {
+			break
+		}
+
+		_, ga.State = ga.GearRef.Docker.ContainerList(ga.Name)
+		if ga.State.IsError() {
+			break
+		}
+
+		ga.State = ga.GearRef.Docker.NetworkList(defaults.GearboxNetwork)
+	}
+
+	if !ga.Quiet {
+		ga.State.PrintResponse()
+	}
+	return ga.State
 }

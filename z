@@ -1,0 +1,6 @@
+	m.State.EnsureNotNil()
+	state := m.State
+
+	var state *ux.State
+	state.EnsureNotNil()
+

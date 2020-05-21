@@ -73,7 +73,7 @@ import (
 //		var private ssh.Signer
 //		private, err = ssh.ParsePrivateKey(privateBytes)
 //		if err != nil {
-//			ux.PrintfRed("SSHFS SERVER: %s\n", err)
+//			ux.PrintflnRed("SSHFS SERVER: %s\n", err)
 //			break
 //		}
 //
@@ -123,7 +123,7 @@ func (s *Ssh) InitServer() error {
 		var private ssh.Signer
 		private, err = ssh.ParsePrivateKey(privateBytes)
 		if err != nil {
-			ux.PrintfRed("SSHFS SERVER: %s\n", err)
+			ux.PrintflnRed("SSHFS SERVER: %s", err)
 			break
 		}
 
@@ -133,7 +133,7 @@ func (s *Ssh) InitServer() error {
 		// accepted.
 		s.ServerListener, err = net.Listen("tcp", "0.0.0.0:0")
 		if err != nil {
-			ux.PrintfRed("SSHFS SERVER: listener ERROR - %s\n", err)
+			ux.PrintflnRed("SSHFS SERVER: listener ERROR - %s", err)
 			break
 		}
 		if s.Debug {
@@ -172,7 +172,7 @@ func (s *Ssh) StartServer() error {
 
 		s.ServerConnection, err = s.ServerListener.Accept()
 		if err != nil {
-			ux.PrintfRed("SSHFS SERVER: listener accept ERROR - %s\n", err)
+			ux.PrintflnRed("SSHFS SERVER: listener accept ERROR - %s", err)
 			break
 		}
 
@@ -182,7 +182,7 @@ func (s *Ssh) StartServer() error {
 		var reqs <-chan *ssh.Request
 		_, chans, reqs, err = ssh.NewServerConn(s.ServerConnection, s.ServerConfig)
 		if err != nil {
-			ux.PrintfRed("SSHFS SERVER: handshake ERROR - %s\n", err)
+			ux.PrintflnRed("SSHFS SERVER: handshake ERROR - %s", err)
 			break
 		}
 		_, _ = fmt.Fprintf(debugStream, "SSH server established\n")
@@ -257,7 +257,7 @@ func (s *Ssh) StartServer() error {
 				ux.PrintfOk("SSHFS SERVER: exited OK\n")
 				break
 			} else if err != nil {
-				ux.PrintfRed("SSHFS SERVER: exit ERROR - %s\n", err)
+				ux.PrintflnRed("SSHFS SERVER: exit ERROR - %s", err)
 				break
 			}
 		}

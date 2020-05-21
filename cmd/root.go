@@ -56,7 +56,10 @@ const (
 	argDebug = "debug"
 	argNoCreate = "no-create"
 	argExample = "example"
+
 	argProvider = "provider"
+	argProviderDefault = "docker"
+
 	argHost = "host"
 	argPort = "port"
 	argProject = "project"
@@ -79,7 +82,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolP(argExample, "e", false, ux.SprintfBlue("Help examples for command."))
 	rootCmd.PersistentFlags().BoolP(argNoCreate, "n", false, ux.SprintfBlue("Don't create container."))
 
-	rootCmd.PersistentFlags().StringP(argProvider, "", "docker", ux.SprintfBlue("Set virtual provider"))
+	rootCmd.PersistentFlags().StringP(argProvider, "", defaults.DefaultProvider, ux.SprintfBlue("Set virtual provider"))
 	rootCmd.PersistentFlags().StringP(argHost, "", "", ux.SprintfBlue("Set virtual provider host."))
 	rootCmd.PersistentFlags().StringP(argPort, "", "", ux.SprintfBlue("Set virtual provider port."))
 	rootCmd.PersistentFlags().StringP(argProject, "p", defaults.DefaultPathNone, ux.SprintfBlue("Mount project directory."))
@@ -122,8 +125,8 @@ func initConfig() {
 	}
 }
 
-var gearArgs GearArgs
-var cmdState ux.State
+//var gearArgs GearArgs
+var _cmdState *ux.State
 var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
@@ -137,7 +140,7 @@ var rootCmd = &cobra.Command {
 }
 
 func gbRootFunc(cmd *cobra.Command, args []string) {
-	var state ux.State
+	_cmdState = ux.NewState(false)
 
 	for range only.Once {
 		var err error
@@ -149,6 +152,7 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 
 		var debugFlag bool
 		debugFlag, _ = fl.GetBool(argDebug)
+		_cmdState.DebugSet(debugFlag)
 		if debugFlag {
 			showArgs(cmd, args)
 			flargs := fl.Args()
@@ -165,7 +169,7 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 			var out bytes.Buffer
 			_ = cmd.GenBashCompletion(&out)
 			fmt.Printf("# Gearbox BASH completion:\n%s\n", out.String())
-			state.ClearAll()
+			_cmdState.Clear()
 			break
 			//os.Exit(0)
 		}
@@ -174,12 +178,12 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 		// Show version.
 		ok, err = fl.GetBool("version")
 		if err != nil {
-			state.SetError("%s", err)
+			_cmdState.SetError("%s", err)
 			break
 		}
 		if ok {
 			ux.Printf("%s: v%s\n", defaults.BinaryName, defaults.BinaryVersion)
-			state.ClearAll()
+			_cmdState.Clear()
 			break
 			//os.Exit(0)
 		}
@@ -197,20 +201,22 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 		// Show help if no commands specified.
 		if len(args) == 0 {
 			_ = cmd.Help()
-			state.ClearAll()
+			_cmdState.Clear()
 			break
 			//os.Exit(0)
 		}
 	}
 
-	cmdState = state
+	if _cmdState.IsNotOk() {
+		_cmdState.PrintResponse()
+	}
 }
 
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() ux.State {
-	var state ux.State
+func Execute() *ux.State {
+	_cmdState = _cmdState.EnsureNotNil()
 
 	for range only.Once {
 		var err error
@@ -222,7 +228,7 @@ func Execute() ux.State {
 		//defaults.RunAs.FullPath, err = filepath.Abs(os.Args[0])
 		defaults.RunAs.FullPath, err = osext.Executable()
 		if err != nil {
-			state.SetError("%s", err)
+			_cmdState.SetError("%s", err)
 			break
 		}
 		//defaults.RunAs.FullPath = "/Users/mick/Documents/GitHub/gb-launch/bin/psql-9.4.26"
@@ -245,12 +251,12 @@ func Execute() ux.State {
 
 		err = rootCmd.Execute()
 		if err != nil {
-			state.SetError("%s", err)
+			_cmdState.SetError("%s", err)
 			break
 		}
 	}
 
-	return state
+	return _cmdState
 }
 
 
@@ -407,6 +413,6 @@ func SetHelp(c *cobra.Command) {
 //
 //}
 
-func GetState() ux.State {
-	return cmdState
+func GetState() *ux.State {
+	return _cmdState
 }

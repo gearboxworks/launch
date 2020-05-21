@@ -12,10 +12,6 @@ import (
 	"path/filepath"
 )
 
-//type Ssh struct {
-//	Server *SshServer
-//	Client *SshClient
-//}
 
 type SshAuth struct {
 	// SSH related.
@@ -57,33 +53,31 @@ func NewSshAuth(args ...SshAuth) *SshAuth {
 	//sshAuth := &SshAuth{}
 	//*sshAuth = SshAuth(_args)
 
-	// Query VB to see if it exists.
-	// If not return nil.
-
 	return &_args
 }
 
 
-func (gear *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPath string, cmdArgs []string) ux.State {
-	var state ux.State
+func (gear *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPath string, cmdArgs []string) *ux.State {
+	if state := gear.IsNil(); state.IsError() {
+		return state
+	}
 
 	for range only.Once {
 		// Get Docker container SSH port.
 		var clientPort string
-		clientPort, state = gear.Container.GetContainerSsh()
-		if state.IsError() {
+		clientPort, gear.State = gear.Container.GetContainerSsh()
+		if gear.State.IsError() {
 			break
 		}
 		if clientPort == "" {
-			state.SetError("no SSH port in gear")
+			gear.State.SetError("no SSH port in gear")
 			break
 		}
 
 		u := url.URL{}
-		var err error
-		err = u.UnmarshalBinary([]byte(gear.Client.DaemonHost()))
+		err := u.UnmarshalBinary([]byte(gear.Client.DaemonHost()))
 		if err != nil {
-			state.SetError("error finding SSH port: %s", err)
+			gear.State.SetError("error finding SSH port: %s", err)
 			break
 		}
 
@@ -107,8 +101,10 @@ func (gear *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPat
 		})
 
 
+		// @TODO - Add remote host capability here!
 		// Run server for SSHFS if required.
-		if gear.SetMountPath(mountPath) {
+		gear.State = gear.SetMountPath(mountPath)
+		if gear.State.IsOk() {
 			err = gear.Ssh.InitServer()
 			if err == nil {
 				//noinspection GoUnhandledErrorResult
@@ -132,7 +128,7 @@ func (gear *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPat
 
 
 		// Process env
-		err = gear.Ssh.getEnv()
+		gear.State = gear.Ssh.getEnv()
 		if err != nil {
 			break
 		}
@@ -143,23 +139,25 @@ func (gear *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPat
 		if err != nil {
 			switch v := err.(type) {
 				case *ssh.ExitError:
-					state.SetExitCode(v.Waitmsg.ExitStatus())
+					gear.State.SetExitCode(v.Waitmsg.ExitStatus())
 					if len(cmdArgs) == 0 {
-						state.SetError("Command exited with error code %d", v.Waitmsg.ExitStatus())
+						gear.State.SetError("Command exited with error code %d", v.Waitmsg.ExitStatus())
 					} else {
-						state.SetError("Command '%s' exited with error code %d", cmdArgs[0], v.Waitmsg.ExitStatus())
+						gear.State.SetError("Command '%s' exited with error code %d", cmdArgs[0], v.Waitmsg.ExitStatus())
 					}
 			}
 			break
 		}
 	}
 
-	return state
+	return gear.State
 }
 
 
-func (gear *DockerGear) SetMountPath(mp string) bool {
-	var ok bool
+func (gear *DockerGear) SetMountPath(mp string) *ux.State {
+	if state := gear.IsNil(); state.IsError() {
+		return state
+	}
 
 	for range only.Once {
 		var err error
@@ -175,38 +173,34 @@ func (gear *DockerGear) SetMountPath(mp string) bool {
 			case mp == defaults.DefaultPathCwd:
 				cwd, err = os.Getwd()
 				if err != nil {
+					gear.State.SetError(err)
 					break
 				}
-				ok = true
-				mp = cwd
+				gear.State.SetOk()
+				gear.Ssh.FsMount = cwd
 
 			case mp == defaults.DefaultPathHome:
 				var u *user.User
 				u, err = user.Current()
 				if err != nil {
+					gear.State.SetError(err)
 					break
 				}
-				ok = true
-				mp = u.HomeDir
+				gear.State.SetOk()
+				gear.Ssh.FsMount = u.HomeDir
 
 			default:
 				mp, err = filepath.Abs(mp)
 				if err != nil {
+					gear.State.SetError(err)
 					break
 				}
-				ok = true
-		}
-
-		if err != nil {
-			break
-		}
-
-		if ok == true {
-			gear.Ssh.FsMount = mp
+				gear.State.SetOk()
+				gear.Ssh.FsMount = mp
 		}
 	}
 
-	return ok
+	return gear.State
 }
 
 func readPublicKeyFile(file string) (ssh.AuthMethod, error) {

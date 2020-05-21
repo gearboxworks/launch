@@ -37,42 +37,20 @@ var gbRunCmd = &cobra.Command{
 	Run: gbRunFunc,
 	Args: cobra.MinimumNArgs(1),
 }
-
 func gbRunFunc(cmd *cobra.Command, args []string) {
-	var state ux.State
-
 	for range only.Once {
-		state = gearArgs.ProcessArgs(cmd, args)
+		var ga GearArgs
+
+		state := ga.ProcessArgs(rootCmd, args)
 		if state.IsError() {
 			break
 		}
 
-		gearArgs.Quiet = true
-
-		gbStartFunc(cmd, args)
-		if !cmdState.IsRunning() {
-			state.SetError("container not started")
+		state = ga.gbRunFunc()
+		if state.IsError() {
 			break
-		}
-
-		// Yuck!
-		sp := strings.Split(args[0], ":")
-		args[0] = sp[0]
-		args = gearArgs.GearRef.Docker.Container.GearConfig.GetCommand(args)
-		if len(args) == 0 {
-			ux.PrintfError("ERROR: no default command defined in gearbox.json")
-			break
-		}
-
-		state = gearArgs.GearRef.Docker.ContainerSsh(false, gearArgs.SshStatus, gearArgs.Mount, args)
-
-		if gearArgs.Temporary {
-			gbUninstallFunc(cmd, args)
-			state = cmdState
 		}
 	}
-
-	cmdState = state
 }
 
 
@@ -87,37 +65,20 @@ var gbShellCmd = &cobra.Command{
 	Run: gbShellFunc,
 	Args: cobra.MinimumNArgs(1),
 }
-
 func gbShellFunc(cmd *cobra.Command, args []string) {
-	var state ux.State
-
 	for range only.Once {
-		state = gearArgs.ProcessArgs(cmd.Parent(), args)
+		var ga GearArgs
+
+		state := ga.ProcessArgs(rootCmd, args)
 		if state.IsError() {
 			break
 		}
 
-		gbStartFunc(cmd, args)
-		if !cmdState.IsRunning() {
-			state.SetError("container not started")
+		state = ga.gbShellFunc()
+		if state.IsError() {
 			break
-		}
-
-		state = gearArgs.GearRef.State()
-		if !state.IsRunning() {
-			state.SetError("container not started")
-			break
-		}
-
-		state = gearArgs.GearRef.Docker.ContainerSsh(true, gearArgs.SshStatus, gearArgs.Mount, args[1:])
-
-		if gearArgs.Temporary {
-			gbUninstallFunc(cmd, args)
-			state = cmdState
 		}
 	}
-
-	cmdState = state
 }
 
 
@@ -132,30 +93,112 @@ var gbUnitTestCmd = &cobra.Command{
 	Run: gbUnitTestFunc,
 	Args: cobra.MinimumNArgs(1),
 }
-
 func gbUnitTestFunc(cmd *cobra.Command, args []string) {
-	var state ux.State
-
 	for range only.Once {
-		state = gearArgs.ProcessArgs(cmd, args)
+		var ga GearArgs
+
+		state := ga.ProcessArgs(rootCmd, args)
 		if state.IsError() {
 			break
 		}
 
-		gbStartFunc(cmd, args)
-		if !cmdState.IsRunning() {
-			state.SetError("container not started")
+		state = ga.gbUnitTestFunc()
+		if state.IsError() {
+			break
+		}
+	}
+}
+
+
+
+func (ga *GearArgs) gbRunFunc() *ux.State {
+	if state := ga.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range only.Once {
+		ga.Quiet = true
+
+		ga.State = ga.gbStartFunc()
+		if !ga.State.IsRunning() {
+			ga.State.SetError("container not started")
 			break
 		}
 
-		args = []string{defaults.DefaultUnitTestCmd}
-		state = gearArgs.GearRef.Docker.ContainerSsh(true, gearArgs.SshStatus, gearArgs.Mount, args)
+		// Yuck!
+		sp := strings.Split(ga.Args[0], ":")
+		ga.Args[0] = sp[0]
+		ga.Args = ga.GearRef.Docker.Container.GearConfig.GetCommand(ga.Args)
+		if len(ga.Args) == 0 {
+			ga.State.SetError("ERROR: no default command defined in gearbox.json")
+			break
+		}
 
-		if gearArgs.Temporary {
-			gbUninstallFunc(cmd, args)
-			state = cmdState
+		// Only for the "run" instance - default to mounting CWD.
+		if ga.Mount == defaults.DefaultPathNone {
+			ga.Mount = DeterminePath(".")
+		}
+
+		ga.State = ga.GearRef.Docker.ContainerSsh(false, ga.SshStatus, ga.Mount, ga.Args)
+		if !ga.State.IsError() {
+			break
+		}
+
+		if ga.Temporary {
+			ga.State = ga.gbUninstallFunc()
 		}
 	}
 
-	cmdState = state
+	return ga.State
+}
+
+func (ga *GearArgs) gbShellFunc() *ux.State {
+	if state := ga.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range only.Once {
+		ga.State = ga.gbStartFunc()
+		if !ga.State.IsRunning() {
+			ga.State.SetError("container not started")
+			break
+		}
+
+		ga.State = ga.GearRef.Docker.ContainerSsh(true, ga.SshStatus, ga.Mount, ga.Args[1:])
+
+		if ga.Temporary {
+			ga.State = ga.gbUninstallFunc()
+		}
+	}
+
+	if !ga.Quiet {
+		ga.State.PrintResponse()
+	}
+	return ga.State
+}
+
+func (ga *GearArgs) gbUnitTestFunc() *ux.State {
+	if state := ga.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range only.Once {
+		ga.State = ga.gbStartFunc()
+		if !ga.State.IsRunning() {
+			ga.State.SetError("container not started")
+			break
+		}
+
+		ga.Args = []string{defaults.DefaultUnitTestCmd}
+		ga.State = ga.GearRef.Docker.ContainerSsh(true, ga.SshStatus, ga.Mount, ga.Args)
+
+		if ga.Temporary {
+			ga.State = ga.gbUninstallFunc()
+		}
+	}
+
+	if !ga.Quiet {
+		ga.State.PrintResponse()
+	}
+	return ga.State
 }

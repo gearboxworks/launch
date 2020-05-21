@@ -241,7 +241,8 @@ func (p *Paths) AppendDir(dir ...string) *Paths {
 }
 
 
-func (p *BasePaths) EnsureNotNil() (err error) {
+func (p *BasePaths) IsNil() error {
+	var err error
 
 	for range only.Once {
 		if p == nil {
@@ -254,7 +255,8 @@ func (p *BasePaths) EnsureNotNil() (err error) {
 }
 
 
-func (p *BasePaths) CreateIfNotExists() (err error) {
+func (p *BasePaths) CreateIfNotExists() error {
+	var err error
 
 	for range only.Once {
 		_, err = p.EventBrokerDir.CreateIfNotExists()

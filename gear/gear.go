@@ -17,48 +17,51 @@ type Gear struct {
 	Repo         *githubClient.GitHubRepo
 	Docker       *dockerClient.DockerGear
 	GearConfig   *gearJson.GearConfig
+
 	Debug        bool
+	State        *ux.State
 }
 
 
-func (gear *Gear) NewGear() ux.State {
-	//var g Gear
-	var state ux.State
-
+func (gear *Gear) NewGear(debugMode bool) *ux.State {
 	for range only.Once {
+		gear.State = ux.NewState(debugMode)
+		gear.State.DebugSet(debugMode)
+		gear.Debug = debugMode
+
 		if gear.Docker == nil {
-			gear.Docker, state = dockerClient.New()
-			if state.IsError() {
-				state.SetError("can not connect to Docker service provider")
+			gear.Docker, gear.State = dockerClient.New(debugMode)
+			if gear.State.IsError() {
+				gear.State.SetError("can not connect to Docker service provider")
 				break
 			}
-			gear.Docker.Debug = gear.Debug
 		}
 
 		if gear.Repo == nil {
-			gear.Repo, state = githubClient.New()
-			state.ClearError()
+			gear.Repo = githubClient.New(debugMode)
+			if gear.Repo.State.IsError() {
+				break
+			}
+
+			gear.State.ClearError()
 			//if state.IsError() {
 			//	break
 			//}
 		}
 	}
 
-	return state
+	return gear.State
 }
 
 
-func (gear *Gear) State() ux.State {
-	var state ux.State
+func (gear *Gear) Status() *ux.State {
+	if state := gear.IsNil(); state.IsError() {
+		return state
+	}
 
 	for range only.Once {
-		state = gear.EnsureNotNil()
-		if state.IsError() {
-			break
-		}
-
-		runState := gear.Docker.Container.State()
-		if state.IsError() {
+		gear.State = gear.Docker.Container.Status()
+		if gear.State.IsError() {
 			break
 		}
 
@@ -77,12 +80,12 @@ func (gear *Gear) State() ux.State {
 			gear.Docker.Image.Version = gear.Docker.Container.Version
 		}
 
-		state = gear.Docker.Image.State()
-		if state.IsError() {
+		state2 := gear.Docker.Image.Status()
+		if state2.IsError() {
 			break
 		}
 
-		state = runState
+		//state = runState
 
 		//state = gear.Docker.Image.State()
 		//if state.IsError() {
@@ -90,35 +93,67 @@ func (gear *Gear) State() ux.State {
 		//}
 	}
 
-	return state
+	return gear.State
 }
 
 
-func (gear *Gear) FindContainer(gearName string, gearVersion string) (bool, ux.State) {
+func (gear *Gear) FindContainer(gearName string, gearVersion string) (bool, *ux.State) {
 	var found bool
-	var state ux.State
+	if state := gear.IsNil(); state.IsError() {
+		return false, state
+	}
 
 	for range only.Once {
-		found, state = gear.Docker.FindContainer(gearName, gearVersion)
+		found, gear.State = gear.Docker.FindContainer(gearName, gearVersion)
 		if !found {
 			break
 		}
-		if state.IsError() {
+		if gear.State.IsError() {
 			break
 		}
 
-		state = gear.State()
-		if state.IsError() {
+		gear.State = gear.Status()
+		if gear.State.IsError() {
 			break
 		}
 	}
 
-	return found, state
+	return found, gear.State
 }
 
 
-func (gear *Gear) DecodeError(err error) (bool, error) {
+func (gear *Gear) FindImage(gearName string, gearVersion string) (bool, *ux.State) {
+	var found bool
+	if state := gear.IsNil(); state.IsError() {
+		return false, state
+	}
+
+	for range only.Once {
+		found, gear.State = gear.Docker.FindImage(gearName, gearVersion)
+		if !found {
+			//state.ClearError()
+			break
+		}
+		if gear.State.IsError() {
+			break
+		}
+
+		//@TODO - TO CHECK
+		//state = gear.Status()
+		//if state.IsError() {
+		//	break
+		//}
+	}
+
+	return found, gear.State
+}
+
+
+func (gear *Gear) DecodeError(err error) (bool, *ux.State) {
 	var ok bool
+	if state := gear.IsNil(); state.IsError() {
+		return false, state
+	}
 
 	for range only.Once {
 		switch {
@@ -134,28 +169,39 @@ func (gear *Gear) DecodeError(err error) (bool, error) {
 		}
 	}
 
-	return ok, err
+	return ok, gear.State
 }
 
-func (gear *Gear) EnsureNotNil() ux.State {
-	var state ux.State
+func (gear *Gear) IsNil() *ux.State {
+	if state := ux.IfNilReturnError(gear); state.IsError() {
+		return state
+	}
 
 	for range only.Once {
-		if gear == nil {
-			state.SetError("gear is nil")
+		gear.State = gear.State.EnsureNotNil()
+
+		gear.State = gear.Docker.IsNil()
+		if gear.State.IsNotOk() {
 			break
 		}
 
-		state = gear.Docker.EnsureNotNil()
-		if state.IsError() {
-			break
-		}
-
-		state = gear.Repo.EnsureNotNil()
-		if state.IsError() {
+		gear.State = gear.Repo.IsNil()
+		if gear.State.IsNotOk() {
 			break
 		}
 	}
 
-	return state
+	return gear.State
+}
+
+func (gear *Gear) IsValid() *ux.State {
+	if state := ux.IfNilReturnError(gear); state.IsError() {
+		return state
+	}
+
+	for range only.Once {
+		gear.State = gear.State.EnsureNotNil()
+	}
+
+	return gear.State
 }

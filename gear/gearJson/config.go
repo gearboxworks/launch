@@ -19,6 +19,8 @@ type GearConfig struct {
 	Versions   GearVersions   `json:"versions"`
 
 	Schema     string         `json:"schema"`
+
+	State      *ux.State
 }
 type GearConfigs map[string]GearConfig
 
@@ -74,17 +76,14 @@ func (gc *GearConfig) MatchCommand(cmd string) *string {
 	return c
 }
 
-// func (gc *GearConfig) CreateLinks(c defaults.ExecCommand, name string, version string) ux.State {
-func (gc *GearConfig) CreateLinks(c defaults.ExecCommand, version string) ux.State {
-	var state ux.State
+func (gc *GearConfig) CreateLinks(c defaults.ExecCommand, version string) *ux.State {
+	if state := gc.IsNil(); state.IsError() {
+		return state
+	}
 
 	for range only.Once {
-		state = gc.ValidateGearConfig()
-		if state.IsError() {
-			break
-		}
-
-		var created bool
+		links := make(map[string]string)
+		var failed bool
 		for k, v := range gc.Run.Commands {
 			var err error
 			var dstFile string
@@ -105,8 +104,6 @@ func (gc *GearConfig) CreateLinks(c defaults.ExecCommand, version string) ux.Sta
 
 			linkStat, err = os.Lstat(dstFile)
 			if linkStat == nil {
-				created = true
-
 				// Symlink doesn't exist - create.
 				err = os.Symlink(c.File, dstFile)
 				if err != nil {
@@ -118,17 +115,9 @@ func (gc *GearConfig) CreateLinks(c defaults.ExecCommand, version string) ux.Sta
 				if linkStat == nil {
 					continue
 				}
+
+				links[k] = "linked"
 			}
-
-			// Symlink exists - validate.
-			l, _ := os.Readlink(dstFile)
-			//if !filepath.IsAbs(l) {
-			//	l, _ = filepath.Abs(fmt.Sprintf("%s%c%s", c.Dir, filepath.Separator, l))
-			//}
-			if l == "" {
-
-			}
-
 			//fmt.Printf("'%s' (%s) => '%s'\n", k, dstFile, v)
 			//fmt.Printf("\tReadlink() => %s\n", l)
 			//fmt.Printf("\tLstat() => %s	%s	%s	%s	%d\n",
@@ -138,27 +127,41 @@ func (gc *GearConfig) CreateLinks(c defaults.ExecCommand, version string) ux.Sta
 			//	linkStat.ModTime().String(),
 			//	linkStat.Size(),
 			//)
-			//fmt.Printf("\n")
+
+			// Symlink exists - validate.
+			l, _ := os.Readlink(dstFile)
+			if l == defaults.BinaryName {
+			}
+
+			fpel, err := filepath.EvalSymlinks(dstFile)
+			//fmt.Printf("%s\n", fpel)
+			if fpel != c.FullPath {
+				links[k] = "incorrect link"
+				failed = true
+			}
 		}
+		gc.State.SetDebug("DEBUGIT")
 
-		if created {
-			ux.PrintfOk("Created application links.\n")
-		}
-	}
-
-	return state
-}
-
-// func (gc *GearConfig) RemoveLinks(c defaults.ExecCommand, name string, version string) ux.State {
-func (gc *GearConfig) RemoveLinks(c defaults.ExecCommand, version string) ux.State {
-	var state ux.State
-
-	for range only.Once {
-		state = gc.ValidateGearConfig()
-		if state.IsError() {
+		if failed {
+			for k, v := range links {
+				ux.PrintflnWarning("%s - %s", k, v)
+			}
 			break
 		}
 
+		gc.State.SetOk("Created application links.")
+	}
+
+	return gc.State
+}
+
+// func (gc *GearConfig) RemoveLinks(c defaults.ExecCommand, name string, version string) *ux.State {
+func (gc *GearConfig) RemoveLinks(c defaults.ExecCommand, version string) *ux.State {
+	if state := gc.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range only.Once {
 		var removed bool
 		for k := range gc.Run.Commands {
 			var err error
@@ -201,7 +204,7 @@ func (gc *GearConfig) RemoveLinks(c defaults.ExecCommand, version string) ux.Sta
 		}
 	}
 
-	return state
+	return gc.State
 }
 
 
@@ -295,12 +298,41 @@ type GearVersion struct {
 }
 type GearVersions map[string]GearVersion
 
+
+func New(cs string) *GearConfig {
+	var gc GearConfig
+
+	for range only.Once {
+		gc.State = gc.State.EnsureNotNil()
+
+		if cs == "" {
+			gc.State.SetError("gear config is empty")
+			break
+		}
+
+		js := []byte(cs)
+		if js == nil {
+			gc.State.SetError("gear config json is nil")
+			break
+		}
+
+		err := json.Unmarshal(js, &gc)
+		if err != nil {
+			gc.State.SetError("gearbox.json schema unknown: %s", err)
+			break
+		}
+	}
+
+	return &gc
+}
+
+
 func (vers *GearVersions) GetLatest() string {
 	var v string
 
-	var r GearVersion
-	for v, r = range *vers {
+	for k, r := range *vers {
 		if r.Latest {
+			v = k
 			break
 		}
 	}
@@ -308,60 +340,90 @@ func (vers *GearVersions) GetLatest() string {
 	return v
 }
 
-func (vers *GearVersions) HasVersion(c string) bool {
-	for v, r := range *vers {
-		if r.Latest && (c == "latest") {
-			return true
-		}
 
-		if v == c {
-			return true
+func (vers *GearVersions) HasVersion(gearVersion string) bool {
+	var ok bool
+
+	for range only.Once {
+		//if gearVersion == "latest" {
+		//	gl := vers.GetLatest()
+		//	if gl == "" {
+		//		break
+		//	}
+		//}
+
+		for v, r := range *vers {
+			if r.Latest && (gearVersion == "latest") {
+				ok = true
+				break
+			}
+
+			if v == gearVersion {
+				ok = true
+				break
+			}
+
+			if r.MajorVersion == gearVersion {
+				ok = true
+				break
+			}
 		}
 	}
-	return false
+
+	return ok
 }
 
 
-func New(cs string) (*GearConfig, ux.State) {
-	var gc GearConfig
-	var state ux.State
-
-	for range only.Once {
-		if cs == "" {
-			state.SetError("gear config is empty")
-			break
-		}
-
-		js := []byte(cs)
-		if js == nil {
-			state.SetError("gear config json is nil")
-			break
-		}
-
-		err := json.Unmarshal(js, &gc)
-		if err != nil {
-			state.SetError("gearbox.json schema unknown: %s", err)
-			break
-		}
-
-		state = gc.ValidateGearConfig()
-		if state.IsError() {
-			break
-		}
+func (gc *GearConfig) IsNil() *ux.State {
+	if state := ux.IfNilReturnError(gc); state.IsError() {
+		return state
 	}
-
-	return &gc, state
+	gc.State = gc.State.EnsureNotNil()
+	return gc.State
 }
 
-func (gc *GearConfig) ValidateGearConfig() ux.State {
-	var state ux.State
+func (gc *GearConfig) IsValid() *ux.State {
+	if state := ux.IfNilReturnError(gc); state.IsError() {
+		return state
+	}
 
 	for range only.Once {
-		if gc == nil {
-			state.SetError("gear config is nil")
+		gc.State = gc.State.EnsureNotNil()
+
+		//if gc == nil {
+		//	gc.State.SetError("gear config is nil")
+		//	break
+		//}
+	}
+
+	return gc.State
+}
+
+
+func (gc *GearConfig) IsMatchedGear(gearName string, gearVersion string, tagVersions []string) bool {
+	var ok bool
+
+	for range only.Once {
+		if gc.Meta.Organization != defaults.Organization {
 			break
+		}
+
+		if gc.Meta.Name != gearName {
+			break
+		}
+
+		if !gc.Versions.HasVersion(gearVersion) {
+			break
+		}
+
+		nameCheck := fmt.Sprintf("%s/%s:%s", defaults.Organization, gearName, gearVersion)
+		for _, s := range tagVersions {
+			if s == nameCheck {
+				ok = true
+				break
+			}
 		}
 	}
 
-	return state
+	return ok
 }

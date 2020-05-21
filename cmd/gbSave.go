@@ -34,11 +34,16 @@ var gbSaveCmd = &cobra.Command{
 	Run: gbSaveFunc,
 	Args: cobra.ExactArgs(1),
 }
-
 func gbSaveFunc(cmd *cobra.Command, args []string) {
 	for range only.Once {
-		// var err error
-		showArgs(cmd, args)
+		var ga GearArgs
+
+		state := ga.ProcessArgs(rootCmd, args)
+		if state.IsError() {
+			break
+		}
+
+		//showArgs(rootCmd, args)
 		ux.PrintfWarning("Command not yet implemented.\n")
 	}
 }
@@ -56,11 +61,16 @@ var gbLoadCmd = &cobra.Command{
 	Run: gbLoadFunc,
 	Args: cobra.ExactArgs(1),
 }
-
 func gbLoadFunc(cmd *cobra.Command, args []string) {
 	for range only.Once {
-		// var err error
-		showArgs(cmd, args)
+		var ga GearArgs
+
+		state := ga.ProcessArgs(rootCmd, args)
+		if state.IsError() {
+			break
+		}
+
+		//showArgs(rootCmd, args)
 		ux.PrintfWarning("Command not yet implemented.\n")
 	}
 }

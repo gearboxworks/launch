@@ -16,6 +16,7 @@ const (
 	DefaultPathCwd = "cwd"
 	DefaultPathHome = "home"
 	DefaultPathEmpty = ""
+	DefaultProvider = "docker"
 
 	LanguageContainerName = "Gear"
 	LanguageImageName = "Gear image"

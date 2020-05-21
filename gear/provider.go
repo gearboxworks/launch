@@ -14,20 +14,23 @@ const (
 )
 
 type Provider struct {
-	Name    string `json:"name"`
-	Host    string `json:"host"`
-	Port    string `json:"port"`
+	Name    string  `json:"name"`
+	Host    string  `json:"host"`
+	Port    string  `json:"port"`
 	Url     url.URL `json:"url"`
-	Project string `json:"project"`
-	Debug   bool `json:"debug"`
+	Project string  `json:"project"`
+
+	Debug   bool    //`json:"debug"`
+	State   *ux.State
 }
 
 
-func (p *Provider) NewProvider() ux.State {
-	var state ux.State
-
+func (p *Provider) NewProvider(debugMode bool) *ux.State {
 	for range only.Once {
 		var err error
+		p.State = p.State.EnsureNotNil()
+		p.State.DebugSet(debugMode)
+		p.Debug = debugMode
 
 		if p.Name == "" {
 			p.Name = ProviderDocker
@@ -59,28 +62,5 @@ func (p *Provider) NewProvider() ux.State {
 		}
 	}
 
-	return state
+	return p.State
 }
-
-
-//func (me *Provider) NewGear() (*Gear, ux.State) {
-//	var g Gear
-//	var state ux.State
-//
-//	for range only.Once {
-//		g.Docker, state = dockerClient.New()
-//		if state.IsError() {
-//			state.SetError("can not connect to Docker service provider")
-//			break
-//		}
-//		g.Docker.Debug = me.Debug
-//
-//		g.Repo, state = githubClient.New()
-//		state.ClearError()
-//		//if state.IsError() {
-//		//	break
-//		//}
-//	}
-//
-//	return &g, state
-//}

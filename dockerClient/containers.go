@@ -17,25 +17,22 @@ import (
 // List and manage containers
 // You can use the API to list containers that are running, just like using docker ps:
 // func ContainerList(f types.ContainerListOptions) error {
-func (gear *DockerGear) ContainerList(f string) (int, ux.State) {
-	var state ux.State
+func (gear *DockerGear) ContainerList(f string) (int, *ux.State) {
 	var count int
+	if state := gear.IsNil(); state.IsError() {
+		return 0, state
+	}
 
 	for range only.Once {
-		var err error
-
-		if gear.Debug {
-			fmt.Printf("DEBUG: ContainerList(%s)\n", f)
-		}
-
 		ctx, cancel := context.WithTimeout(context.Background(), defaults.Timeout)
 		//noinspection GoDeferInLoop
 		defer cancel()
 
 		var containers []types.Container
+		var err error
 		containers, err = gear.Client.ContainerList(ctx, types.ContainerListOptions{Size: true, All: true})
 		if err != nil {
-			state.SetError("gear list error: %s", err)
+			gear.State.SetError("gear list error: %s", err)
 			break
 		}
 
@@ -56,8 +53,8 @@ func (gear *DockerGear) ContainerList(f string) (int, ux.State) {
 
 		for _, c := range containers {
 			var gc *gearJson.GearConfig
-			gc, state = gearJson.New(c.Labels["gearbox.json"])
-			if state.IsError() {
+			gc = gearJson.New(c.Labels["gearbox.json"])
+			if gc.State.IsError() {
 				continue
 			}
 
@@ -122,39 +119,30 @@ func (gear *DockerGear) ContainerList(f string) (int, ux.State) {
 			})
 		}
 
-		state.ClearError()
+		gear.State.ClearError()
 		count = t.Length()
 		if count == 0 {
 			ux.PrintfYellow("None found\n")
 			break
 		}
 
-		ux.PrintfGreen("%d found\n", count)
+		ux.PrintflnGreen("%d found", count)
 		t.Render()
-		ux.PrintfWhite("\n")
+		ux.PrintflnBlue("")
 	}
 
-	return count, state
+	return count, gear.State
 }
 
-func (gear *DockerGear) FindContainer(gearName string, gearVersion string) (bool, ux.State) {
+func (gear *DockerGear) FindContainer(gearName string, gearVersion string) (bool, *ux.State) {
 	var ok bool
-	var state ux.State
+	if state := gear.IsNil(); state.IsError() {
+		return false, state
+	}
 
 	for range only.Once {
-		var err error
-
-		if gear.Debug {
-			fmt.Printf("DEBUG: FindContainer(%s, %s)\n", gearName, gearVersion)
-		}
-
-		state = gear.EnsureNotNil()
-		if state.IsError() {
-			break
-		}
-
 		if gearName == "" {
-			state.SetError("empty gearname")
+			gear.State.SetError("empty gearname")
 			break
 		}
 
@@ -167,63 +155,22 @@ func (gear *DockerGear) FindContainer(gearName string, gearVersion string) (bool
 		defer cancel()
 
 		var containers []types.Container
+		var err error
 		containers, err = gear.Client.ContainerList(ctx, types.ContainerListOptions{All: true, Limit: 256})
 		if err != nil {
-			state.SetError("gear list error: %s", err)
+			gear.State.SetError("gear list error: %s", err)
 			break
 		}
 
 		// Start out with "not found". Will be cleared if found or error occurs.
-		state.SetWarning("Gear '%s:%s' doesn't exist.", gearName, gearVersion)
+		gear.State.SetWarning("Gear '%s:%s' doesn't exist.", gearName, gearVersion)
 
 		for _, c := range containers {
 			var gc *gearJson.GearConfig
-			gc, state = gearJson.New(c.Labels["gearbox.json"])
-			if state.IsError() {
+			ok, gc = MatchContainer(&c, defaults.Organization, gearName, gearVersion)
+			if !ok {
 				continue
 			}
-
-			if gc.Meta.Organization != defaults.Organization {
-				continue
-			}
-
-			// @TODO - BEGIN - This needs to be refactored!!!
-			if gc.Meta.Name != gearName {
-				if !defaults.RunAs.AsLink {
-					continue
-				}
-
-				cs := gc.MatchCommand(gearName)
-				if cs == nil {
-					continue
-				}
-
-				gearName = gc.Meta.Name
-			}
-
-			if gearVersion == "latest" {
-				gl := gc.Versions.GetLatest()
-				if gl == "" {
-					continue
-				}
-				gearVersion = gl
-			} else {
-				if !gc.Versions.HasVersion(gearVersion) {
-					// Finally compare container image name.
-					finalCheck := fmt.Sprintf("%s/%s:%s", defaults.Organization, gearName, gearVersion)
-					if finalCheck != c.Image {
-						continue
-					}
-				}
-			}
-
-			//fmt.Printf("%s => F:%s:F:%s:F\n", gearVersion, c.Labels["gearbox.version"], c.Labels["container.majorversion"])
-			if c.Labels["gearbox.version"] == gearVersion {
-			} else if c.Labels["container.majorversion"] == gearVersion {
-			} else {
-				continue
-			}
-			// @TODO - END - This needs to be refactored!!!
 
 			gear.Container.Name = gearName
 			gear.Container.Version = gearVersion
@@ -231,14 +178,17 @@ func (gear *DockerGear) FindContainer(gearName string, gearVersion string) (bool
 			gear.Container.Summary = &c
 			gear.Container.ID = c.ID
 			gear.Container.Name = gc.Meta.Name
+			gear.Container.State = gear.Container.State.EnsureNotNil()
 			ok = true
-			state.ClearAll()
+			gear.State.SetOk("Found Gear '%s:%s'.", gearName, gearVersion)
 
 			break
 		}
 
-		if state.IsError() {
-			state.ClearError()
+		if gear.State.IsNotOk() {
+			if !ok {
+				gear.State.ClearError()
+			}
 			break
 		}
 
@@ -246,23 +196,90 @@ func (gear *DockerGear) FindContainer(gearName string, gearVersion string) (bool
 			break
 		}
 
+		ctx2, cancel2 := context.WithTimeout(context.Background(), defaults.Timeout)
+		//noinspection GoDeferInLoop
+		defer cancel2()
 		d := types.ContainerJSON{}
-		d, err = gear.Client.ContainerInspect(ctx, gear.Container.ID)
+		d, err = gear.Client.ContainerInspect(ctx2, gear.Container.ID)
 		if err != nil {
-			state.SetError("gear inspect error: %s", err)
+			gear.State.SetError("gear inspect error: %s", err)
 			break
 		}
 		gear.Container.Details = &d
+	}
 
-		state = gear.Container.EnsureNotNil()
-		if state.IsError() {
+	return ok, gear.State
+}
+
+
+func MatchContainer(m *types.Container, gearOrg string, gearName string, gearVersion string) (bool, *gearJson.GearConfig) {
+	var ok bool
+	var gc *gearJson.GearConfig
+
+	for range only.Once {
+		if MatchTag("<none>:<none>", m.Names) {
+			ok = false
 			break
 		}
+
+		gc = gearJson.New(m.Labels["gearbox.json"])
+		if gc.State.IsError() {
+			ok = false
+			break
+		}
+
+		if gc.Meta.Organization != defaults.Organization {
+			ok = false
+			break
+		}
+
+		tagCheck := fmt.Sprintf("%s/%s:%s", gearOrg, gearName, gearVersion)
+		if m.Image == tagCheck {
+			ok = true
+			break
+		}
+
+		if gc.Meta.Name != gearName {
+			if !defaults.RunAs.AsLink {
+				ok = false
+				break
+			}
+
+			cs := gc.MatchCommand(gearName)
+			if cs == nil {
+				ok = false
+				break
+			}
+
+			gearName = gc.Meta.Name
+		}
+
+		if !gc.Versions.HasVersion(gearVersion) {
+			ok = false
+			break
+		}
+
+		if gearVersion == "latest" {
+			gl := gc.Versions.GetLatest()
+			if gearVersion != "" {
+				gearVersion = gl
+			}
+		}
+		for range only.Once {
+			if m.Labels["gearbox.version"] == gearVersion {
+				ok = true
+				break
+			}
+
+			if m.Labels["container.majorversion"] == gearVersion {
+				ok = true
+				break
+			}
+
+			ok = false
+		}
+		break
 	}
 
-	if gear.Debug {
-		state.Print()
-	}
-
-	return ok, state
+	return ok, gc
 }

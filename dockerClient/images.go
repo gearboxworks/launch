@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/api/types/registry"
 	"github.com/dustin/go-humanize"
 	"github.com/jedib0t/go-pretty/table"
 	"launch/defaults"
@@ -20,22 +19,13 @@ import (
 // List all images
 // List the images on your Engine, similar to docker image ls:
 // func ImageList(f types.ImageListOptions) error {
-func (gear *DockerGear) ImageList(f string) (int, ux.State) {
-	var state ux.State
+func (gear *DockerGear) ImageList(f string) (int, *ux.State) {
 	var count int
+	if state := gear.IsNil(); state.IsError() {
+		return 0, state
+	}
 
 	for range only.Once {
-		var err error
-
-		if gear.Debug {
-			fmt.Printf("DEBUG: ImageList(%s)\n", f)
-		}
-
-		state = gear.EnsureNotNil()
-		if state.IsError() {
-			break
-		}
-
 		df := filters.NewArgs()
 		//if f != "" {
 		//	df.Add("label", f)
@@ -45,10 +35,9 @@ func (gear *DockerGear) ImageList(f string) (int, ux.State) {
 		//noinspection GoDeferInLoop
 		defer cancel()
 
-		var images []types.ImageSummary
-		images, err = gear.Client.ImageList(ctx, types.ImageListOptions{All: true, Filters: df})
+		images, err := gear.Client.ImageList(ctx, types.ImageListOptions{All: true, Filters: df})
 		if err != nil {
-			state.SetError("gear image list error: %s", err)
+			gear.State.SetError("gear image list error: %s", err)
 			break
 		}
 
@@ -59,8 +48,8 @@ func (gear *DockerGear) ImageList(f string) (int, ux.State) {
 
 		for _, i := range images {
 			var gc *gearJson.GearConfig
-			gc, state = gearJson.New(i.Labels["gearbox.json"])
-			if state.IsError() {
+			gc = gearJson.New(i.Labels["gearbox.json"])
+			if gc.State.IsError() {
 				continue
 			}
 
@@ -92,39 +81,31 @@ func (gear *DockerGear) ImageList(f string) (int, ux.State) {
 			})
 		}
 
-		state.ClearError()
+		gear.State.ClearError()
 		count = t.Length()
 		if count == 0 {
 			ux.PrintfYellow("None found\n")
 			break
 		}
 
-		ux.PrintfGreen("%d found\n", count)
+		ux.PrintflnGreen("%d found", count)
 		t.Render()
-		ux.PrintfWhite("\n")
+		ux.PrintflnBlue("")
 	}
 
-	return count, state
+	return count, gear.State
 }
 
 
-func (gear *DockerGear) FindImage(gearName string, gearVersion string) (bool, ux.State) {
+func (gear *DockerGear) FindImage(gearName string, gearVersion string) (bool, *ux.State) {
 	var ok bool
-	var state ux.State
-	//var err error
+	if state := gear.IsNil(); state.IsError() {
+		return false, state
+	}
 
 	for range only.Once {
-		if gear.Debug {
-			fmt.Printf("DEBUG: FindImage(%s, %s)\n", gearName, gearVersion)
-		}
-
-		state = gear.EnsureNotNil()
-		if state.IsError() {
-			break
-		}
-
 		if gearName == "" {
-			state.SetError("empty gear name")
+			gear.State.SetError("empty gear name")
 			break
 		}
 
@@ -136,11 +117,9 @@ func (gear *DockerGear) FindImage(gearName string, gearVersion string) (bool, ux
 		//noinspection GoDeferInLoop
 		defer cancel()
 
-		var images []types.ImageSummary
-		var err error
-		images, err = gear.Client.ImageList(ctx, types.ImageListOptions{All: true})
+		images, err := gear.Client.ImageList(ctx, types.ImageListOptions{All: true})
 		if err != nil {
-			state.SetError("gear image list error: %s", err)
+			gear.State.SetError("gear image list error: %s", err)
 			break
 		}
 
@@ -149,37 +128,13 @@ func (gear *DockerGear) FindImage(gearName string, gearVersion string) (bool, ux
 		}
 
 		// Start out with "not found". Will be cleared if found or error occurs.
-		state.SetWarning("Gear image '%s:%s' doesn't exist.", gearName, gearVersion)
+		gear.State.SetWarning("Gear image '%s:%s' doesn't exist.", gearName, gearVersion)
 
 		for _, i := range images {
 			var gc *gearJson.GearConfig
-			gc, state = gearJson.New(i.Labels["gearbox.json"])
-			if state.IsError() {
+			ok, gc = MatchImage(&i, defaults.Organization, gearName, gearVersion)
+			if !ok {
 				continue
-			}
-
-			if gc.Meta.Organization != defaults.Organization {
-				continue
-			}
-
-			if i.RepoTags[0] == "<none>:<none>" {
-				continue
-			}
-
-			if gc.Meta.Name != gearName {
-				continue
-			}
-
-			if gearVersion == "latest" {
-				gl := gc.Versions.GetLatest()
-				if gl == "" {
-					continue
-				}
-				// gearVersion = gl
-			} else {
-				if !gc.Versions.HasVersion(gearVersion) {
-					continue
-				}
 			}
 
 			gear.Image.Name = gearName
@@ -187,13 +142,17 @@ func (gear *DockerGear) FindImage(gearName string, gearVersion string) (bool, ux
 			gear.Image.GearConfig = gc
 			gear.Image.Summary = &i
 			gear.Image.ID = i.ID
+			gear.Image.State = gear.Image.State.EnsureNotNil()
 			//gear.Image.client = gear.DockerClient
 			ok = true
 
 			break
 		}
 
-		if state.IsError() {
+		if gear.State.IsNotOk() {
+			if !ok {
+				gear.State.ClearError()
+			}
 			break
 		}
 
@@ -201,34 +160,29 @@ func (gear *DockerGear) FindImage(gearName string, gearVersion string) (bool, ux
 			break
 		}
 
-		gear.Image.Details, _, err = gear.Client.ImageInspectWithRaw(ctx, gear.Image.ID)
+		ctx2, cancel2 := context.WithTimeout(context.Background(), defaults.Timeout)
+		//noinspection GoDeferInLoop
+		defer cancel2()
+		gear.Image.Details, _, err = gear.Client.ImageInspectWithRaw(ctx2, gear.Image.ID)
 		if err != nil {
-			state.SetError("error inspecting gear: %s", err)
+			gear.State.SetError("error inspecting gear: %s", err)
 			break
 		}
 
-		state = gear.Image.EnsureNotNil()
-		if state.IsError() {
-			break
-		}
-
-		state.SetOk("found image")
+		gear.State.SetOk("found image")
 	}
 
-	return ok, state
+	return ok, gear.State
 }
 
 
 // Search for an image in remote registry.
-func (gear *DockerGear) Search(gearName string, gearVersion string) ux.State {
-	var state ux.State
+func (gear *DockerGear) Search(gearName string, gearVersion string) *ux.State {
+	if state := gear.IsNil(); state.IsError() {
+		return state
+	}
 
 	for range only.Once {
-		state = gear.EnsureNotNil()
-		if state.IsError() {
-			break
-		}
-
 		var repo string
 		if gearVersion == "" {
 			repo = fmt.Sprintf("gearboxworks/%s", gearName)
@@ -244,11 +198,9 @@ func (gear *DockerGear) Search(gearName string, gearVersion string) ux.State {
 		//df.Add("name", "terminus")
 		repo = gearName
 
-		var images []registry.SearchResult
-		var err error
-		images, err = gear.Client.ImageSearch(ctx, repo, types.ImageSearchOptions{Filters: df, Limit: 100})
+		images, err := gear.Client.ImageSearch(ctx, repo, types.ImageSearchOptions{Filters: df, Limit: 100})
 		if err != nil {
-			state.SetError("gear image search error: %s", err)
+			gear.State.SetError("gear image search error: %s", err)
 			break
 		}
 
@@ -260,5 +212,92 @@ func (gear *DockerGear) Search(gearName string, gearVersion string) ux.State {
 		}
 	}
 
-	return state
+	return gear.State
+}
+
+
+func MatchImage(m *types.ImageSummary, gearOrg string, gearName string, gearVersion string) (bool, *gearJson.GearConfig) {
+	var ok bool
+	var gc *gearJson.GearConfig
+
+	for range only.Once {
+		if MatchTag("<none>:<none>", m.RepoTags) {
+			ok = false
+			break
+		}
+
+		gc = gearJson.New(m.Labels["gearbox.json"])
+		if gc.State.IsError() {
+			ok = false
+			break
+		}
+
+		if gc.Meta.Organization != defaults.Organization {
+			ok = false
+			break
+		}
+
+		tagCheck := fmt.Sprintf("%s/%s:%s", gearOrg, gearName, gearVersion)
+		if !MatchTag(tagCheck, m.RepoTags) {
+			ok = false
+			break
+		}
+
+		if gc.Meta.Name != gearName {
+			if !defaults.RunAs.AsLink {
+				ok = false
+				break
+			}
+
+			cs := gc.MatchCommand(gearName)
+			if cs == nil {
+				ok = false
+				break
+			}
+
+			gearName = gc.Meta.Name
+		}
+
+		if !gc.Versions.HasVersion(gearVersion) {
+			ok = false
+			break
+		}
+
+		if gearVersion == "latest" {
+			gl := gc.Versions.GetLatest()
+			if gearVersion != "" {
+				gearVersion = gl
+			}
+		}
+		for range only.Once {
+			if m.Labels["gearbox.version"] == gearVersion {
+				ok = true
+				break
+			}
+
+			if m.Labels["container.majorversion"] == gearVersion {
+				ok = true
+				break
+			}
+
+			ok = false
+		}
+		break
+	}
+
+	return ok, gc
+}
+
+
+func MatchTag(match string, tags []string) bool {
+	var ok bool
+
+	for _, s := range tags {
+		if s == match {
+			ok = true
+			break
+		}
+	}
+
+	return ok
 }

@@ -32,75 +32,20 @@ var gbStartCmd = &cobra.Command{
 	Run: gbStartFunc,
 	Args: cobra.ExactArgs(1),
 }
-
 func gbStartFunc(cmd *cobra.Command, args []string) {
-	var state ux.State
-
 	for range only.Once {
-		state = gearArgs.ProcessArgs(cmd, args)
+		var ga GearArgs
+
+		state := ga.ProcessArgs(rootCmd, args)
 		if state.IsError() {
 			break
 		}
 
-		var found bool
-		found, state = gearArgs.GearRef.FindContainer(gearArgs.Name, gearArgs.Version)
+		state = ga.gbStartFunc()
 		if state.IsError() {
 			break
 		}
-		if !found {
-			if !gearArgs.Temporary {
-				gearArgs.Quiet = false
-			}
-
-			if IsNoCreate(cmd) {
-				state.SetError("Gear '%s:%s' doesn't exist.", gearArgs.Name, gearArgs.Version)
-				break
-			}
-
-			gbInstallFunc(cmd, args)
-			if cmdState.IsError() {
-				state = cmdState
-				break
-			}
-			state.ClearAll()
-
-			found, state = gearArgs.GearRef.FindContainer(gearArgs.Name, gearArgs.Version)
-			if state.IsError() {
-				break
-			}
-		}
-
-		//state = gearArgs.GearRef.State()
-		if state.IsRunning() {
-			if !gearArgs.Quiet {
-				ux.PrintfGreen("Gear '%s:%s' already started\n", gearArgs.Name, gearArgs.Version)
-			}
-			break
-		}
-
-
-		if !gearArgs.Quiet {
-			ux.Printf("Starting gear '%s:%s': ", gearArgs.Name, gearArgs.Version)
-		}
-		state = gearArgs.GearRef.Docker.Container.Start()
-		if state.IsError() {
-			state.SetError("Gear '%s:%s' start error - %s", gearArgs.Name, gearArgs.Version, state.Error)
-			ux.PrintfRed("%s\n", state.Error)
-			break
-		}
-
-		if state.IsRunning() {
-			if !gearArgs.Quiet {
-				ux.PrintfGreen("OK\n")
-			}
-			break
-		}
-
-		state.SetWarning("Gear '%s:%s' cannot be started", gearArgs.Name, gearArgs.Version)
-		ux.PrintfWarning("%s\n", state.Warning)
 	}
-
-	cmdState = state
 }
 
 
@@ -114,63 +59,133 @@ var gbStopCmd = &cobra.Command{
 	Run: gbStopFunc,
 	Args: cobra.ExactArgs(1),
 }
-
 func gbStopFunc(cmd *cobra.Command, args []string) {
-	var state ux.State
-
 	for range only.Once {
-		state = gearArgs.ProcessArgs(cmd, args)
+		var ga GearArgs
+
+		state := ga.ProcessArgs(rootCmd, args)
 		if state.IsError() {
 			break
 		}
 
-		var found bool
-		found, state = gearArgs.GearRef.FindContainer(gearArgs.Name, gearArgs.Version)
+		state = ga.gbStopFunc()
 		if state.IsError() {
+			break
+		}
+	}
+}
+
+
+func (ga *GearArgs) gbStartFunc() *ux.State {
+	if state := ga.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range only.Once {
+		var found bool
+		found, ga.State = ga.GearRef.FindContainer(ga.Name, ga.Version)
+		if ga.State.IsError() {
+			break
+		}
+		if !found {
+			if !ga.Temporary {
+				ga.Quiet = false
+			}
+
+			if ga.NoCreate {
+				ga.State.SetError("Not creating Gear '%s:%s'.", ga.Name, ga.Version)
+				break
+			}
+
+			ga.gbInstallFunc()
+			if ga.State.IsError() {
+				break
+			}
+
+			//found, ga.State = ga.GearRef.FindContainer(ga.Name, ga.Version)
+			//if ga.State.IsError() {
+			//	break
+			//}
+		}
+
+		if ga.State.IsRunning() {
+			ga.State.SetOk("Gear '%s:%s' already started.", ga.Name, ga.Version)
+			ga.State.SetOutput("")
+			break
+		}
+
+
+		if !ga.Quiet {
+			ux.PrintflnNormal("Starting gear '%s:%s': ", ga.Name, ga.Version)
+		}
+		ga.State = ga.GearRef.Docker.Container.Start()
+		if ga.State.IsError() {
+			ga.State.SetError("Gear '%s:%s' start error - %s", ga.Name, ga.Version, ga.State.GetError())
+			break
+		}
+
+		if ga.State.IsRunning() {
+			ga.State.SetOk("Gear '%s:%s' started OK", ga.Name, ga.Version)
+			ga.State.SetOutput("")
+			break
+		}
+
+		ga.State.SetError("Gear '%s:%s' cannot be started", ga.Name, ga.Version)
+	}
+
+	if !ga.Quiet {
+		ga.State.PrintResponse()
+	}
+	return ga.State
+}
+
+func (ga *GearArgs) gbStopFunc() *ux.State {
+	if state := ga.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range only.Once {
+		var found bool
+		found, ga.State = ga.GearRef.FindContainer(ga.Name, ga.Version)
+		if ga.State.IsError() {
 			break
 		}
 		if !found {
 			break
 		}
-		if state.IsExited() {
-			if !gearArgs.Quiet {
-				ux.PrintfGreen("Gear '%s:%s' already stopped\n", gearArgs.Name, gearArgs.Version)
-			}
+		if ga.State.IsExited() {
+			ga.State.SetOk("Gear image '%s:%s' already stopped.", ga.Name, ga.Version)
+			ga.State.SetOutput("")
 			break
 		}
 
 
-		if !gearArgs.Quiet {
-			ux.Printf("Stopping gear '%s:%s': ", gearArgs.Name, gearArgs.Version)
+		if !ga.Quiet {
+			ux.PrintflnNormal("Stopping gear '%s:%s': ", ga.Name, ga.Version)
 		}
-		state = gearArgs.GearRef.Docker.Container.Stop()
-		if state.IsError() {
-			if !gearArgs.Quiet {
-				ux.PrintfRed("error stopping - %s\n", state.Error)
-			}
-			state.SetError("Gear '%s:%s' stop error - %s", gearArgs.Name, gearArgs.Version, state.Error)
+		ga.State = ga.GearRef.Docker.Container.Stop()
+		if ga.State.IsError() {
+			ga.State.SetError("Gear '%s:%s' stop error - %s", ga.Name, ga.Version, ga.State.GetError())
 			break
 		}
 
-		if state.IsExited() {
-			if !gearArgs.Quiet {
-				ux.PrintfGreen("OK\n")
-			}
+		if ga.State.IsExited() {
+			ga.State.SetOk("Gear '%s:%s' stopped OK", ga.Name, ga.Version)
+			ga.State.SetOutput("")
 			break
 		}
 
-		if state.IsCreated() {
-			if !gearArgs.Quiet {
-				ux.PrintfGreen("OK\n")
-			}
+		if ga.State.IsCreated() {
+			ga.State.SetOk("Gear '%s:%s' stopped OK", ga.Name, ga.Version)
+			ga.State.SetOutput("")
 			break
 		}
 
-		if !gearArgs.Quiet {
-			ux.PrintfWarning("cannot be stopped\n")
-		}
-		state.SetWarning("Gear '%s:%s' cannot be stopped", gearArgs.Name, gearArgs.Version)
+		ga.State.SetWarning("Gear '%s:%s' cannot be stopped", ga.Name, ga.Version)
 	}
 
-	cmdState = state
+	if !ga.Quiet {
+		ga.State.PrintResponse()
+	}
+	return ga.State
 }

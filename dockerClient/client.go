@@ -18,20 +18,28 @@ type DockerGear struct {
 	Ssh       *Ssh
 
 	Debug     bool
+	State     *ux.State
 }
 
-func New() (*DockerGear, ux.State) {
-	var cli DockerGear
-	var state ux.State
+func New(debugMode bool) (*DockerGear, *ux.State) {
+	var gear DockerGear
 
 	for range only.Once {
-		//cli.Debug = d
+		gear.State = gear.State.EnsureNotNil()
+		gear.State.DebugSet(debugMode)
+		gear.Debug = debugMode
+
+		gear.Image = *gear.Image.EnsureNotNil()
+		gear.State.DebugSet(debugMode)
+
+		gear.Container = *gear.Container.EnsureNotNil()
+		gear.State.DebugSet(debugMode)
 
 		var err error
-		cli.Client, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+		gear.Client, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 		//cli.DockerClient, err = client.NewEnvClient()
 		if err != nil {
-			state.SetError("Docker client error: %s", err)
+			gear.State.SetError("Docker client error: %s", err)
 			break
 		}
 
@@ -40,38 +48,46 @@ func New() (*DockerGear, ux.State) {
 		defer cancel()
 
 		//var result types.Ping
-		_, err = cli.Client.Ping(ctx)
+		_, err = gear.Client.Ping(ctx)
 		if err != nil {
-			state.SetError("Docker client error: %s", err)
+			gear.State.SetError("Docker client error: %s", err)
 			break
 		}
 		//fmt.Printf("PING: %v", result)
 
-		cli.Image._Parent = &cli
-		cli.Container._Parent = &cli
+		gear.Image._Parent = &gear
+		gear.Container._Parent = &gear
 	}
 
-	return &cli, state
+	return &gear, gear.State
 }
 
 
-func (gear *DockerGear) EnsureNotNil() ux.State {
-	var state ux.State
+func (gear *DockerGear) IsNil() *ux.State {
+	if state := ux.IfNilReturnError(gear); state.IsError() {
+		return state
+	}
+	gear.State = gear.State.EnsureNotNil()
+	return gear.State
+}
+
+func (gear *DockerGear) IsValid() *ux.State {
+	if state := ux.IfNilReturnError(gear); state.IsError() {
+		return state
+	}
 
 	for range only.Once {
-		if gear == nil {
-			state.SetError("gear is nil")
-			break
-		}
+		gear.State = gear.State.EnsureNotNil()
 
 		if gear.Client == nil {
-			state.SetError("docker client is nil")
+			gear.State.SetError("docker client is nil")
 			break
 		}
 	}
 
-	return state
+	return gear.State
 }
+
 
 func (gear *DockerGear) SetSshStatusLine(s bool) {
 	gear.Ssh.StatusLine.Enable = s

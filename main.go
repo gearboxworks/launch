@@ -8,18 +8,18 @@ import (
 )
 
 func init() {
-	_ = ux.Open()
+	_ = ux.Open("Gearbox: ")
 }
 
 func main() {
-	var state ux.State
+	state := ux.NewState(false)
 
 	for range only.Once {
 		state = cmd.Execute()
 		if state.IsError() {
 			break
 		}
-		state = cmd.GetState()
+		//state = cmd.GetState()
 
 		// @TODO - testing.
 		//ux.PrintfOk("OK - it works\n")
@@ -33,21 +33,20 @@ func main() {
 		//_ = ux.Draw5()
 	}
 
-	exit := 0
 	if state.IsError() {
-		exit = 1
-	}
-	if state.IsExitCodeError() {
-		exit = state.ExitCode
+		state.SetExitCode(1)
 	}
 
 	//if state.IsWarning() {
 	//	exit = 2
 	//}
 
-	state.Print()
+	if state.IsNotOk() {
+		state.PrintResponse()
+	}
+
 	ux.Close()
-	os.Exit(exit)
+	os.Exit(state.ExitCode)
 }
 
 // @TODO - Add '--strict' flag to fail early, (fail as soon as something isn't right EG: don't create or install).

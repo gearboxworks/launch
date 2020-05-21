@@ -8,4 +8,6 @@ const (
 	StateRemoving = "removing"
 	StateExited = "exited"
 	StateDead = "dead"
+
+	OnlyOnce = "1"
 )

@@ -35,119 +35,158 @@ func showArgs(cmd *cobra.Command, args []string) {
 }
 
 type GearArgs struct {
-	Valid bool
+	Name      string
+	Version   string
 
-	Name string
-	Version string
-	Project string
-	Mount string
+	Args      []string
+	Project   string
+	Mount     string
 	Temporary bool
 	SshStatus bool
-	Quiet bool
-	Debug bool
-	Provider gear.Provider
-	GearRef gear.Gear
+	Quiet     bool
+	Debug     bool
+	NoCreate  bool
+
+	Provider  gear.Provider
+	GearRef   gear.Gear
+
+	Valid     bool
+	State     *ux.State
 }
 
-func (gear *GearArgs) ProcessArgs(cmd *cobra.Command, args []string) ux.State {
-	var state ux.State
+
+func (ga *GearArgs) IsNil() *ux.State {
+	if state := ux.IfNilReturnError(ga); state.IsError() {
+		return state
+	}
+	ga.State = ga.State.EnsureNotNil()
+	return ga.State
+}
+
+func (ga *GearArgs) IsValid() *ux.State {
+	if state := ux.IfNilReturnError(ga); state.IsError() {
+		return state
+	}
 
 	for range only.Once {
-		if gear.Valid {
+		if !ga.Valid {
+			ga.State.SetError("gear args is not valid")
+			break
+		}
+
+		ga.State = ga.State.EnsureNotNil()
+	}
+
+	return ga.State
+}
+
+
+func (ga *GearArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
+	for range only.Once {
+		ga.State = ux.NewState(false)
+
+		if ga.Valid {
 			break
 		}
 
 		var err error
 		fl := cmd.Flags()
 
-		//showArgs(cmd, args)
+		ga.Debug, err = fl.GetBool(argDebug)
+		if err != nil {
+			ga.Debug = false
+		}
+		ga.State.DebugSet(ga.Debug)
 
-		if len(args) > 0 {
-			gear.Name = args[0]
-			if strings.Contains(gear.Name, ":") {
-				spl := strings.Split(gear.Name, ":")
-				gear.Name = spl[0]
-				gear.Version = spl[1]
-				//} else if strings.Contains(gear.Name, "-") {
-				//	spl := strings.Split(gear.Name, "-")
-				//	gear.Name = spl[0]
-				//	gear.Version = spl[1]
+
+		ga.Args = args
+		if len(ga.Args) > 0 {
+			ga.Name = ga.Args[0]
+			if strings.Contains(ga.Name, ":") {
+				spl := strings.Split(ga.Name, ":")
+				ga.Name = spl[0]
+				ga.Version = spl[1]
+				//} else if strings.Contains(ga.Name, "-") {
+				//	spl := strings.Split(ga.Name, "-")
+				//	ga.Name = spl[0]
+				//	ga.Version = spl[1]
 			}
 
-			if gear.Version == "" {
-				gear.Version = "latest"
+			if ga.Version == "" {
+				ga.Version = "latest"
 			}
 		}
 
 
-		gear.Project, err = fl.GetString(argProject)
+		ga.Project, err = fl.GetString(argProject)
 		if err != nil {
-			gear.Project = defaults.DefaultPathNone
+			ga.Project = defaults.DefaultPathNone
 		} else {
-			gear.Project = DeterminePath(gear.Project)
+			ga.Project = DeterminePath(ga.Project)
 		}
 
 
-		gear.Mount, err = fl.GetString(argMount)
+		ga.Mount, err = fl.GetString(argMount)
 		if err != nil {
-			gear.Mount = defaults.DefaultPathNone
+			ga.Mount = defaults.DefaultPathNone
 		} else {
-			gear.Mount = DeterminePath(gear.Mount)
+			ga.Mount = DeterminePath(ga.Mount)
 		}
 
 
-		gear.Debug, err = fl.GetBool(argDebug)
+		ga.Quiet, err = fl.GetBool(argQuiet)
 		if err != nil {
-			gear.Debug = false
+			ga.Quiet = false
 		}
 
 
-		gear.Quiet, err = fl.GetBool(argQuiet)
+		ga.SshStatus, err = fl.GetBool(argStatus)
 		if err != nil {
-			gear.Quiet = false
+			ga.SshStatus = false
 		}
 
 
-		gear.SshStatus, err = fl.GetBool(argStatus)
+		ga.Temporary, err = fl.GetBool(argTemporary)
 		if err != nil {
-			gear.SshStatus = false
+			ga.Temporary = false
 		}
 
-
-		gear.Temporary, err = fl.GetBool(argTemporary)
+		ga.NoCreate, err = fl.GetBool(argNoCreate)
 		if err != nil {
-			gear.Temporary = false
+			ga.NoCreate = false
 		}
 
-		gear.Provider.Debug = gear.Debug
-		gear.Provider.Name, _ = fl.GetString(argProvider)
+
+		ga.Provider.Debug = ga.Debug
+		ga.Provider.Name, err = fl.GetString(argProvider)
 		if err != nil {
-			gear.Provider.Name = ""
+			ga.Provider.Name = defaults.DefaultProvider
 		}
 
-		gear.Provider.Host, _ = fl.GetString(argHost)
+		ga.Provider.Host, err = fl.GetString(argHost)
 		if err != nil {
-			gear.Provider.Host = ""
+			ga.Provider.Host = ""
 		}
 
-		gear.Provider.Port, _ = fl.GetString(argPort)
+		ga.Provider.Port, err = fl.GetString(argPort)
 		if err != nil {
-			gear.Provider.Port = ""
+			ga.Provider.Port = ""
 		}
 
-		gear.Provider.Project, _ = fl.GetString(argProject)
+		ga.Provider.Project, err = fl.GetString(argProject)
 		if err != nil {
-			gear.Provider.Project = ""
+			ga.Provider.Project = ""
 		}
 
-		state = gear.Provider.NewProvider()
-		if state.IsError() {
+
+		ga.State = ga.Provider.NewProvider(ga.Debug)
+		if ga.State.IsError() {
 			break
 		}
 
-		state = gear.GearRef.NewGear()
-		//gear.GearRef, state = gear.Provider.NewGear()
-		if state.IsError() {
+		ga.State = ga.GearRef.NewGear(ga.Debug)
+		//ga.GearRef, state = ga.Provider.NewGear()
+		if ga.State.IsError() {
 			break
 		}
 
@@ -157,11 +196,25 @@ func (gear *GearArgs) ProcessArgs(cmd *cobra.Command, args []string) ux.State {
 		//	break
 		//}
 
-		gear.Valid = true
+		ga.Valid = true
 	}
 
-	return state
+	return ga.State
 }
+
+
+func (ga *GearArgs) CreateLinks(c defaults.ExecCommand, version string) *ux.State {
+	if state := ga.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range only.Once {
+		ga.State = ga.GearRef.GearConfig.CreateLinks(c, version)
+	}
+
+	return ga.State
+}
+
 
 func DeterminePath(mp string) string {
 	var ok bool

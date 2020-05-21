@@ -23,6 +23,9 @@ type GitHubRepo struct {
 	Latest	        *Release
 	Selected        *Release
 	BaseDir         *ospaths.Dir
+
+	Debug           bool
+	State           *ux.State
 }
 type ReleasesMap map[Version]*Release
 type Version string
@@ -35,6 +38,9 @@ type Release struct {
 	Instance      *github.RepositoryRelease
 	DlIndex       int
 	IsDownloading bool
+
+	Debug         bool
+	State         *ux.State
 }
 
 type ReleaseSelector struct {
@@ -44,43 +50,36 @@ type ReleaseSelector struct {
 	SpecificVersion string
 	RegexpVersion   string
 	Latest			*bool
+
+	State         *ux.State
 }
 
 
-func New() (*GitHubRepo, ux.State) {
-	var ret *GitHubRepo
-	var state ux.State
+func New(debugMode bool) *GitHubRepo {
+	var ret GitHubRepo
 
 	for range only.Once {
+		ret.State = ret.State.EnsureNotNil()
+		ret.State.DebugSet(debugMode)
+		ret.Debug = debugMode
+
 		p := ospaths.New("")
+		ret.BaseDir = p.UserConfigDir.AddToPath("iso")
+		ret.Map = make(ReleasesMap)
 
-		me := GitHubRepo{}
-		me.BaseDir = p.UserConfigDir.AddToPath("iso")
-		me.Map = make(ReleasesMap)
-
-		state = me.UpdateReleases()
-
-		ret = &me
-
-		//eblog.Debug(entity.VmBoxEntityName, "created new release structre")
+		//ret.State = ret.UpdateReleases()
 	}
 
-	//eblog.LogIfNil(ret, err)
-	//eblog.LogIfError(entity.VmBoxEntityName, err)
-
-	return ret, state
+	return &ret
 }
 
 
-func (ghr *GitHubRepo) ShowReleases() ux.State {
-	var state ux.State
+func (ghr *GitHubRepo) ShowReleases() *ux.State {
+	if state := ghr.IsNil(); state.IsError() {
+		return state
+	}
 
 	for range only.Once {
-		state = ghr.EnsureNotNil()
-		if state.IsError() {
-			break
-		}
-
 		ux.Printf("Latest release: %v\n\n", ghr.Latest)
 		for _, release := range ghr.Map {
 			ux.Printf("Assets for release:	%v\n", release.Instance.GetName())
@@ -110,24 +109,18 @@ func (ghr *GitHubRepo) ShowReleases() ux.State {
 		//eblog.Debug(entity.VmBoxEntityName, "Showing all ISO releases. Latest == %s", ghr.Latest)
 	}
 
-	//eblog.LogIfNil(ghr, err)
-	//eblog.LogIfError(entity.VmBoxEntityName, err)
-
-	return state
+	return ghr.State
 }
 
 
-func (r *Release) ShowRelease() ux.State {
-	var state ux.State
+func (r *Release) ShowRelease() *ux.State {
+	if state := r.IsNil(); state.IsError() {
+		return state
+	}
 
 	for range only.Once {
-		state = r.EnsureNotNil()
-		if state.IsError() {
-			break
-		}
-
 		if r.Instance.Name == nil {
-			state.SetError("no release version specified")
+			r.State.SetError("no release version specified")
 			break
 		}
 
@@ -149,29 +142,22 @@ func (r *Release) ShowRelease() ux.State {
 		//eblog.Debug(entity.VmBoxEntityName, "Showing ISO release for v%s", *r.Instance.Name)
 	}
 
-	//eblog.LogIfNil(r, err)
-	//eblog.LogIfError(entity.VmBoxEntityName, err)
-
-	return state
+	return r.State
 }
 
 
-func (ghr *GitHubRepo) UpdateReleases() ux.State {
-
-	var rm = make(ReleasesMap)
-	var state ux.State
+func (ghr *GitHubRepo) UpdateReleases() *ux.State {
+	if state := ghr.IsNil(); state.IsError() {
+		return state
+	}
 
 	for range only.Once {
-		state = ghr.EnsureNotNil()
-		if state.IsError() {
-			break
-		}
-
 		if ghr.BaseDir == nil {
 			p := ospaths.New("")
 			ghr.BaseDir = p.UserConfigDir.AddToPath("iso")
 		}
 
+		var rm = make(ReleasesMap)
 		ghr.Map = rm
 
 		client := github.NewClient(nil)
@@ -180,7 +166,7 @@ func (ghr *GitHubRepo) UpdateReleases() ux.State {
 
 		releases, _, err := client.Repositories.ListReleases(context.Background(), "gearboxworks", "docker-os", opt)
 		if err != nil {
-			state.SetError("can't fetch GitHub releases")
+			ghr.State.SetError("can't fetch GitHub releases")
 			break
 		}
 
@@ -229,10 +215,7 @@ func (ghr *GitHubRepo) UpdateReleases() ux.State {
 		//eblog.Debug(entity.VmBoxEntityName, "Fetching ISO releases. Latest == %s", ghr.Latest)
 	}
 
-	//eblog.LogIfNil(ghr, err)
-	//eblog.LogIfError(entity.VmBoxEntityName, err)
-
-	return state
+	return ghr.State
 }
 
 
@@ -244,16 +227,13 @@ Updates the following:
    me.VmIsoRelease    Release
 */
 //noinspection GoUnusedParameter
-func (ghr *GitHubRepo) SelectRelease(selector ReleaseSelector) (*Release, ux.State) {
+func (ghr *GitHubRepo) SelectRelease(selector ReleaseSelector) *Release {
 	var r *Release
-	var state ux.State
+	if state := ghr.IsNil(); state.IsError() {
+		return &Release{ State: state }
+	}
 
 	for range only.Once {
-		state = ghr.EnsureNotNil()
-		if state.IsError() {
-			break
-		}
-
 		//err = ghr.UpdateReleases()
 		//if err != nil {
 		//	break
@@ -262,39 +242,31 @@ func (ghr *GitHubRepo) SelectRelease(selector ReleaseSelector) (*Release, ux.Sta
 		// For now just select the latest.
 		ghr.Selected = ghr.Latest
 		r = ghr.Selected
-
-		//eblog.Debug(entity.VmBoxEntityName, "selecting the latest release == %s", ghr.Latest.Version)
 	}
 
-	//eblog.LogIfNil(ghr, err)
-	//eblog.LogIfError(entity.VmBoxEntityName, err)
-
-	return r, state
+	return r
 }
 
 
-func (r *Release) GetIso() ux.State {
-	var state ux.State
+func (r *Release) GetIso() *ux.State {
+	if state := r.IsNil(); state.IsError() {
+		return state
+	}
 
 	for range only.Once {
-		state = r.EnsureNotNil()
-		if state.IsError() {
-			break
-		}
-
 		if r.File.String() == "" {
-			state.SetError(fmt.Sprintf("no Gearbox OS iso file defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String()))
+			r.State.SetError(fmt.Sprintf("no Gearbox OS iso file defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String()))
 			break
 		}
 
 		if r.Url == "" {
-			state.SetError(fmt.Sprintf("no Gearbox OS iso url defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String()))
+			r.State.SetError(fmt.Sprintf("no Gearbox OS iso url defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String()))
 			break
 		}
 
 
 		var numb int
-		numb, state = r.IsIsoFilePresent()
+		numb, r.State = r.IsIsoFilePresent()
 		if numb != IsoFileNeedsToDownload {
 			break
 		}
@@ -340,7 +312,7 @@ func (r *Release) GetIso() ux.State {
 		// check for errors
 		if err := resp.Err(); err != nil {
 			ux.PrintfError("\nDownload failed\n")
-			state.SetError(fmt.Sprintf("ISO download failed VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String()))
+			r.State.SetError(fmt.Sprintf("ISO download failed VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String()))
 			break
 		}
 		ux.PrintfOk("%s VM: Downloaded ISO completed OK.\n",
@@ -354,10 +326,7 @@ func (r *Release) GetIso() ux.State {
 		r.IsDownloading = false
 	}
 
-	//eblog.LogIfNil(r, err)
-	//eblog.LogIfError(entity.VmBoxEntityName, err)
-
-	return state
+	return r.State
 }
 
 
@@ -365,11 +334,11 @@ func (r *Release) GetIso() ux.State {
 //
 //	client := messages.MessageAddress(entity.VmUpdateEntityName)
 //	state := states.New(&client, &client, entity.VmBoxEntityName)
-//	state.SetWant("100%")
-//	state.SetCurrent(states.State(fmt.Sprintf("%d%%", me.DlIndex)))
+//	r.State.SetWant("100%")
+//	r.State.SetCurrent(states.State(fmt.Sprintf("%d%%", me.DlIndex)))
 //
 //	f := messages.MessageAddress(states.ActionUpdate)
-//	msg := f.ConstructMessage(entity.BroadcastEntityName, states.ActionStatus, state.ToMessageText())
+//	msg := f.ConstructMessage(entity.BroadcastEntityName, states.ActionStatus, r.State.ToMessageText())
 //	_ = me.channels.Publish(msg)
 //}
 
@@ -377,38 +346,33 @@ func (r *Release) GetIso() ux.State {
 const IsoFileNeedsToDownload	= 0
 const IsoFileIsDownloading		= 1
 const IsoFileDownloaded			= 2
-func (r *Release) IsIsoFilePresent() (int, ux.State) {
-	var state ux.State
+func (r *Release) IsIsoFilePresent() (int, *ux.State) {
 	var ret int
-	var stat os.FileInfo
+	if state := r.IsNil(); state.IsError() {
+		return 0, state
+	}
 
 	for range only.Once {
-		state = r.EnsureNotNil()
-		if state.IsError() {
-			break
-		}
-
 		if r.File.String() == "" {
-			state.SetError( fmt.Sprintf("no Gearbox OS iso file defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String()))
+			r.State.SetError( fmt.Sprintf("no Gearbox OS iso file defined VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String()))
 			break
 		}
 
-		var err error
-		stat, err = os.Stat(r.File.String())
+		stat, err := os.Stat(r.File.String())
 		if os.IsNotExist(err) {
-			state.SetError("ISO file needs to download from GitHub VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String())
+			r.State.SetError("ISO file needs to download from GitHub VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String())
 			ret = IsoFileNeedsToDownload
 			break
 		}
 
 		if r.IsDownloading {
-			state.SetError("ISO file still downloading VmIsoUrl:%s VmIsoFile:%s Percent:%d", r.Url, r.File.String(), r.DlIndex)
+			r.State.SetError("ISO file still downloading VmIsoUrl:%s VmIsoFile:%s Percent:%d", r.Url, r.File.String(), r.DlIndex)
 			ret = IsoFileIsDownloading
 			break
 		}
 
 		if stat.Size() != r.Size {
-			state.SetError("ISO file needs to re-download from GitHub VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String())
+			r.State.SetError("ISO file needs to re-download from GitHub VmIsoUrl:%s VmIsoFile:%s", r.Url, r.File.String())
 			ret = IsoFileNeedsToDownload
 			break
 		}
@@ -424,83 +388,52 @@ func (r *Release) IsIsoFilePresent() (int, ux.State) {
 		//eblog.Debug(entity.VmBoxEntityName, "ISO already fetched from '%s' and saved to '%s'", r.Url, r.File.String())
 	}
 
-	//eblog.LogIfNil(r, err)
-	//eblog.LogIfError(entity.VmBoxEntityName, err)
-
-	return ret, state
+	return ret, r.State
 }
 
 
-func (ghr *GitHubRepo) EnsureNotNil() ux.State {
-	var state ux.State
+func (ghr *GitHubRepo) IsNil() *ux.State {
+	if state := ux.IfNilReturnError(ghr); state.IsError() {
+		return state
+	}
+	ghr.State = ghr.State.EnsureNotNil()
+	return ghr.State
+}
 
-	for range only.Once {
-		if ghr == nil {
-			state.SetError("releases is nil")
-			break
-		}
+func (ghr *GitHubRepo) IsValid() *ux.State {
+	if state := ux.IfNilReturnError(ghr); state.IsError() {
+		return state
 	}
 
-	return state
-}
-
-//noinspection GoUnusedExportedFunction
-func EnsureReleasesNotNil(me *GitHubRepo) ux.State {
-	return me.EnsureNotNil()
-}
-
-
-func (m *ReleasesMap) EnsureNotNil() ux.State {
-	var state ux.State
-
 	for range only.Once {
-		if m == nil {
-			state.SetError("Release is nil")
-			break
-		}
+		ghr.State = ghr.State.EnsureNotNil()
 	}
 
-	return state
-}
-
-//noinspection GoUnusedExportedFunction
-func EnsureReleasesMapNotNil(me *ReleasesMap) ux.State {
-	return me.EnsureNotNil()
+	return ghr.State
 }
 
 
-func (r *Release) EnsureNotNil() ux.State {
-	var state ux.State
+func (r *Release) IsNil() *ux.State {
+	if state := ux.IfNilReturnError(r); state.IsError() {
+		return state
+	}
+	r.State = r.State.EnsureNotNil()
+	return r.State
+}
 
-	for range only.Once {
-		if r == nil {
-			state.SetError("Release is nil")
-			break
-		}
+
+func (r *Release) IsValid() *ux.State {
+	if state := ux.IfNilReturnError(r); state.IsError() {
+		return state
 	}
 
-	return state
+	for range only.Once {
+		r.State = r.State.EnsureNotNil()
+	}
+
+	return r.State
 }
 
-//noinspection GoUnusedExportedFunction
-func EnsureReleaseNotNil(me *Release) ux.State {
-	return me.EnsureNotNil()
-}
-
-
-
-
-//func EnsureReleaseNotNil(rm *Release) (sts status.Status) {
-//	if rm == nil {
-//		sts = status.Fail(&status.Args{
-//			Message: "unexpected error",
-//			Help:    help.ContactSupportHelp(), // @TODO need better support here
-//			Data:    VmStateUnknown,
-//		})
-//	}
-//
-//	return sts
-//}
 
 //type ReleaseAsset struct {
 //	ID                 *int64     `json:"id,omitempty"`
