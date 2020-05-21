@@ -99,6 +99,7 @@ func (ga *GearArgs) gbStartFunc() *ux.State {
 
 			ga.gbInstallFunc()
 			if ga.State.IsError() {
+				ga.State.SetError("Cannot start Gear '%s:%s'.", ga.Name, ga.Version)
 				break
 			}
 

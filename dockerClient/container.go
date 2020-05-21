@@ -300,6 +300,8 @@ func (c *Container) ContainerCreate(gearName string, gearVersion string, gearMou
 					break
 				}
 
+				ux.PrintflnNormal("Downloading Gear '%s:%s'.", gearName, gearVersion)
+
 				// Pull Gear image.
 				c._Parent.Image.ID = gearName
 				c._Parent.Image.Name = gearName
@@ -318,7 +320,7 @@ func (c *Container) ContainerCreate(gearName string, gearVersion string, gearMou
 				}
 			}
 			if !ok {
-				c.State.SetError("error downloading Gear image: %s", c.State.GetError())
+				c.State.SetError("Cannot install Gear image '%s:%s' - %s.", gearName, gearVersion, c.State.GetError())
 				break
 			}
 			//c.State.Clear()

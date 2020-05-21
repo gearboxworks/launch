@@ -160,7 +160,7 @@ func (ga *GearArgs) gbShellFunc() *ux.State {
 	for range only.Once {
 		ga.State = ga.gbStartFunc()
 		if !ga.State.IsRunning() {
-			ga.State.SetError("container not started")
+			ga.State.SetError("Cannot shell out to Gear '%s:%s.'", ga.Name, ga.Version)
 			break
 		}
 

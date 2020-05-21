@@ -98,6 +98,7 @@ func (gear *DockerGear) ContainerSsh(interactive bool, statusLine bool, mountPat
 			GearName:    gear.Container.Name,
 			GearVersion: gear.Container.Version,
 			CmdArgs:     cmdArgs,
+			State:       ux.NewState(gear.Debug),
 		})
 
 

@@ -179,7 +179,6 @@ func (ga *GearArgs) gbInstallFunc() *ux.State {
 		}
 		ga.State = ga.GearRef.Docker.Container.ContainerCreate(ga.Name, ga.Version, ga.Project)
 		if ga.State.IsError() {
-			ga.State.SetError("Gear '%s:%s' install error - %s", ga.Name, ga.Version, ga.State.GetError())
 			break
 		}
 

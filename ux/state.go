@@ -101,6 +101,9 @@ func IfNilReturnError(ref interface{}) *State {
 	}
 
 	state := SearchStructureForUxState(ref)
+	if state == nil {
+		state = NewState(false)
+	}
 	return state
 	//return ref.(*State)
 }
