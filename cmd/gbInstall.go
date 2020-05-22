@@ -194,23 +194,23 @@ func (ga *GearArgs) gbInstallFunc() *ux.State {
 
 		if found {
 			if !ga.Temporary {
-				// Create symlinks.
-				//ga.GearRef.GearConfig.CreateLinks(defaults.RunAs, ga.Name, ga.Version)
-				ga.State = ga.GearRef.GearConfig.CreateLinks(defaults.RunAs, ga.Version)
+				found, ga.State = ga.GearRef.FindImage(ga.Name, ga.Version)
+				if found {
+					// Create symlinks.
+					ga.GearRef.GearConfig.CreateLinks(defaults.RunAs, ga.Version)
+				}
 			}
 
 			ga.State.SetOk("Gear '%s:%s' already installed.", ga.Name, ga.Version)
 			ga.State.SetOutput("")
 			break
 		}
-		//ga.State.Clear()
 
 
 		ga.State = ga.GearRef.Docker.NetworkCreate(defaults.GearboxNetwork)
 		if ga.State.IsError() {
 			break
 		}
-		//ga.State.Clear()
 
 
 		if !ga.Quiet {
@@ -262,6 +262,14 @@ func (ga *GearArgs) gbUninstallFunc() *ux.State {
 			break
 		}
 		if !found {
+			if !ga.Temporary {
+				found, ga.State = ga.GearRef.FindImage(ga.Name, ga.Version)
+				if found {
+					// Create symlinks.
+					ga.GearRef.GearConfig.RemoveLinks(defaults.RunAs, ga.Version)
+				}
+			}
+
 			ga.State.SetOk("Gear '%s:%s' already removed.", ga.Name, ga.Version)
 			ga.State.SetOutput("")
 			break

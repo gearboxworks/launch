@@ -137,6 +137,10 @@ func (gear *Gear) FindImage(gearName string, gearVersion string) (bool, *ux.Stat
 			break
 		}
 
+		if gear.GearConfig == nil {
+			gear.GearConfig = gear.Docker.Image.GearConfig
+		}
+
 		//@TODO - TO CHECK
 		//state = gear.Status()
 		//if state.IsError() {

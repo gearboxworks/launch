@@ -1,13 +1,25 @@
+VERSION := $(shell tools/getVersion.sh)
+COMMENT := $(shell tools/getComment.sh)
+
 all:
-	@cat Makefile
-	@echo git tag -a v1.4 -m "Better error handling"
-	@echo git push origin v1.4
+	@echo "Current launch version is:	v$(VERSION)"
+	@echo "Last commit message is:		'$(COMMENT)'"
+	@#echo git tag -a v$(VERSION) -m '"$(COMMENT)"'
+	@#echo git push origin v$(VERSION)
+	@echo ""
+	@echo "build	- Build for local testing."
+	@echo "release	- Build for published release."
+	@echo "push	- Push repo to GitHub."
+	@echo "sync	- Used only by MickMake"
 
 build:
 	@goreleaser --snapshot --skip-publish --rm-dist
 
 release:
-	@goreleaser --rm-dist
+	@echo "Current launch version is v$(VERSION)"
+	@echo git tag -a v$(VERSION) -m "Release v$(VERSION)"
+	@echo git push origin v$(VERSION)
+	@echo goreleaser --rm-dist
 
 sync:
 	@rsync -HvaxP dist/launch_darwin_amd64/launch mick@macpro:~/Documents/GitHub/containers/docker-template/bin/Darwin/launch
@@ -18,6 +30,6 @@ push:
 	@echo "Pushing to: $(shell git branch)"
 	@git config core.hooksPath .git-hooks
 	@git add .
-	@git commit .
+	@git commit -m '"$(COMMENT)"' .
 	@git push
 

@@ -18,12 +18,15 @@ func main() {
 
 // @TODO - Add '--strict' flag to fail early, (fail as soon as something isn't right EG: don't create or install).
 
-// @TODO - When piping, don't print ANSI codes.
+// @TODO - Add '--bin-path' flag to allow alternative path links.
+
+// @TODO - Change configuration to point to 'launch.json' next to the launch binary.
+// @TODO -		Use '$HOME/.gearbox/launch.json' as a fallback.
 
 // @TODO - Add LABEL showing source repo for container/image.
 
 // @TODO - '-t' flag should probably start the container as an 'exec' rather than a full SSH.
-// @TODO -		- Will still have to perform an SSHFS mount when using the '-m' flag.
+// @TODO -		Will still have to perform an SSHFS mount when using the '-m' flag.
 
 // @TODO - Consider changing 'list' to 'show' OR 'info'.
 // @TODO - Add several sub-commands to 'list' or have them as flags.
@@ -44,6 +47,8 @@ func main() {
 // @TODO - Add several sub-commands to 'version' or have them as flags.
 // @TODO -		'--update'	OR 'version update'	- update the current launch binary.
 // @TODO - Add '--update' flag to 'version' command OR add 'self-update' command.
+
+// @DONE - When piping, don't print ANSI codes.
 
 // @DONE - Needs to be a better way to determine correct image/container validity. The current method works, but is a little fragile.
 

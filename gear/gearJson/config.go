@@ -85,6 +85,7 @@ func (gc *GearConfig) CreateLinks(c defaults.ExecCommand, version string) *ux.St
 	for range OnlyOnce {
 		links := make(map[string]string)
 		var failed bool
+
 		for k, v := range gc.Run.Commands {
 			var err error
 			var dstFile string
@@ -141,10 +142,13 @@ func (gc *GearConfig) CreateLinks(c defaults.ExecCommand, version string) *ux.St
 				failed = true
 			}
 		}
-		gc.State.SetDebug("DEBUGIT")
 
 		if failed {
+			gc.State.SetWarning("Failed to add all application links.")
 			for k, v := range links {
+				if v == "linked" {
+					continue
+				}
 				ux.PrintflnWarning("%s - %s", k, v)
 			}
 			break
@@ -163,17 +167,23 @@ func (gc *GearConfig) RemoveLinks(c defaults.ExecCommand, version string) *ux.St
 	}
 
 	for range OnlyOnce {
-		var removed bool
-		for k := range gc.Run.Commands {
+		links := make(map[string]string)
+		var failed bool
+
+		for k, v := range gc.Run.Commands {
 			var err error
 			var dstFile string
 			var linkStat os.FileInfo
 
 			if k == "default" {
-				continue
+				k = filepath.Base(v)
 			}
 
-			dstFile, err = filepath.Abs(fmt.Sprintf("%s%c%s-%s", c.Dir, filepath.Separator, k, version))
+			if version == "latest" {
+				dstFile, err = filepath.Abs(fmt.Sprintf("%s%c%s", c.Dir, filepath.Separator, k))
+			} else {
+				dstFile, err = filepath.Abs(fmt.Sprintf("%s%c%s-%s", c.Dir, filepath.Separator, k, version))
+			}
 			if err != nil {
 				continue
 			}
@@ -182,13 +192,18 @@ func (gc *GearConfig) RemoveLinks(c defaults.ExecCommand, version string) *ux.St
 			if err != nil {
 				continue
 			}
-
 			if linkStat == nil {
 				// Symlink doesn't exist.
 				continue
 			}
 
-			removed = true
+			fpel, err := filepath.EvalSymlinks(dstFile)
+			//fmt.Printf("%s\n", fpel)
+			if fpel != c.FullPath {
+				links[k] = "incorrect link"
+				failed = true
+				continue
+			}
 
 			l, _ := os.Readlink(dstFile)
 			if l == defaults.BinaryName {
@@ -199,10 +214,17 @@ func (gc *GearConfig) RemoveLinks(c defaults.ExecCommand, version string) *ux.St
 				err = os.Remove(dstFile)
 			}
 		}
+		gc.State.SetDebug("DEBUGIT")
 
-		if removed {
-			ux.PrintfOk("Removed application links.\n")
+		if failed {
+			gc.State.SetWarning("Failed to remove all application links.")
+			for k, v := range links {
+				ux.PrintflnWarning("%s - %s", k, v)
+			}
+			break
 		}
+
+		gc.State.SetOk("Removed application links.")
 	}
 
 	return gc.State

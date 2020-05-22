@@ -124,9 +124,9 @@ func initConfig() {
 	}
 }
 
-//var gearArgs GearArgs
 var _cmdState *ux.State
 var cfgFile string
+
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command {
@@ -137,6 +137,7 @@ var rootCmd = &cobra.Command {
 	TraverseChildren: true,
 	ValidArgs: []string{"run", "shell", "test"},
 }
+
 
 func gbRootFunc(cmd *cobra.Command, args []string) {
 	_cmdState = ux.NewState(false)

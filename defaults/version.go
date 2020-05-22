@@ -1,3 +1,6 @@
 package defaults
 
-const BinaryVersion = "1.6.4"
+const (
+	BinaryName = "launch"
+	BinaryVersion = "1.6.5"
+)

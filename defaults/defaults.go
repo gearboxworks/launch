@@ -8,7 +8,6 @@ const (
 	Timeout = time.Second * 2
 	DefaultProject = "/home/gearbox/projects/default"
 	GearboxNetwork = "gearboxnet"
-	BinaryName = "launch"
 	DefaultUnitTestCmd = "/etc/gearbox/unit-tests/run.sh"
 	DefaultCommandName = "default"
 
