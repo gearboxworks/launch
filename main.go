@@ -16,6 +16,15 @@ func main() {
 	os.Exit(state.ExitCode)
 }
 
+
+// @TODO - Add '--sshfs-host' OR '--mount-host' flag, (string). When set to:
+// @TODO -		'' - Connect via direct SSH to host, (host.docker.internal).
+// @TODO -		'docker' - Connect via direct SSH to host, (host.docker.internal).
+// @TODO -			- Enabled automatically when Docker server is local.
+// @TODO -		'tunnel' - Connect via SSH tunnel, (host.docker.internal through client SSH).
+// @TODO -			- Enabled automatically when Docker server is remote.
+// @TODO -		'*' - Connect via direct SSH to host, (specified hostname).
+
 // @TODO - Add '--strict' flag to fail early, (fail as soon as something isn't right EG: don't create or install).
 
 // @TODO - Add '--bin-path' flag to allow alternative path links.

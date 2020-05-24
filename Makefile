@@ -17,9 +17,12 @@ build:
 
 release:
 	@echo "Current launch version is v$(VERSION)"
-	@echo git tag -a v$(VERSION) -m "Release v$(VERSION)"
-	@echo git push origin v$(VERSION)
-	@echo goreleaser --rm-dist
+	@git add .
+	@git commit -a -m "Latest push"
+	@git push
+	@git tag -a v$(VERSION) -m '"Release v$(VERSION)"'
+	@git push origin v$(VERSION)
+	@goreleaser --rm-dist
 
 sync:
 	@rsync -HvaxP dist/launch_darwin_amd64/launch mick@macpro:~/Documents/GitHub/containers/docker-template/bin/Darwin/launch

@@ -135,7 +135,7 @@ var rootCmd = &cobra.Command {
 	Long: ux.SprintfBlue(`Gearbox gear launcher.`),
 	Run: gbRootFunc,
 	TraverseChildren: true,
-	ValidArgs: []string{"run", "shell", "test"},
+	//ValidArgs: []string{"run", "shell", "test"},
 }
 
 

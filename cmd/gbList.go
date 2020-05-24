@@ -25,11 +25,11 @@ func init() {
 var gbListCmd = &cobra.Command{
 	Use:   "list [gear name]",
 	Aliases: []string{"ls", "show"},
-	//SuggestFor: []string{"ls", "show"},
 	Short: ux.SprintfBlue("List a Gearbox gear"),
 	Long: ux.SprintfBlue("List a Gearbox gear."),
 	Example: ux.SprintfWhite("launch list golang"),
 	DisableFlagParsing: false,
+	DisableFlagsInUseLine: false,
 	Run: gbListFunc,
 	Args: cobra.RangeArgs(0, 1),
 }

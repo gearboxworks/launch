@@ -28,11 +28,12 @@ func init() {
 // gbRunCmd represents the gbRun command
 var gbRunCmd = &cobra.Command{
 	Use:   "run <gear name> [gear args]",
+	Aliases: []string{},
 	Short: ux.SprintfBlue("Run default Gearbox gear command"),
 	Long: ux.SprintfBlue("Run default Gearbox gear command."),
+	Example: ux.SprintfWhite("launch run golang build"),
 	DisableFlagParsing: true,
 	DisableFlagsInUseLine: true,
-	Example: ux.SprintfWhite("launch run golang build"),
 	Run: gbRunFunc,
 	Args: cobra.MinimumNArgs(1),
 }
