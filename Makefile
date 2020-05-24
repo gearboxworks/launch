@@ -19,7 +19,7 @@ release:
 	@echo "Current launch version is v$(VERSION)"
 	@git add .
 	@git commit -a -m "Latest push"
-	@git push
+	-@git push
 	@git tag -a v$(VERSION) -m '"Release v$(VERSION)"'
 	@git push origin v$(VERSION)
 	@goreleaser --rm-dist
