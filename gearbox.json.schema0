@@ -1,0 +1,33 @@
+{
+	"state": "production",
+	"organization": "gearboxworks",
+	"name": "adminer",
+	"maintainer": "Gearbox Team <team@gearbox.works>",
+	"class": "admin",
+	"network": "--network gearboxnet",
+	"ports": [
+		"80"
+	],
+	"volumes": "",
+	"restart": "--restart no",
+	"run": "",
+	"args": "/usr/local/bin/php -S 0.0.0.0:80 -t /var/www/html",
+	"env": {
+		"ADMINER_USER": "gearbox"
+	},
+	"refurl": "https://www.adminer.org/",
+	"versions": {
+		"4.2.0": {
+			"majorversion": "4.2",
+			"latest": false,
+			"ref": "adminer:4.2.0",
+			"base": "gearboxworks/gearbox-base:alpine-3.3"
+		},
+		"4.7.6": {
+			"majorversion": "4.7",
+			"latest": true,
+			"ref": "adminer:4.7.6",
+			"base": "gearboxworks/gearbox-base:alpine-3.9"
+		}
+	}
+}

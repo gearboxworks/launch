@@ -1,0 +1,79 @@
+{{- if .Json.meta }}
+{{- else }}
+{
+	"schema": "gear-1",
+	"meta": {
+		"state": "{{ .Json.state }}",
+		"organization": "{{ with .Json.organization }}{{ . }}{{ else }}gearboxworks{{ end }}",
+		"name": "{{ .Json.name }}",
+		"label": "{{ with .Json.label }}{{ .Json.label }}{{ else }}{{ title .Json.name }}{{ end }}",
+		"maintainer": "{{ with .Json.maintainer }}{{ . }}{{ else }}Gearbox Team <team@gearbox.works>{{ end }}",
+		"class": "{{ with .Json.class }}{{ . }}{{ else }}unknown{{ end }}",
+		"refurl": "{{ with .Json.refurl }}{{ . }}{{ else }}unknown{{ end }}"
+	},
+	"build": {
+		"ports": {
+{{- $str := "" }}
+{{- range $k, $v := .Json.ports }}
+{{- $p := "unknown" }}
+{{- if eq $v "80" }}
+{{- $p = "http" }}
+{{- else if eq $v "443" }}
+{{- $p = "https" }}
+{{- else if eq $v "9970" }}
+{{- $p = "gearapi" }}
+{{- else if eq $v "22" }}
+{{- $p = "ssh" }}
+{{- else if eq $v "3306" }}
+{{- $p = "mysql" }}
+{{- else if eq $v "1313" }}
+{{- $p = "hugo" }}
+{{- else if eq $v "25" }}
+{{- $p = "smtp" }}
+{{- else if eq $v "11211" }}
+{{- $p = "memcache" }}
+{{- else if eq $v "9000" }}
+{{- $p = "php-fpm" }}
+{{- else if eq $v "5432" }}
+{{- $p = "postgres" }}
+{{- else if eq $v "6379" }}
+{{- $p = "redis" }}
+{{- end }}
+{{- $str = printf "%s\x0a			\x22%s\x22: \x22%s\x22," $str $p $v }}
+{{- end }}
+{{ trimSuffix "," $str }}
+		},
+		"run": "{{ with .Json.run }}{{ . }}{{ end }}",
+		"args": "{{ with .Json.args }}{{ . }}{{ end }}",
+		"env": {
+{{- $str := "" }}
+{{- range $k, $v := .Json.env }}
+{{- $str = printf "%s\x0a			\x22%s\x22: \x22%s\x22," $str ($k | ToUpper) $v }}
+{{- end }}
+{{ trimSuffix "," $str }}
+		},
+		"network": "{{ with .Json.network }}{{ . }}{{ end }}",
+		"volumes": "{{ with .Json.volumes }}{{ . }}{{ end }}",
+		"restart": "{{ with .Json.restart }}{{ . }}{{ end }}"
+	},
+	"run": {
+	},
+	"project": {
+	},
+	"extensions": {
+	},
+	"versions": {
+{{- $s := keys .Json.versions | sortAlpha }}
+{{- range $k, $v := $s }}
+{{- $e := get $.Json.versions $v }}
+		"{{ $v }}": {
+			"majorversion": "{{ $e.majorversion }}",
+			"latest": {{ $e.latest }},
+			"ref": "{{ $e.ref }}",
+			"base": "{{ $e.base }}"
+		},
+{{- end }}
+		"": {}
+	}
+}
+{{- end }}

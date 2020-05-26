@@ -1,0 +1,237 @@
+{{- $version := FindInMap .Json.versions .Env.GB_VERSION }}
+{{- if not $version }}
+################################################################################
+# No version
+
+{{- else if not $version.base }}
+################################################################################
+# No base
+
+{{- else if not .Json.meta.name }}
+################################################################################
+# No name
+
+{{- else if not $version.ref }}
+################################################################################
+# {{ .CreationWarning }}
+# {{ .CreationInfo }}
+# Plain Docker container for docker-{{ .Json.meta.name }} based off {{ $version.base }}
+
+ARG VERSION={{ .Env.GB_VERSION }}
+
+# 1. First reference the gearbox-base image.
+FROM {{ $version.base }}
+ARG VERSION
+ARG GEARBOX_ENTRYPOINT
+ARG GEARBOX_ENTRYPOINT_ARGS
+
+# 2. Set up env variables.
+MAINTAINER {{ with .Json.meta.maintainer }}{{ . }}{{ else }}Unknown{{ end }}
+ENV GEARBOX_CONTAINER_NAME "docker-{{ .Json.meta.name }}"
+ENV GEARBOX_CONTAINER_VERSION ${VERSION}
+ENV GEARBOX_ENTRYPOINT ${GEARBOX_ENTRYPOINT}
+ENV GEARBOX_ENTRYPOINT_ARGS ${GEARBOX_ENTRYPOINT_ARGS}
+LABEL gearbox.json='{{ .JsonString }}'
+LABEL gearbox.version='{{ .Env.GB_VERSION }}'
+ENV GEARBOX_VERSION "{{ .Env.GB_VERSION }}"
+{{- range $k, $v := .Json.meta }}
+	{{- if eq $k "versions" }}
+# SKIP {{ $k }}
+	{{- else if eq $k "env" }}
+# SKIP {{ $k }}
+	{{- else }}
+LABEL container.{{ $k }}="{{ $v }}"
+ENV GEARBOX_{{ $k | ToUpper }} "{{ $v }}"
+	{{- end }}
+{{- end }}
+
+{{- range $k, $v := .Json.build }}
+	{{- if eq $k "versions" }}
+# SKIP {{ $k }}
+	{{- else if eq $k "env" }}
+# SKIP {{ $k }}
+	{{- else }}
+LABEL container.{{ $k }}="{{ $v }}"
+ENV GEARBOX_{{ $k | ToUpper }} "{{ $v }}"
+	{{- end }}
+{{- end }}
+
+{{- range $k, $v := $version }}
+LABEL container.{{ $k }}="{{ $v }}"
+ENV GEARBOX_{{ $k | ToUpper }} "{{ $v }}"
+{{- end }}
+
+{{- range $k, $v := .Json.build.env }}
+ENV {{ $k | ToUpper }} "{{ $v }}"
+{{- end }}
+
+# 3. Now copy the local files specific to this container.
+COPY build /etc/gearbox
+COPY versions/${VERSION}/build /etc/gearbox
+
+# 4. Run the base.sh script to set everything up.
+RUN /bin/sh /etc/gearbox/build/base.sh
+
+# 5. Run the {{ .Json.meta.name }}.sh script to set everything up.
+RUN /bin/sh /etc/gearbox/build/{{ .Json.meta.name }}.sh
+
+# 6. Expose ports.
+EXPOSE 22 9970 {{ range .Json.build.ports }}{{ . }} {{ end }}
+WORKDIR /home/gearbox/projects
+
+# END
+################################################################################
+
+{{- else if eq $version.ref "base" }}
+################################################################################
+# {{ .CreationWarning }}
+# {{ .CreationInfo }}
+# Base Reference Docker container for docker-{{ .Json.meta.name }} based off {{ $version.base }}
+
+ARG VERSION={{ .Env.GB_VERSION }}
+
+# 1. First reference the gearbox-base image.
+FROM {{ $version.base }}
+ARG VERSION
+# ARG GEARBOX_ENTRYPOINT
+# ARG GEARBOX_ENTRYPOINT_ARGS
+
+# 2. Set up env variables.
+MAINTAINER {{ with .Json.meta.maintainer }}{{ . }}{{ else }}Unknown{{ end }}
+ENV GEARBOX_CONTAINER_NAME "docker-{{ .Json.meta.name }}"
+ENV GEARBOX_CONTAINER_VERSION ${VERSION}
+LABEL gearbox.json='{{ .JsonString }}'
+LABEL gearbox.version='{{ .Env.GB_VERSION }}'
+ENV GEARBOX_VERSION "{{ .Env.GB_VERSION }}"
+ENV GEARBOX_BASE_VERSION "{{ .Env.GB_VERSION }}"
+ENV GEARBOX_BASE_REF "{{ $version.ref }}"
+{{- range $k, $v := .Json.meta }}
+	{{- if eq $k "versions" }}
+# SKIP {{ $k }}
+	{{- else if eq $k "env" }}
+# SKIP {{ $k }}
+	{{- else }}
+LABEL container.{{ $k }}="{{ $v }}"
+ENV GEARBOX_{{ $k | ToUpper }} "{{ $v }}"
+	{{- end }}
+{{- end }}
+
+{{- range $k, $v := .Json.build }}
+	{{- if eq $k "versions" }}
+# SKIP {{ $k }}
+	{{- else if eq $k "env" }}
+# SKIP {{ $k }}
+	{{- else }}
+LABEL container.{{ $k }}="{{ $v }}"
+ENV GEARBOX_{{ $k | ToUpper }} "{{ $v }}"
+	{{- end }}
+{{- end }}
+
+{{- range $k, $v := $version }}
+LABEL container.{{ $k }}="{{ $v }}"
+ENV GEARBOX_{{ $k | ToUpper }} "{{ $v }}"
+{{- end }}
+
+{{- range $k, $v := .Json.build.env }}
+ENV {{ $k | ToUpper }} "{{ $v }}"
+{{- end }}
+
+# 3. Now copy the local files specific to this container.
+COPY build /etc/gearbox
+COPY versions/${VERSION}/build /etc/gearbox
+
+# 4. Run the base.sh script to set everything up.
+RUN /bin/sh /etc/gearbox/build/base.sh
+
+# 6. Expose ports.
+EXPOSE {{ range .Json.build.ports }}{{ . }} {{ end }}
+WORKDIR /home/gearbox/projects
+USER root
+
+# 7. Run S6 init.
+CMD ["/init"]
+
+# END
+################################################################################
+
+{{- else }}
+################################################################################
+# {{ .CreationWarning }}
+# {{ .CreationInfo }}
+# Referenced Docker container for docker-{{ .Json.meta.name }} based off {{ $version.base }} with {{ $version.ref }} overlayed.
+
+ARG VERSION={{ .Env.GB_VERSION }}
+
+# 1. First reference the gearbox-base image.
+FROM {{ $version.base }} as gearbox-base
+
+# 2. Next reference the third party image.
+FROM {{ $version.ref }}
+ARG VERSION
+ARG GEARBOX_ENTRYPOINT
+ARG GEARBOX_ENTRYPOINT_ARGS
+USER root
+
+# 3. Copy the build directory over from gearbox-base image.
+COPY --from=gearbox-base /etc/gearbox /etc/gearbox
+
+# 4. Set up env variables.
+MAINTAINER {{ with .Json.meta.maintainer }}{{ . }}{{ else }}Unknown{{ end }}
+ENV GEARBOX_CONTAINER_NAME "docker-{{ .Json.meta.name }}"
+ENV GEARBOX_CONTAINER_VERSION ${VERSION}
+ENV GEARBOX_ENTRYPOINT ${GEARBOX_ENTRYPOINT}
+ENV GEARBOX_ENTRYPOINT_ARGS ${GEARBOX_ENTRYPOINT_ARGS}
+LABEL gearbox.json='{{ .JsonString }}'
+LABEL gearbox.version='{{ .Env.GB_VERSION }}'
+ENV GEARBOX_VERSION "{{ .Env.GB_VERSION }}"
+{{- range $k, $v := .Json.meta }}
+	{{- if eq $k "versions" }}
+# SKIP {{ $k }}
+	{{- else if eq $k "env" }}
+# SKIP {{ $k }}
+	{{- else }}
+LABEL container.{{ $k }}="{{ $v }}"
+ENV GEARBOX_{{ $k | ToUpper }} "{{ $v }}"
+	{{- end }}
+{{- end }}
+
+{{- range $k, $v := .Json.build }}
+	{{- if eq $k "versions" }}
+# SKIP {{ $k }}
+	{{- else if eq $k "env" }}
+# SKIP {{ $k }}
+	{{- else }}
+LABEL container.{{ $k }}="{{ $v }}"
+ENV GEARBOX_{{ $k | ToUpper }} "{{ $v }}"
+	{{- end }}
+{{- end }}
+
+{{- range $k, $v := $version }}
+LABEL container.{{ $k }}="{{ $v }}"
+ENV GEARBOX_{{ $k | ToUpper }} "{{ $v }}"
+{{- end }}
+
+{{- range $k, $v := .Json.build.env }}
+ENV {{ $k | ToUpper }} "{{ $v }}"
+{{- end }}
+
+# 5. Now copy the local files specific to this container.
+COPY build /etc/gearbox
+COPY versions/${VERSION}/build /etc/gearbox
+
+# 6. Run the base.sh script to set everything up.
+RUN /bin/sh /etc/gearbox/build/base.sh
+
+# 7. Run the {{ .Json.meta.name }}.sh script to set everything up.
+RUN /bin/sh /etc/gearbox/build/{{ .Json.meta.name }}.sh
+
+# 8. Expose ports.
+EXPOSE 22 9970 {{ range .Json.build.ports }}{{ . }} {{ end }}
+WORKDIR /home/gearbox/projects
+{{ with .Json.build.inner }}{{ . }}{{ end }}
+CMD ["/init"]
+
+# END
+################################################################################
+
+{{- end }}

@@ -1,0 +1,36 @@
+name: release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build_docker_images:
+    runs-on: ubuntu-latest
+    name: Building Images for ${{ github.ref }}
+    env:
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    steps:
+    - name: 00-env
+      if: env.DOCKERHUB_TOKEN == ''
+      run: exit 1
+    - name: 01-pull
+      id: pull
+      uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+    - name: 02-list
+      run: ls -l
+    - name: 03-build
+      # run: make ${{steps.pull.args }}
+      run: make build-all
+    - name: 04-test
+      run: |
+        eval "$(ssh-agent -s)"
+        ssh-add - <<< "${SSH_KEY}"
+        make test-all
+    - name: 05-push
+      run: |
+        docker login --username gearboxbuild --password "${DOCKERHUB_TOKEN}"
+        make dockerhub-all
