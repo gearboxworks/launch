@@ -2,5 +2,5 @@ package defaults
 
 const (
 	BinaryName = "launch"
-	BinaryVersion = "1.6.5"
+	BinaryVersion = "1.6.6"
 )

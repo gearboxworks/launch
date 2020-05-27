@@ -30,13 +30,66 @@ builds:
 
 
 ################################################################################
+# .goreleaser.yml
 archives:
-- replacements:
-    darwin: Darwin
-    linux: Linux
-    windows: Windows
-    386: i386
-    amd64: x86_64
+  -
+    # ID of this archive.
+    # Defaults to `default`.
+    id: my-archive
+
+    # Builds reference which build instances should be archived in this archive.
+    builds:
+    - default
+
+    # Archive name template.
+    # Defaults:
+    # - if format is `tar.gz`, `tar.xz`, `gz` or `zip`:
+    #   - `{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}`
+    # - if format is `binary`:
+    #   - `{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}`
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+    # Replacements for GOOS and GOARCH in the archive name.
+    # Keys should be valid GOOSs or GOARCHs.
+    # Values are the respective replacements.
+    # Default is empty.
+    replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+
+    # Set to true, if you want all files in the archive to be in a single directory.
+    # If set to true and you extract the archive 'goreleaser_Linux_arm64.tar.gz',
+    # you get a folder 'goreleaser_Linux_arm64'.
+    # If set to false, all files are extracted separately.
+    # You can also set it to a custom folder name (templating is supported).
+    # Default is false.
+    wrap_in_directory: false
+
+    # Archive format. Valid options are `tar.gz`, `tar.xz`, `gz`, `zip` and `binary`.
+    # If format is `binary`, no archives are created and the binaries are instead
+    # uploaded directly.
+    # Default is `tar.gz`.
+    format: tar.gz
+
+    # Can be used to change the archive formats for specific GOOSs.
+    # Most common use case is to archive as zip on Windows.
+    # Default is empty.
+    #format_overrides:
+    #  - goos: windows
+    #    format: zip
+
+    # Additional files/template/globs you want to add to the archive.
+    # Defaults are any files matching `LICENCE*`, `LICENSE*`,
+    # `README*` and `CHANGELOG*` (case-insensitive).
+    #files:
+    #  - LICENSE.txt
+    #  - README_{{.Os}}.md
+    #  - CHANGELOG.md
+    #  - docs/*
+    #  - design/*.png
+    #  - templates/**/*
 
 
 ################################################################################
@@ -60,7 +113,25 @@ changelog:
 
 ################################################################################
 publishers:
-  - name: binary-release
+  -
+    # Unique name of your publisher. Used for identification
+    name: "binary-release"
+
+    # IDs of the artifacts you want to publish
+    #ids:
+    # - foo
+    # - bar
+
+    # Publish checksums (defaults to false)
+    checksum: true
+
+    # Publish signatures (defaults to false)
+    signature: true
+
+    # Working directory in which to execute the command
+    dir: "{{ dir .ArtifactPath }}"
+
+    # Command to be executed
     cmd: |
       github-release upload \
       --user gearboxworks \
@@ -69,107 +140,110 @@ publishers:
       --name "{{ .ArtifactName }}" \
       --label "{{ .ArtifactName }}" \
       -R -f "{{ .ArtifactName }}"
-    dir: "{{ dir .ArtifactPath }}"
+
+    # Environment variables
+    env:
+      - API_TOKEN=secret-token
 
 
 ################################################################################
-brews:
-  -
-    name: launch
-
-    # IDs of the archives to use.
-    # Defaults to all.
-    ids:
-    # foo
-    # bar
-
-    # GOARM to specify which 32-bit arm version to use if there are multiple versions
-    # from the build section. Brew formulas support atm only one 32-bit version.
-    # Default is 6 for all artifacts or each id if there a multiple versions.
-    goarm: 6
-
-    # NOTE: make sure the url_template, the token and given repo (github or gitlab) owner and name are from the
-    # same kind. We will probably unify this in the next major version like it is done with scoop.
-
-    # Github repository to push the tap to.
-    github:
-      owner: gearboxworks
-      name: {{ .ProjectName }}
-
-    # Template for the url which is determined by the given Token (github or gitlab)
-    # Default for github is "https://github.com/<repo_owner>/<repo_name>/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
-    # Default for gitlab is "https://gitlab.com/<repo_owner>/<repo_name>/uploads/{{ .ArtifactUploadHash }}/{{ .ArtifactName }}"
-    #url_template: "http://github.mycompany.com/foo/bar/releases/{{ .Tag }}/{{ .ArtifactName }}"
-
-    # Allows you to set a custom download strategy. Note that you'll need
-    # to implement the strategy and add it to your tap repository.
-    # Example: https://docs.brew.sh/Formula-Cookbook#specifying-the-download-strategy-explicitly
-    # Default is empty.
-    download_strategy: CurlDownloadStrategy.
-
-    # Allows you to add a custom require_relative at the top of the formula template
-    # Default is empty
-    custom_require: custom_download_strategy
-
-    # Git author used to commit to the repository.
-    # Defaults are shown.
-    commit_author:
-      name: goreleaserbot
-      email: team@newclarity.com
-
-    # Folder inside the repository to put the formula.
-    # Default is the root folder.
-    folder: Formula
-
-    # Caveats for the user of your binary.
-    # Default is empty.
-    #caveats: "How to use this binary"
-
-    # Your app's homepage.
-    # Default is empty.
-    homepage: "https://github.com/gearboxworks/"
-
-    # Your app's description.
-    # Default is empty.
-    description: "Next Gen Developer Productivity Platform"
-
-    # Setting this will prevent goreleaser to actually try to commit the updated
-    # formula - instead, the formula file will be stored on the dist folder only,
-    # leaving the responsibility of publishing it to the user.
-    # If set to auto, the release will not be uploaded to the homebrew tap
-    # in case there is an indicator for prerelease in the tag e.g. v1.0.0-rc1
-    # Default is false.
-    skip_upload: false
-
-    # Custom block for brew.
-    # Can be used to specify alternate downloads for devel or head releases.
-    # Default is empty.
-    #custom_block: |
-    #  head "https://github.com/some/package.git"
-
-    # Packages your package depends on.
-    #dependencies:
-    #  - name: git
-    #  - name: zsh
-    #    type: optional
-
-    # Packages that conflict with your package.
-    #conflicts:
-    #  - svn
-    #  - bash
-
-    # Specify for packages that run as a service.
-    # Default is empty.
-    #plist: |
-    #  <?xml version="1.0" encoding="UTF-8"?>
-
-    # So you can `brew test` your formula.
-    # Default is empty.
-    #test: |
-    #  system "#{bin}/program --version"
-
-    # Custom install script for brew.
-    # Default is 'bin.install "program"'.
-    #install: |
-    #  bin.install "program"
+#brews:
+#  -
+#    name: launch
+#
+#    # IDs of the archives to use.
+#    # Defaults to all.
+#    ids:
+#    # foo
+#    # bar
+#
+#    # GOARM to specify which 32-bit arm version to use if there are multiple versions
+#    # from the build section. Brew formulas support atm only one 32-bit version.
+#    # Default is 6 for all artifacts or each id if there a multiple versions.
+#    #goarm: 6
+#
+#    # NOTE: make sure the url_template, the token and given repo (github or gitlab) owner and name are from the
+#    # same kind. We will probably unify this in the next major version like it is done with scoop.
+#
+#    # Github repository to push the tap to.
+#    github:
+#      owner: gearboxworks
+#      name: "{{ .ProjectName }}"
+#
+#    # Template for the url which is determined by the given Token (github or gitlab)
+#    # Default for github is "https://github.com/<repo_owner>/<repo_name>/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+#    # Default for gitlab is "https://gitlab.com/<repo_owner>/<repo_name>/uploads/{{ .ArtifactUploadHash }}/{{ .ArtifactName }}"
+#    #url_template: "http://github.mycompany.com/foo/bar/releases/{{ .Tag }}/{{ .ArtifactName }}"
+#
+#    # Allows you to set a custom download strategy. Note that you'll need
+#    # to implement the strategy and add it to your tap repository.
+#    # Example: https://docs.brew.sh/Formula-Cookbook#specifying-the-download-strategy-explicitly
+#    # Default is empty.
+#    download_strategy: CurlDownloadStrategy.
+#
+#    # Allows you to add a custom require_relative at the top of the formula template
+#    # Default is empty
+#    custom_require: custom_download_strategy
+#
+#    # Git author used to commit to the repository.
+#    # Defaults are shown.
+#    commit_author:
+#      name: goreleaserbot
+#      email: team@newclarity.com
+#
+#    # Folder inside the repository to put the formula.
+#    # Default is the root folder.
+#    folder: Formula
+#
+#    # Caveats for the user of your binary.
+#    # Default is empty.
+#    #caveats: "How to use this binary"
+#
+#    # Your app's homepage.
+#    # Default is empty.
+#    homepage: "https://github.com/gearboxworks/"
+#
+#    # Your app's description.
+#    # Default is empty.
+#    description: "Next Gen Developer Productivity Platform"
+#
+#    # Setting this will prevent goreleaser to actually try to commit the updated
+#    # formula - instead, the formula file will be stored on the dist folder only,
+#    # leaving the responsibility of publishing it to the user.
+#    # If set to auto, the release will not be uploaded to the homebrew tap
+#    # in case there is an indicator for prerelease in the tag e.g. v1.0.0-rc1
+#    # Default is false.
+#    skip_upload: false
+#
+#    # Custom block for brew.
+#    # Can be used to specify alternate downloads for devel or head releases.
+#    # Default is empty.
+#    #custom_block: |
+#    #  head "https://github.com/some/package.git"
+#
+#    # Packages your package depends on.
+#    #dependencies:
+#    #  - name: git
+#    #  - name: zsh
+#    #    type: optional
+#
+#    # Packages that conflict with your package.
+#    #conflicts:
+#    #  - svn
+#    #  - bash
+#
+#    # Specify for packages that run as a service.
+#    # Default is empty.
+#    #plist: |
+#    #  <?xml version="1.0" encoding="UTF-8"?>
+#
+#    # So you can `brew test` your formula.
+#    # Default is empty.
+#    #test: |
+#    #  system "#{bin}/program --version"
+#
+#    # Custom install script for brew.
+#    # Default is 'bin.install "program"'.
+#    #install: |
+#    #  bin.install "program"
 
