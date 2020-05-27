@@ -1,8 +1,9 @@
+BINARY := $(shell tools/getBinary.sh)
 VERSION := $(shell tools/getVersion.sh)
 COMMENT := $(shell tools/getComment.sh)
 
 all:
-	@echo "Current launch version is:	v$(VERSION)"
+	@echo "Current $(BINARY) version is:	v$(VERSION)"
 	@echo "Last commit message is:		'$(COMMENT)'"
 	@#echo git tag -a v$(VERSION) -m '"$(COMMENT)"'
 	@#echo git push origin v$(VERSION)
@@ -16,7 +17,7 @@ build:
 	@goreleaser --snapshot --skip-publish --rm-dist
 
 release:
-	@echo "Current launch version is v$(VERSION)"
+	@echo "Current $(BINARY) version is v$(VERSION)"
 	@git add .
 	@git commit -a -m "Latest push"
 	-@git push
@@ -25,9 +26,9 @@ release:
 	@goreleaser --rm-dist
 
 sync:
-	@rsync -HvaxP dist/launch_darwin_amd64/launch mick@macpro:~/Documents/GitHub/containers/docker-template/bin/Darwin/launch
-	@rsync -HvaxP dist/launch_linux_amd64/launch mick@macpro:~/Documents/GitHub/containers/docker-template/bin/Linux/launch
-	@rsync -HvaxP dist/launch_windows_amd64/launch.exe mick@macpro:~/Documents/GitHub/containers/docker-template/bin/Windows/launch.exe
+	@rsync -HvaxP dist/$(BINARY)_darwin_amd64/$(BINARY) mick@macpro:~/Documents/GitHub/containers/docker-template/bin/Darwin/$(BINARY)
+	@rsync -HvaxP dist/$(BINARY)_linux_amd64/$(BINARY) mick@macpro:~/Documents/GitHub/containers/docker-template/bin/Linux/$(BINARY)
+	@rsync -HvaxP dist/$(BINARY)_windows_amd64/$(BINARY).exe mick@macpro:~/Documents/GitHub/containers/docker-template/bin/Windows/$(BINARY).exe
 
 push:
 	@echo "Pushing to: $(shell git branch)"

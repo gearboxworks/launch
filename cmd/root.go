@@ -260,33 +260,34 @@ func Execute() *ux.State {
 }
 
 
-func _SprintfBlue(c string) string {
-	return ux.SprintfBlue(c)
-}
+//func _SprintfBlue(c string) string {
+//	return ux.SprintfBlue(c)
+//}
+//
+//func _SprintfCyan(c string) string {
+//	return ux.SprintfCyan(c)
+//}
+//
+//func _SprintfWhite(c string) string {
+//	return ux.SprintfWhite(c)
+//}
+//
+//func _SprintfGreen(c string) string {
+//	return ux.SprintfGreen(c)
+//}
+//
+//func _SprintfMagenta(c string) string {
+//	return ux.SprintfMagenta(c)
+//}
+//
+//func _SprintfRed(c string) string {
+//	return ux.SprintfRed(c)
+//}
+//
+//func _SprintfYellow(c string) string {
+//	return ux.SprintfYellow(c)
+//}
 
-func _SprintfCyan(c string) string {
-	return ux.SprintfCyan(c)
-}
-
-func _SprintfWhite(c string) string {
-	return ux.SprintfWhite(c)
-}
-
-func _SprintfGreen(c string) string {
-	return ux.SprintfGreen(c)
-}
-
-func _SprintfMagenta(c string) string {
-	return ux.SprintfMagenta(c)
-}
-
-func _SprintfRed(c string) string {
-	return ux.SprintfRed(c)
-}
-
-func _SprintfYellow(c string) string {
-	return ux.SprintfYellow(c)
-}
 
 func _GetUsage(c *cobra.Command) string {
 	var str string
@@ -335,13 +336,13 @@ func SetHelp(c *cobra.Command) {
 	cobra.AddTemplateFunc("GetUsage", _GetUsage)
 	cobra.AddTemplateFunc("GetVersion", _GetVersion)
 
-	cobra.AddTemplateFunc("SprintfBlue", _SprintfBlue)
-	cobra.AddTemplateFunc("SprintfCyan", _SprintfCyan)
-	cobra.AddTemplateFunc("SprintfGreen", _SprintfGreen)
-	cobra.AddTemplateFunc("SprintfMagenta", _SprintfMagenta)
-	cobra.AddTemplateFunc("SprintfRed", _SprintfRed)
-	cobra.AddTemplateFunc("SprintfWhite", _SprintfWhite)
-	cobra.AddTemplateFunc("SprintfYellow", _SprintfYellow)
+	cobra.AddTemplateFunc("SprintfBlue", ux.SprintfBlue)
+	cobra.AddTemplateFunc("SprintfCyan", ux.SprintfCyan)
+	cobra.AddTemplateFunc("SprintfGreen", ux.SprintfGreen)
+	cobra.AddTemplateFunc("SprintfMagenta", ux.SprintfMagenta)
+	cobra.AddTemplateFunc("SprintfRed", ux.SprintfRed)
+	cobra.AddTemplateFunc("SprintfWhite", ux.SprintfWhite)
+	cobra.AddTemplateFunc("SprintfYellow", ux.SprintfYellow)
 
 	// 	{{ with .Parent }}{{ SprintfCyan .Name }}{{ end }} {{ SprintfGreen .Name }} {{ if .HasAvailableSubCommands }}{{ SprintfGreen "[command]" }}{{ end }}
 
