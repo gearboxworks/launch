@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Microsoft/go-winio v0.4.14 // indirect
+	github.com/blang/semver v3.5.1+incompatible
 	github.com/cavaliercoder/grab v2.0.0+incompatible
 	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/distribution v2.7.1+incompatible // indirect
@@ -40,6 +41,7 @@ require (
 	github.com/opencontainers/runc v0.1.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/sftp v1.11.0
+	github.com/rhysd/go-github-selfupdate v1.2.2
 	github.com/rivo/tview v0.0.0-20200329194346-7cc182c5846e
 	github.com/spf13/cobra v0.0.6
 	github.com/spf13/viper v1.4.0

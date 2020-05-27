@@ -5,10 +5,12 @@ project_name: launch
 ################################################################################
 before:
   hooks:
-    # you may remove this if you don't use vgo
     - go mod download
-    # you may remove this if you don't need go generate
     - go generate ./...
+
+#after:
+#  hooks:
+#    - tools/updateBinaryRepo.sh
 
 
 ################################################################################
@@ -35,11 +37,11 @@ archives:
   -
     # ID of this archive.
     # Defaults to `default`.
-    id: my-archive
+    #id: launch-archive
 
     # Builds reference which build instances should be archived in this archive.
-    builds:
-    - default
+    #builds:
+    #- default
 
     # Archive name template.
     # Defaults:
@@ -47,7 +49,7 @@ archives:
     #   - `{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}`
     # - if format is `binary`:
     #   - `{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}`
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    #name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
     # Replacements for GOOS and GOARCH in the archive name.
     # Keys should be valid GOOSs or GOARCHs.
@@ -112,38 +114,38 @@ changelog:
 
 
 ################################################################################
-publishers:
-  -
-    # Unique name of your publisher. Used for identification
-    name: "binary-release"
-
-    # IDs of the artifacts you want to publish
-    #ids:
-    # - foo
-    # - bar
-
-    # Publish checksums (defaults to false)
-    checksum: true
-
-    # Publish signatures (defaults to false)
-    signature: true
-
-    # Working directory in which to execute the command
-    dir: "{{ dir .ArtifactPath }}"
-
-    # Command to be executed
-    cmd: |
-      github-release upload \
-      --user gearboxworks \
-      --repo "{{ .ProjectName }}" \
-      --tag "{{ .Version }}" \
-      --name "{{ .ArtifactName }}" \
-      --label "{{ .ArtifactName }}" \
-      -R -f "{{ .ArtifactName }}"
-
-    # Environment variables
-    env:
-      - API_TOKEN=secret-token
+#publishers:
+#  -
+#    # Unique name of your publisher. Used for identification
+#    name: "binary-release"
+#
+#    # IDs of the artifacts you want to publish
+#    #ids:
+#    # - foo
+#    # - bar
+#
+#    # Publish checksums (defaults to false)
+#    checksum: true
+#
+#    # Publish signatures (defaults to false)
+#    signature: true
+#
+#    # Working directory in which to execute the command
+#    dir: "{{ dir .ArtifactPath }}"
+#
+#    # Command to be executed
+#    cmd: |
+#      github-release upload \
+#      --user gearboxworks \
+#      --repo "{{ .ProjectName }}" \
+#      --tag "{{ .Version }}" \
+#      --name "{{ .ArtifactName }}" \
+#      --label "{{ .ArtifactName }}" \
+#      -R -f "{{ .ArtifactName }}"
+#
+#    # Environment variables
+#    env:
+#      - API_TOKEN=secret-token
 
 
 ################################################################################

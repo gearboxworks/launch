@@ -19,7 +19,7 @@ build:
 release:
 	@echo "Current $(BINARY) version is v$(VERSION)"
 	@git add .
-	@git commit -a -m '"Release v$(VERSION)"'
+	@git commit -a -m '"Commit before release v$(VERSION)"'
 	-@git push
 	@git tag -a v$(VERSION) -m '"Release v$(VERSION)"'
 	@git push origin v$(VERSION)
