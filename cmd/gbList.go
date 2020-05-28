@@ -34,29 +34,25 @@ var gbListCmd = &cobra.Command{
 	Args: cobra.RangeArgs(0, 1),
 }
 func gbListFunc(cmd *cobra.Command, args []string) {
-	var state *ux.State
-
 	for range OnlyOnce {
 		var ga GearArgs
 
-		state = ga.ProcessArgs(rootCmd, args)
-		if state.IsError() {
-			if state.IsNotOk() {
-				state.PrintResponse()
+		CmdState = ga.ProcessArgs(rootCmd, args)
+		if CmdState.IsError() {
+			if CmdState.IsNotOk() {
+				CmdState.PrintResponse()
 			}
 			break
 		}
 
-		state = ga.gbListFunc()
-		if state.IsError() {
-			if state.IsNotOk() {
-				state.PrintResponse()
+		CmdState = ga.gbListFunc()
+		if CmdState.IsError() {
+			if CmdState.IsNotOk() {
+				CmdState.PrintResponse()
 			}
 			break
 		}
 	}
-
-	_cmdState = state
 }
 
 

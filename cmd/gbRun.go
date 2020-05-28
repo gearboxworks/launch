@@ -38,23 +38,19 @@ var gbRunCmd = &cobra.Command{
 	Args: cobra.MinimumNArgs(1),
 }
 func gbRunFunc(cmd *cobra.Command, args []string) {
-	var state *ux.State
-
 	for range OnlyOnce {
 		var ga GearArgs
 
-		state = ga.ProcessArgs(rootCmd, args)
-		if state.IsError() {
+		CmdState = ga.ProcessArgs(rootCmd, args)
+		if CmdState.IsError() {
 			break
 		}
 
-		state = ga.gbRunFunc()
-		if state.IsError() {
+		CmdState = ga.gbRunFunc()
+		if CmdState.IsError() {
 			break
 		}
 	}
-
-	_cmdState = state
 }
 
 
@@ -70,29 +66,25 @@ var gbShellCmd = &cobra.Command{
 	Args: cobra.MinimumNArgs(1),
 }
 func gbShellFunc(cmd *cobra.Command, args []string) {
-	var state *ux.State
-
 	for range OnlyOnce {
 		var ga GearArgs
 
-		state = ga.ProcessArgs(rootCmd, args)
-		if state.IsError() {
-			if state.IsNotOk() {
-				state.PrintResponse()
+		CmdState = ga.ProcessArgs(rootCmd, args)
+		if CmdState.IsError() {
+			if CmdState.IsNotOk() {
+				CmdState.PrintResponse()
 			}
 			break
 		}
 
-		state = ga.gbShellFunc()
-		if state.IsError() {
-			if state.IsNotOk() {
-				state.PrintResponse()
+		CmdState = ga.gbShellFunc()
+		if CmdState.IsError() {
+			if CmdState.IsNotOk() {
+				CmdState.PrintResponse()
 			}
 			break
 		}
 	}
-
-	_cmdState = state
 }
 
 
@@ -108,31 +100,26 @@ var gbUnitTestCmd = &cobra.Command{
 	Args: cobra.MinimumNArgs(1),
 }
 func gbUnitTestFunc(cmd *cobra.Command, args []string) {
-	var state *ux.State
-
 	for range OnlyOnce {
 		var ga GearArgs
 
-		state = ga.ProcessArgs(rootCmd, args)
-		if state.IsError() {
-			if state.IsNotOk() {
-				state.PrintResponse()
+		CmdState = ga.ProcessArgs(rootCmd, args)
+		if CmdState.IsError() {
+			if CmdState.IsNotOk() {
+				CmdState.PrintResponse()
 			}
 			break
 		}
 
-		state = ga.gbUnitTestFunc()
-		if state.IsError() {
-			if state.IsNotOk() {
-				state.PrintResponse()
+		CmdState = ga.gbUnitTestFunc()
+		if CmdState.IsError() {
+			if CmdState.IsNotOk() {
+				CmdState.PrintResponse()
 			}
 			break
 		}
 	}
-
-	_cmdState = state
 }
-
 
 
 func (ga *GearArgs) gbRunFunc() *ux.State {

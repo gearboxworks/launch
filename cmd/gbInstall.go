@@ -37,29 +37,25 @@ var gbInstallCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 func gbInstallFunc(cmd *cobra.Command, args []string) {
-	var state *ux.State
-
 	for range OnlyOnce {
 		var ga GearArgs
 
-		state = ga.ProcessArgs(rootCmd, args)
-		if state.IsError() {
-			if state.IsNotOk() {
-				state.PrintResponse()
+		CmdState = ga.ProcessArgs(rootCmd, args)
+		if CmdState.IsError() {
+			if CmdState.IsNotOk() {
+				CmdState.PrintResponse()
 			}
 			break
 		}
 
-		state = ga.gbInstallFunc()
-		if state.IsError() {
-			if state.IsNotOk() {
-				state.PrintResponse()
+		CmdState = ga.gbInstallFunc()
+		if CmdState.IsError() {
+			if CmdState.IsNotOk() {
+				CmdState.PrintResponse()
 			}
 			break
 		}
 	}
-
-	_cmdState = state
 }
 
 
@@ -76,29 +72,25 @@ var gbUninstallCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 func gbUninstallFunc(cmd *cobra.Command, args []string) {
-	var state *ux.State
-
 	for range OnlyOnce {
 		var ga GearArgs
 
-		state = ga.ProcessArgs(rootCmd, args)
-		if state.IsError() {
-			if state.IsNotOk() {
-				state.PrintResponse()
+		CmdState = ga.ProcessArgs(rootCmd, args)
+		if CmdState.IsError() {
+			if CmdState.IsNotOk() {
+				CmdState.PrintResponse()
 			}
 			break
 		}
 
-		state = ga.gbUninstallFunc()
-		if state.IsError() {
-			if state.IsNotOk() {
-				state.PrintResponse()
+		CmdState = ga.gbUninstallFunc()
+		if CmdState.IsError() {
+			if CmdState.IsNotOk() {
+				CmdState.PrintResponse()
 			}
 			break
 		}
 	}
-
-	_cmdState = state
 }
 
 
@@ -115,29 +107,25 @@ var gbReinstallCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 func gbReinstallFunc(cmd *cobra.Command, args []string) {
-	var state *ux.State
-
 	for range OnlyOnce {
 		var ga GearArgs
 
-		state = ga.ProcessArgs(rootCmd, args)
-		if state.IsError() {
-			if state.IsNotOk() {
-				state.PrintResponse()
+		CmdState = ga.ProcessArgs(rootCmd, args)
+		if CmdState.IsError() {
+			if CmdState.IsNotOk() {
+				CmdState.PrintResponse()
 			}
 			break
 		}
 
-		state = ga.gbReinstallFunc()
-		if state.IsError() {
-			if state.IsNotOk() {
-				state.PrintResponse()
+		CmdState = ga.gbReinstallFunc()
+		if CmdState.IsError() {
+			if CmdState.IsNotOk() {
+				CmdState.PrintResponse()
 			}
 			break
 		}
 	}
-
-	_cmdState = state
 }
 
 
@@ -154,29 +142,25 @@ var gbCleanCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 func gbCleanFunc(cmd *cobra.Command, args []string) {
-	var state *ux.State
-
 	for range OnlyOnce {
 		var ga GearArgs
 
-		state = ga.ProcessArgs(rootCmd, args)
-		if state.IsError() {
-			if state.IsNotOk() {
-				state.PrintResponse()
+		CmdState = ga.ProcessArgs(rootCmd, args)
+		if CmdState.IsError() {
+			if CmdState.IsNotOk() {
+				CmdState.PrintResponse()
 			}
 			break
 		}
 
-		state = ga.gbCleanFunc()
-		if state.IsError() {
-			if state.IsNotOk() {
-				state.PrintResponse()
+		CmdState = ga.gbCleanFunc()
+		if CmdState.IsError() {
+			if CmdState.IsNotOk() {
+				CmdState.PrintResponse()
 			}
 			break
 		}
 	}
-
-	_cmdState = state
 }
 
 

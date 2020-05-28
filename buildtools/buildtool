@@ -1,0 +1,21 @@
+echo off
+
+goto(){
+# UNIX script
+EXEC="$(dirname $0)/$(uname -s)/$(basename $0)"
+if [ -x "${EXEC}" ]; then exec "${EXEC}" "$@"; fi
+echo "Gearbox: Architecture not supported, ${EXEC}."
+echo "Please download the buildtool binary and place in the $(dirname $0)/$(uname -s) directory"
+echo "https://github.com/gearboxworks/buildtool/releases"
+}
+
+goto $@
+exit
+
+:(){
+rem Windows script
+echo %OS%
+echo Please download the buildtool binary and place in the buildtools/Windows directory
+echo https://github.com/gearboxworks/buildtool/releases
+explorer "https://github.com/gearboxworks/buildtool/releases"
+exit

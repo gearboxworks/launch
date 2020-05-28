@@ -124,7 +124,7 @@ func initConfig() {
 	}
 }
 
-var _cmdState *ux.State
+var CmdState *ux.State
 var cfgFile string
 
 
@@ -140,7 +140,7 @@ var rootCmd = &cobra.Command {
 
 
 func gbRootFunc(cmd *cobra.Command, args []string) {
-	_cmdState = ux.NewState(false)
+	CmdState = ux.NewState(false)
 
 	for range OnlyOnce {
 		var err error
@@ -152,7 +152,7 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 
 		var debugFlag bool
 		debugFlag, _ = fl.GetBool(argDebug)
-		_cmdState.DebugSet(debugFlag)
+		CmdState.DebugSet(debugFlag)
 		if debugFlag {
 			showArgs(cmd, args)
 			flargs := fl.Args()
@@ -169,7 +169,7 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 			var out bytes.Buffer
 			_ = cmd.GenBashCompletion(&out)
 			fmt.Printf("# Gearbox BASH completion:\n%s\n", out.String())
-			_cmdState.Clear()
+			CmdState.Clear()
 			break
 			//os.Exit(0)
 		}
@@ -178,12 +178,12 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 		// Show version.
 		ok, err = fl.GetBool("version")
 		if err != nil {
-			_cmdState.SetError("%s", err)
+			CmdState.SetError("%s", err)
 			break
 		}
 		if ok {
 			ux.Printf("%s: v%s\n", defaults.BinaryName, defaults.BinaryVersion)
-			_cmdState.Clear()
+			CmdState.Clear()
 			break
 			//os.Exit(0)
 		}
@@ -201,14 +201,14 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 		// Show help if no commands specified.
 		if len(args) == 0 {
 			_ = cmd.Help()
-			_cmdState.Clear()
+			CmdState.Clear()
 			break
 			//os.Exit(0)
 		}
 	}
 
-	if _cmdState.IsNotOk() {
-		_cmdState.PrintResponse()
+	if CmdState.IsNotOk() {
+		CmdState.PrintResponse()
 	}
 }
 
@@ -216,7 +216,7 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() *ux.State {
-	_cmdState = _cmdState.EnsureNotNil()
+	CmdState = CmdState.EnsureNotNil()
 
 	for range OnlyOnce {
 		var err error
@@ -228,7 +228,7 @@ func Execute() *ux.State {
 		//defaults.RunAs.FullPath, err = filepath.Abs(os.Args[0])
 		defaults.RunAs.FullPath, err = osext.Executable()
 		if err != nil {
-			_cmdState.SetError("%s", err)
+			CmdState.SetError("%s", err)
 			break
 		}
 		//defaults.RunAs.FullPath = "/Users/mick/Documents/GitHub/gb-launch/bin/psql-9.4.26"
@@ -251,12 +251,12 @@ func Execute() *ux.State {
 
 		err = rootCmd.Execute()
 		if err != nil {
-			_cmdState.SetError("%s", err)
+			CmdState.SetError("%s", err)
 			break
 		}
 	}
 
-	return _cmdState
+	return CmdState
 }
 
 
@@ -415,5 +415,5 @@ func SetHelp(c *cobra.Command) {
 //}
 
 func GetState() *ux.State {
-	return _cmdState
+	return CmdState
 }

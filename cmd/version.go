@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"launch/defaults"
 	"launch/ux"
+	"strings"
 )
 
 
@@ -31,28 +32,19 @@ func Version(cmd *cobra.Command, args []string) {
 
 		switch {
 			case len(args) == 0:
-				VersionShow(cmd, args)
+				VersionShow()
 
 			case args[0] == "update":
 				VersionUpdate(cmd, args)
 
-			case args[0] == "release":
-				VersionPublish(cmd, args)
-
 			default:
-				VersionShow(cmd, args)
+				VersionShow()
 		}
 	}
 }
 
 
-var versionShowCmd = &cobra.Command{
-	Use:   "show",
-	Short: ux.SprintfBlue("Show version of %s.", defaults.BinaryName),
-	Long:  ux.SprintfBlue("Show version of %s.", defaults.BinaryName),
-	Run:   VersionShow,
-}
-func VersionShow(cmd *cobra.Command, args []string) {
+func VersionShow() {
 	fmt.Printf("%s %s\n",
 		ux.SprintfBlue(defaults.BinaryName),
 		ux.SprintfCyan("v%s", defaults.BinaryVersion),
@@ -79,65 +71,36 @@ var versionUpdateCmd = &cobra.Command{
 }
 func VersionUpdate(cmd *cobra.Command, args []string) {
 	for range OnlyOnce {
-		fmt.Printf("%s %s\n",
+		fmt.Printf("Checking for more recent version of %s %s at '%s'\n",
 			ux.SprintfBlue(defaults.BinaryName),
 			ux.SprintfCyan("v%s", defaults.BinaryVersion),
+			ux.SprintfGreen(defaults.BinaryRepo),
 		)
 
-		err := selfUpdate(defaults.BinaryRepo)
+		repo := StripUrlPrefix(defaults.BinaryRepo)
+		previous := semver.MustParse(defaults.BinaryVersion)
+
+		latest, err := selfupdate.UpdateSelf(previous, repo)
 		if err != nil {
-			_cmdState.SetError(err)
+			CmdState.SetError(err)
+		}
+
+		if previous.Equals(latest.Version) {
+			ux.PrintflnOk("%s is up to date: v%s", defaults.BinaryName, defaults.BinaryVersion)
+		} else {
+			ux.PrintflnOk("%s updated to v%s", defaults.BinaryName, latest.Version)
+			if latest.ReleaseNotes != "" {
+				ux.PrintflnOk("%s %s Release Notes:\n%s", defaults.BinaryName, latest.Version, latest.ReleaseNotes)
+			}
 		}
 	}
 }
 
+func StripUrlPrefix(url string) string {
+	url = strings.TrimPrefix(url, "https://")
+	url = strings.TrimPrefix(url, "github.com/")
+	url = strings.TrimSuffix(url, "/")
+	url = strings.TrimSpace(url)
 
-func selfUpdate(slug string) error {
-	//selfupdate.EnableLog()
-
-	ux.PrintflnOk("Checking for more recent version: v%s", defaults.BinaryVersion)
-	previous := semver.MustParse(defaults.BinaryVersion)
-	latest, err := selfupdate.UpdateSelf(previous, slug)
-	if err != nil {
-		return err
-	}
-
-	if previous.Equals(latest.Version) {
-		ux.PrintflnOk("%s is up to date: v%s", defaults.BinaryName, defaults.BinaryVersion)
-	} else {
-		ux.PrintflnOk("%s updated to v%s", defaults.BinaryName, latest.Version)
-		if latest.ReleaseNotes != "" {
-			ux.PrintflnOk("%s %s Release Notes:\n%s", defaults.BinaryName, latest.Version, latest.ReleaseNotes)
-		}
-	}
-
-	return nil
-}
-
-
-var versionPublishCmd = &cobra.Command{
-	Use:   "release",
-	Short: ux.SprintfBlue("Publish release version of %s.", defaults.BinaryName),
-	Long:  ux.SprintfBlue("Publish release version of %s.", defaults.BinaryName),
-	Run:   VersionPublish,
-}
-func VersionPublish(cmd *cobra.Command, args []string) {
-	for range OnlyOnce {
-		fmt.Printf("%s %s\n",
-			ux.SprintfBlue(defaults.BinaryName),
-			ux.SprintfCyan("v%s", defaults.BinaryVersion),
-		)
-
-
-		// Use defaults.SourceRepo
-		//args = []string{
-		//	"-u", "gearboxworks",
-		//	"-r", "jtc",
-		//	defaults.BinaryVersion,
-		//}
-		//cli := &gitRelease.CLI{OutStream: os.Stdout, ErrStream: os.Stderr}
-		//cli.Run(args)
-
-
-	}
+	return url
 }

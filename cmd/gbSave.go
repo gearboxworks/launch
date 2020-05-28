@@ -34,15 +34,13 @@ var gbSaveCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 func gbSaveFunc(cmd *cobra.Command, args []string) {
-	var state *ux.State
-
 	for range OnlyOnce {
 		var ga GearArgs
 
-		state = ga.ProcessArgs(rootCmd, args)
-		if state.IsError() {
-			if state.IsNotOk() {
-				state.PrintResponse()
+		CmdState = ga.ProcessArgs(rootCmd, args)
+		if CmdState.IsError() {
+			if CmdState.IsNotOk() {
+				CmdState.PrintResponse()
 			}
 			break
 		}
@@ -50,8 +48,6 @@ func gbSaveFunc(cmd *cobra.Command, args []string) {
 		//showArgs(rootCmd, args)
 		ux.PrintfWarning("Command not yet implemented.\n")
 	}
-
-	_cmdState = state
 }
 
 
@@ -68,15 +64,13 @@ var gbLoadCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 func gbLoadFunc(cmd *cobra.Command, args []string) {
-	var state *ux.State
-
 	for range OnlyOnce {
 		var ga GearArgs
 
-		state = ga.ProcessArgs(rootCmd, args)
-		if state.IsError() {
-			if state.IsNotOk() {
-				state.PrintResponse()
+		CmdState = ga.ProcessArgs(rootCmd, args)
+		if CmdState.IsError() {
+			if CmdState.IsNotOk() {
+				CmdState.PrintResponse()
 			}
 			break
 		}
@@ -84,6 +78,4 @@ func gbLoadFunc(cmd *cobra.Command, args []string) {
 		//showArgs(rootCmd, args)
 		ux.PrintfWarning("Command not yet implemented.\n")
 	}
-
-	_cmdState = state
 }
