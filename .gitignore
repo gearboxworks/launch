@@ -1,5 +1,5 @@
 .*.swp
 dist/
 bin/
-# buildtools/*/*
+buildtools/*/*
 launch
