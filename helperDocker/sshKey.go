@@ -1,4 +1,4 @@
-package dockerClient
+package helperDocker
 
 const SshHostPrivateKey = `
 -----BEGIN RSA PRIVATE KEY-----

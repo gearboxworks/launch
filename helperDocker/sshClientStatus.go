@@ -1,4 +1,4 @@
-package dockerClient
+package helperDocker
 
 import (
 	"fmt"
