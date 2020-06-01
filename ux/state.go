@@ -289,6 +289,12 @@ func (p *State) SprintResponse() string {
 	return p.Sprint()
 }
 func (p *State) PrintResponse() {
+	_, _ = fmt.Fprintf(os.Stdout, p.Sprint() + "\n")
+}
+func (p *State) DebugPrint() {
+	if !p.debug.Enabled {
+		return
+	}
 	_, _ = fmt.Fprintf(os.Stderr, p.Sprint() + "\n")
 }
 func (p *State) SprintError() string {

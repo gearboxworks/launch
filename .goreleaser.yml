@@ -45,16 +45,16 @@ archives:
     #   - `{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}`
     # - if format is `binary`:
     #   - `{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}`
-    #name_template: "{{ .ProjectName }}-{{ .Os }}_{{ .Arch }}"
+    name_template: "{{ .ProjectName }}-{{ .Os }}_{{ .Arch }}"
 
     # Replacements for GOOS and GOARCH in the archive name.
     # Keys should be valid GOOSs or GOARCHs.
     # Values are the respective replacements.
     # Default is empty.
     replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
+      darwin: darwin
+      linux: linux
+      windows: windows
       386: i386
       amd64: x86_64
 

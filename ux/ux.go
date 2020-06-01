@@ -89,60 +89,60 @@ func Close() {
 
 func PrintfWhite(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	_, _ = fmt.Fprintf(os.Stderr, "%s%s", aurora.BrightWhite(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stdout, "%s%s", aurora.BrightWhite(inline), aurora.Reset(""))
 }
 func PrintfCyan(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	_, _ = fmt.Fprintf(os.Stderr, "%s%s", aurora.BrightCyan(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stdout, "%s%s", aurora.BrightCyan(inline), aurora.Reset(""))
 }
 func PrintfYellow(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	_, _ = fmt.Fprintf(os.Stderr, "%s%s", aurora.BrightYellow(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stdout, "%s%s", aurora.BrightYellow(inline), aurora.Reset(""))
 }
 func PrintfRed(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	_, _ = fmt.Fprintf(os.Stderr, "%s%s", aurora.BrightRed(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stdout, "%s%s", aurora.BrightRed(inline), aurora.Reset(""))
 }
 func PrintfGreen(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	_, _ = fmt.Fprintf(os.Stderr, "%s%s", aurora.BrightGreen(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stdout, "%s%s", aurora.BrightGreen(inline), aurora.Reset(""))
 }
 func PrintfBlue(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	_, _ = fmt.Fprintf(os.Stderr, "%s%s", aurora.BrightBlue(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stdout, "%s%s", aurora.BrightBlue(inline), aurora.Reset(""))
 }
 func PrintfMagenta(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	_, _ = fmt.Fprintf(os.Stderr, "%s%s", aurora.BrightMagenta(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stdout, "%s%s", aurora.BrightMagenta(inline), aurora.Reset(""))
 }
 
 func PrintflnWhite(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	_, _ = fmt.Fprintf(os.Stderr, "%s%s\n", aurora.BrightWhite(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stdout, "%s%s\n", aurora.BrightWhite(inline), aurora.Reset(""))
 }
 func PrintflnCyan(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	_, _ = fmt.Fprintf(os.Stderr, "%s%s\n", aurora.BrightCyan(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stdout, "%s%s\n", aurora.BrightCyan(inline), aurora.Reset(""))
 }
 func PrintflnYellow(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	_, _ = fmt.Fprintf(os.Stderr, "%s%s\n", aurora.BrightYellow(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stdout, "%s%s\n", aurora.BrightYellow(inline), aurora.Reset(""))
 }
 func PrintflnRed(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	_, _ = fmt.Fprintf(os.Stderr, "%s%s\n", aurora.BrightRed(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stdout, "%s%s\n", aurora.BrightRed(inline), aurora.Reset(""))
 }
 func PrintflnGreen(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	_, _ = fmt.Fprintf(os.Stderr, "%s%s\n", aurora.BrightGreen(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stdout, "%s%s\n", aurora.BrightGreen(inline), aurora.Reset(""))
 }
 func PrintflnBlue(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	_, _ = fmt.Fprintf(os.Stderr, "%s%s\n", aurora.BrightBlue(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stdout, "%s%s\n", aurora.BrightBlue(inline), aurora.Reset(""))
 }
 func PrintflnMagenta(format string, args ...interface{}) {
 	inline := fmt.Sprintf(format, args...)
-	_, _ = fmt.Fprintf(os.Stderr, "%s%s\n", aurora.BrightMagenta(inline), aurora.Reset(""))
+	_, _ = fmt.Fprintf(os.Stdout, "%s%s\n", aurora.BrightMagenta(inline), aurora.Reset(""))
 }
 
 
@@ -181,7 +181,7 @@ func Sprintf(format string, args ...interface{}) string {
 	return fmt.Sprintf("%s%s%s", aurora.BrightCyan(_name).Bold(), inline, aurora.Reset(""))
 }
 func Printf(format string, args ...interface{}) {
-	_, _ = fmt.Fprintf(os.Stderr, Sprintf(format, args...))
+	_, _ = fmt.Fprintf(os.Stdout, Sprintf(format, args...))
 }
 
 
@@ -193,13 +193,13 @@ func SprintfNormal(format string, args ...interface{}) string {
 	return Sprintf("%s", aurora.BrightBlue(inline))
 }
 //func PrintfNormal(format string, args ...interface{}) {
-//	_, _ = fmt.Fprintf(os.Stderr, fmt.Sprintf(format, args...))
+//	_, _ = fmt.Fprintf(os.Stdout, fmt.Sprintf(format, args...))
 //}
 func PrintfNormal(format string, args ...interface{}) {
-	_, _ = fmt.Fprintf(os.Stderr, SprintfNormal(format, args...))
+	_, _ = fmt.Fprintf(os.Stdout, SprintfNormal(format, args...))
 }
 func PrintflnNormal(format string, args ...interface{}) {
-	_, _ = fmt.Fprintf(os.Stderr, SprintfNormal(format + "\n", args...))
+	_, _ = fmt.Fprintf(os.Stdout, SprintfNormal(format + "\n", args...))
 }
 
 
@@ -208,10 +208,10 @@ func SprintfOk(format string, args ...interface{}) string {
 	return Sprintf("%s", aurora.BrightGreen(inline))
 }
 func PrintfOk(format string, args ...interface{}) {
-	_, _ = fmt.Fprintf(os.Stderr, SprintfOk(format, args...))
+	_, _ = fmt.Fprintf(os.Stdout, SprintfOk(format, args...))
 }
 func PrintflnOk(format string, args ...interface{}) {
-	_, _ = fmt.Fprintf(os.Stderr, SprintfOk(format + "\n", args...))
+	_, _ = fmt.Fprintf(os.Stdout, SprintfOk(format + "\n", args...))
 }
 
 
@@ -228,10 +228,10 @@ func SprintfWarning(format string, args ...interface{}) string {
 	return Sprintf("%s", aurora.BrightYellow(inline))
 }
 func PrintfWarning(format string, args ...interface{}) {
-	_, _ = fmt.Fprintf(os.Stderr, SprintfWarning(format, args...))
+	_, _ = fmt.Fprintf(os.Stdout, SprintfWarning(format, args...))
 }
 func PrintflnWarning(format string, args ...interface{}) {
-	_, _ = fmt.Fprintf(os.Stderr, SprintfWarning(format + "\n", args...))
+	_, _ = fmt.Fprintf(os.Stdout, SprintfWarning(format + "\n", args...))
 }
 
 
