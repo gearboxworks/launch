@@ -2,7 +2,7 @@ package main
 
 import (
 	"launch/cmd"
-	"launch/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 	"os"
 )
 
@@ -18,6 +18,9 @@ func main() {
 
 
 /*
+
+@TODO - Refactor JTC and include helperDocker under the JTC framework.
+
 @TODO - Add '--tmp-dir' flag to provide alternative mount point for TmpDir.
 @TODO -		- The TmpDir should mount up automatically on every container, (not via SSHFS).
 @TODO -		- This dir should be either $HOME/tmp/, /tmp/ or override flag above.

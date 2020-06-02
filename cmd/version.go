@@ -6,7 +6,7 @@ import (
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
 	"github.com/spf13/cobra"
 	"launch/defaults"
-	"launch/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 	"strings"
 )
 

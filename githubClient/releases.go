@@ -6,7 +6,7 @@ import (
 	"github.com/google/go-github/github"
 	"golang.org/x/net/context"
 	"launch/ospaths"
-	"launch/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 	"os"
 	"strings"
 	"time"

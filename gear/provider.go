@@ -1,9 +1,8 @@
 package gear
 
 import (
-	"fmt"
-	"github.com/docker/docker/client"
-	"launch/ux"
+	"github.com/newclarity/scribeHelpers/helperDocker"
+	"github.com/newclarity/scribeHelpers/ux"
 	"net/url"
 	"os"
 )
@@ -46,7 +45,8 @@ func (p *Provider) NewProvider(debugMode bool) *ux.State {
 				}
 
 				var urlString *url.URL
-				urlString, err = client.ParseHostURL(fmt.Sprintf("tcp://%s:%s", p.Host, p.Port))
+				//urlString, err = client.ParseHostURL(fmt.Sprintf("tcp://%s:%s", p.Host, p.Port))
+				urlString, err = helperDocker.ParseHostURL("tcp://%s:%s", p.Host, p.Port)
 				if err != nil {
 					break
 				}

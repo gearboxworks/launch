@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"launch/defaults"
-	"launch/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 )
 
 func init() {

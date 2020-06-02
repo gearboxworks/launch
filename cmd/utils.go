@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/cobra"
 	"launch/defaults"
 	"launch/gear"
-	"launch/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 	"os"
 	"os/user"
 	"path/filepath"

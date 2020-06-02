@@ -42,7 +42,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"launch/defaults"
-	"launch/ux"
+	"github.com/newclarity/scribeHelpers/ux"
 	"os"
 	"path/filepath"
 	"regexp"

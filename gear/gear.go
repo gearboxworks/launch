@@ -1,14 +1,13 @@
 package gear
 
 import (
-	"github.com/docker/docker/client"
-	//"github.com/docker/docker/integration-cli/cli"
-	"launch/helperDocker"
+	"github.com/newclarity/scribeHelpers/helperDocker"
+	"github.com/newclarity/scribeHelpers/ux"
 	"launch/gear/gearJson"
 	"launch/githubClient"
-	"launch/ux"
 	"strings"
 )
+//"github.com/docker/docker/integration-cli/cli"
 // DOCKER_HOST=tcp://macpro:2376
 
 
@@ -163,11 +162,11 @@ func (gear *Gear) DecodeError(err error) (bool, *ux.State) {
 			case err != nil:
 				ok = true
 
-			//case client.IsErrContainerNotFound(err):
-			case client.IsErrConnectionFailed(err):
-			case client.IsErrNotFound(err):
-			case client.IsErrPluginPermissionDenied(err):
-			case client.IsErrUnauthorized(err):
+			//case gear.Docker.IsErrContainerNotFound(err):
+			case gear.Docker.IsErrConnectionFailed(err):
+			case gear.Docker.IsErrNotFound(err):
+			case gear.Docker.IsErrPluginPermissionDenied(err):
+			case gear.Docker.IsErrUnauthorized(err):
 			default:
 		}
 	}
