@@ -19,12 +19,6 @@ func main() {
 
 /*
 
-@TODO - Refactor JTC and include helperDocker under the JTC framework.
-
-@TODO - Add '--tmp-dir' flag to provide alternative mount point for TmpDir.
-@TODO -		- The TmpDir should mount up automatically on every container, (not via SSHFS).
-@TODO -		- This dir should be either $HOME/tmp/, /tmp/ or override flag above.
-
 @TODO - Add '--sshfs-host' OR '--mount-host' flag, (string). When set to:
 @TODO -		'' - Connect via direct SSH to host, (host.docker.internal).
 @TODO -		'docker' - Connect via direct SSH to host, (host.docker.internal). (Enabled automatically when Docker server is local.)
@@ -58,10 +52,6 @@ func main() {
 @TODO -		'--release' OR 'build release'	- .
 @TODO -		'--release' OR 'build release'	- .
 @TODO -		'--release' OR 'build release'	- .
-
-@TODO - Add several sub-commands to 'version' or have them as flags.
-@TODO -		'--update'	OR 'version update'	- update the current launch binary.
-@TODO - Add '--update' flag to 'version' command OR add 'self-update' command.
 */
 
 /*
@@ -77,4 +67,14 @@ func main() {
 
 @DONE - Add several sub-commands to 'uninstall' or have them as flags.
 @DONE -		'--image'	OR 'uninstall image'	- remove the image as well as the container.
+
+@DONE - Refactor JTC and include helperDocker under the JTC framework.
+
+@DONE - Add several sub-commands to 'version' or have them as flags.
+@DONE -		'--update'	OR 'version update'	- update the current launch binary.
+@DONE - Add '--update' flag to 'version' command OR add 'self-update' command.
+
+@DONE - Add '--tmp-dir' flag to provide alternative mount point for TmpDir.
+@DONE -		- The TmpDir should mount up automatically on every container, (not via SSHFS).
+@DONE -		- This dir should be either $HOME/tmp/, /tmp/ or override flag above.
 */
