@@ -33,20 +33,20 @@ var gbStartCmd = &cobra.Command{
 }
 func gbStartFunc(cmd *cobra.Command, args []string) {
 	for range OnlyOnce {
-		var ga GearArgs
+		var ga LaunchArgs
 
-		CmdState = ga.ProcessArgs(rootCmd, args)
-		if CmdState.IsError() {
-			if CmdState.IsNotOk() {
-				CmdState.PrintResponse()
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
 			}
 			break
 		}
 
-		CmdState = ga.gbStartFunc()
-		if CmdState.IsError() {
-			if CmdState.IsNotOk() {
-				CmdState.PrintResponse()
+		Cmd.State = ga.gbStartFunc()
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
 			}
 			break
 		}
@@ -66,20 +66,20 @@ var gbStopCmd = &cobra.Command{
 }
 func gbStopFunc(cmd *cobra.Command, args []string) {
 	for range OnlyOnce {
-		var ga GearArgs
+		var ga LaunchArgs
 
-		CmdState = ga.ProcessArgs(rootCmd, args)
-		if CmdState.IsError() {
-			if CmdState.IsNotOk() {
-				CmdState.PrintResponse()
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
 			}
 			break
 		}
 
-		CmdState = ga.gbStopFunc()
-		if CmdState.IsError() {
-			if CmdState.IsNotOk() {
-				CmdState.PrintResponse()
+		Cmd.State = ga.gbStopFunc()
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
 			}
 			break
 		}
@@ -87,7 +87,7 @@ func gbStopFunc(cmd *cobra.Command, args []string) {
 }
 
 
-func (ga *GearArgs) gbStartFunc() *ux.State {
+func (ga *LaunchArgs) gbStartFunc() *ux.State {
 	if state := ga.IsNil(); state.IsError() {
 		return state
 	}
@@ -149,7 +149,7 @@ func (ga *GearArgs) gbStartFunc() *ux.State {
 }
 
 
-func (ga *GearArgs) gbStopFunc() *ux.State {
+func (ga *LaunchArgs) gbStopFunc() *ux.State {
 	if state := ga.IsNil(); state.IsError() {
 		return state
 	}

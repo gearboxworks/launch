@@ -82,7 +82,7 @@ func VersionUpdate(cmd *cobra.Command, args []string) {
 
 		latest, err := selfupdate.UpdateSelf(previous, repo)
 		if err != nil {
-			CmdState.SetError(err)
+			Cmd.State.SetError(err)
 		}
 
 		if previous.Equals(latest.Version) {

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/newclarity/scribeHelpers/helperGear"
 	"github.com/spf13/cobra"
 	"launch/defaults"
 	"github.com/newclarity/scribeHelpers/ux"
@@ -38,20 +39,20 @@ var gbInstallCmd = &cobra.Command{
 }
 func gbInstallFunc(cmd *cobra.Command, args []string) {
 	for range OnlyOnce {
-		var ga GearArgs
+		var ga LaunchArgs
 
-		CmdState = ga.ProcessArgs(rootCmd, args)
-		if CmdState.IsError() {
-			if CmdState.IsNotOk() {
-				CmdState.PrintResponse()
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
 			}
 			break
 		}
 
-		CmdState = ga.gbInstallFunc()
-		if CmdState.IsError() {
-			if CmdState.IsNotOk() {
-				CmdState.PrintResponse()
+		Cmd.State = ga.gbInstallFunc()
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
 			}
 			break
 		}
@@ -73,20 +74,20 @@ var gbUninstallCmd = &cobra.Command{
 }
 func gbUninstallFunc(cmd *cobra.Command, args []string) {
 	for range OnlyOnce {
-		var ga GearArgs
+		var ga LaunchArgs
 
-		CmdState = ga.ProcessArgs(rootCmd, args)
-		if CmdState.IsError() {
-			if CmdState.IsNotOk() {
-				CmdState.PrintResponse()
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
 			}
 			break
 		}
 
-		CmdState = ga.gbUninstallFunc()
-		if CmdState.IsError() {
-			if CmdState.IsNotOk() {
-				CmdState.PrintResponse()
+		Cmd.State = ga.gbUninstallFunc()
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
 			}
 			break
 		}
@@ -108,20 +109,20 @@ var gbReinstallCmd = &cobra.Command{
 }
 func gbReinstallFunc(cmd *cobra.Command, args []string) {
 	for range OnlyOnce {
-		var ga GearArgs
+		var ga LaunchArgs
 
-		CmdState = ga.ProcessArgs(rootCmd, args)
-		if CmdState.IsError() {
-			if CmdState.IsNotOk() {
-				CmdState.PrintResponse()
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
 			}
 			break
 		}
 
-		CmdState = ga.gbReinstallFunc()
-		if CmdState.IsError() {
-			if CmdState.IsNotOk() {
-				CmdState.PrintResponse()
+		Cmd.State = ga.gbReinstallFunc()
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
 			}
 			break
 		}
@@ -143,20 +144,20 @@ var gbCleanCmd = &cobra.Command{
 }
 func gbCleanFunc(cmd *cobra.Command, args []string) {
 	for range OnlyOnce {
-		var ga GearArgs
+		var ga LaunchArgs
 
-		CmdState = ga.ProcessArgs(rootCmd, args)
-		if CmdState.IsError() {
-			if CmdState.IsNotOk() {
-				CmdState.PrintResponse()
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
 			}
 			break
 		}
 
-		CmdState = ga.gbCleanFunc()
-		if CmdState.IsError() {
-			if CmdState.IsNotOk() {
-				CmdState.PrintResponse()
+		Cmd.State = ga.gbCleanFunc()
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
 			}
 			break
 		}
@@ -164,7 +165,7 @@ func gbCleanFunc(cmd *cobra.Command, args []string) {
 }
 
 
-func (ga *GearArgs) gbInstallFunc() *ux.State {
+func (ga *LaunchArgs) gbInstallFunc() *ux.State {
 	if state := ga.IsNil(); state.IsError() {
 		return state
 	}
@@ -181,7 +182,7 @@ func (ga *GearArgs) gbInstallFunc() *ux.State {
 				found, ga.State = ga.GearRef.FindImage(ga.Name, ga.Version)
 				if found {
 					// Create symlinks.
-					ga.GearRef.GearConfig.CreateLinks(defaults.RunAs, ga.Version)
+					ga.CreateLinks(ga.Version)
 				}
 			}
 
@@ -197,10 +198,19 @@ func (ga *GearArgs) gbInstallFunc() *ux.State {
 		}
 
 
+		if ga.Project != helperGear.DefaultPathNone {
+			ga.GearRef.AddVolume(ga.Project, helperGear.DefaultProject)
+		}
+
+		if ga.TmpDir != helperGear.DefaultPathNone {
+			ga.GearRef.AddVolume(ga.TmpDir, helperGear.DefaultTmpDir)
+		}
+
+
 		if !ga.Quiet {
 			ux.PrintflnNormal("Installing Gear '%s:%s'.", ga.Name, ga.Version)
 		}
-		ga.State = ga.GearRef.Docker.Container.ContainerCreate(ga.Name, ga.Version, ga.Project)
+		ga.State = ga.GearRef.ContainerCreate(ga.Name, ga.Version)
 		if ga.State.IsError() {
 			break
 		}
@@ -217,7 +227,7 @@ func (ga *GearArgs) gbInstallFunc() *ux.State {
 			}
 
 			// Create symlinks.
-			ga.State = ga.GearRef.GearConfig.CreateLinks(defaults.RunAs, ga.Version)
+			ga.State = ga.CreateLinks(ga.Version)
 
 			ga.State.SetOk("Installed Gear '%s:%s' OK.", ga.Name, ga.Version)
 			ga.State.SetOutput("")
@@ -234,7 +244,7 @@ func (ga *GearArgs) gbInstallFunc() *ux.State {
 }
 
 
-func (ga *GearArgs) gbUninstallFunc() *ux.State {
+func (ga *LaunchArgs) gbUninstallFunc() *ux.State {
 	if state := ga.IsNil(); state.IsError() {
 		return state
 	}
@@ -249,8 +259,8 @@ func (ga *GearArgs) gbUninstallFunc() *ux.State {
 			if !ga.Temporary {
 				found, ga.State = ga.GearRef.FindImage(ga.Name, ga.Version)
 				if found {
-					// Create symlinks.
-					ga.GearRef.GearConfig.RemoveLinks(defaults.RunAs, ga.Version)
+					// Remove symlinks.
+					ga.RemoveLinks(ga.Version)
 				}
 			}
 
@@ -281,7 +291,7 @@ func (ga *GearArgs) gbUninstallFunc() *ux.State {
 			}
 
 			// Remove symlinks.
-			ga.GearRef.GearConfig.RemoveLinks(defaults.RunAs, ga.Version)
+			ga.RemoveLinks(ga.Version)
 
 			ga.State.SetOk("Gear '%s:%s' removed OK", ga.Name, ga.Version)
 			ga.State.SetOutput("")
@@ -298,7 +308,7 @@ func (ga *GearArgs) gbUninstallFunc() *ux.State {
 }
 
 
-func (ga *GearArgs) gbReinstallFunc() *ux.State {
+func (ga *LaunchArgs) gbReinstallFunc() *ux.State {
 	if state := ga.IsNil(); state.IsError() {
 		return state
 	}
@@ -322,7 +332,7 @@ func (ga *GearArgs) gbReinstallFunc() *ux.State {
 }
 
 
-func (ga *GearArgs) gbCleanFunc() *ux.State {
+func (ga *LaunchArgs) gbCleanFunc() *ux.State {
 	if state := ga.IsNil(); state.IsError() {
 		return state
 	}

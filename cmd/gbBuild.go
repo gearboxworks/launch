@@ -34,12 +34,12 @@ var gbBuildCmd = &cobra.Command {
 }
 func gbBuildFunc(cmd *cobra.Command, args []string) {
 	for range OnlyOnce {
-		var ga GearArgs
+		var ga LaunchArgs
 
-		CmdState = ga.ProcessArgs(rootCmd, args)
-		if CmdState.IsError() {
-			if CmdState.IsNotOk() {
-				CmdState.PrintResponse()
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
 			}
 			break
 		}
@@ -63,12 +63,12 @@ var gbPublishCmd = &cobra.Command{
 }
 func gbPublishFunc(cmd *cobra.Command, args []string) {
 	for range OnlyOnce {
-		var ga GearArgs
+		var ga LaunchArgs
 
-		CmdState = ga.ProcessArgs(rootCmd, args)
-		if CmdState.IsError() {
-			if CmdState.IsNotOk() {
-				CmdState.PrintResponse()
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
 			}
 			break
 		}

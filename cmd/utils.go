@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/newclarity/scribeHelpers/helperGear"
+	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"launch/defaults"
-	"launch/gear"
-	"github.com/newclarity/scribeHelpers/ux"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -33,28 +33,30 @@ func showArgs(cmd *cobra.Command, args []string) {
 	fmt.Println("")
 }
 
-type GearArgs struct {
+type LaunchArgs struct {
 	Name      string
 	Version   string
 
 	Args      []string
 	Project   string
 	Mount     string
+	TmpDir    string
+
 	Temporary bool
 	SshStatus bool
 	Quiet     bool
 	Debug     bool
 	NoCreate  bool
 
-	Provider  gear.Provider
-	GearRef   gear.Gear
+	Provider  *helperGear.Provider
+	GearRef   *helperGear.Gear
 
 	Valid     bool
 	State     *ux.State
 }
 
 
-func (ga *GearArgs) IsNil() *ux.State {
+func (ga *LaunchArgs) IsNil() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
 	}
@@ -62,7 +64,7 @@ func (ga *GearArgs) IsNil() *ux.State {
 	return ga.State
 }
 
-func (ga *GearArgs) IsValid() *ux.State {
+func (ga *LaunchArgs) IsValid() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
 	}
@@ -80,23 +82,9 @@ func (ga *GearArgs) IsValid() *ux.State {
 }
 
 
-func (ga *GearArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
+func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
 	for range OnlyOnce {
-		ga.State = ux.NewState(false)
-
-		if ga.Valid {
-			break
-		}
-
-		var err error
-		fl := cmd.Flags()
-
-		ga.Debug, err = fl.GetBool(argDebug)
-		if err != nil {
-			ga.Debug = false
-		}
-		ga.State.DebugSet(ga.Debug)
-
+		ga.State = ux.NewState(Cmd.Runtime.CmdName, Cmd.Debug)
 
 		ga.Args = args
 		if len(ga.Args) > 0 {
@@ -116,84 +104,30 @@ func (ga *GearArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
 			}
 		}
 
-
-		ga.Project, err = fl.GetString(argProject)
-		if err != nil {
-			ga.Project = defaults.DefaultPathNone
-		} else {
-			ga.Project = DeterminePath(ga.Project)
+		if ga.Project != defaults.DefaultPathNone {
+			ga.Project = DeterminePath(Cmd.Project)
 		}
 
-
-		ga.Mount, err = fl.GetString(argMount)
-		if err != nil {
-			ga.Mount = defaults.DefaultPathNone
-		} else {
-			ga.Mount = DeterminePath(ga.Mount)
+		if ga.Mount != defaults.DefaultPathNone {
+			ga.Mount = DeterminePath(Cmd.Mount)
 		}
 
-
-		ga.Quiet, err = fl.GetBool(argQuiet)
-		if err != nil {
-			ga.Quiet = false
+		if ga.TmpDir != defaults.DefaultPathNone {
+			ga.TmpDir = DeterminePath(Cmd.TmpDir)
 		}
 
-
-		ga.SshStatus, err = fl.GetBool(argStatus)
-		if err != nil {
-			ga.SshStatus = false
-		}
-
-
-		ga.Temporary, err = fl.GetBool(argTemporary)
-		if err != nil {
-			ga.Temporary = false
-		}
-
-		ga.NoCreate, err = fl.GetBool(argNoCreate)
-		if err != nil {
-			ga.NoCreate = false
-		}
-
-
-		ga.Provider.Debug = ga.Debug
-		ga.Provider.Name, err = fl.GetString(argProvider)
-		if err != nil {
-			ga.Provider.Name = defaults.DefaultProvider
-		}
-
-		ga.Provider.Host, err = fl.GetString(argHost)
-		if err != nil {
-			ga.Provider.Host = ""
-		}
-
-		ga.Provider.Port, err = fl.GetString(argPort)
-		if err != nil {
-			ga.Provider.Port = ""
-		}
-
-		ga.Provider.Project, err = fl.GetString(argProject)
-		if err != nil {
-			ga.Provider.Project = ""
-		}
-
-
-		ga.State = ga.Provider.NewProvider(ga.Debug)
+		ga.Provider = helperGear.NewProvider(Cmd.Runtime)
+		ga.State = ga.Provider.State
 		if ga.State.IsError() {
 			break
 		}
+		ga.State = ga.Provider.SetProvider(Cmd.Provider)
 
-		ga.State = ga.GearRef.NewGear(ga.Debug)
-		//ga.GearRef, state = ga.Provider.NewGear()
+		ga.GearRef = helperGear.NewGear(Cmd.Runtime)
+		ga.State = ga.GearRef.State
 		if ga.State.IsError() {
 			break
 		}
-
-
-		//if len(args) == 0 {
-		//	state.SetWarning("no args")
-		//	break
-		//}
 
 		ga.Valid = true
 	}
@@ -202,13 +136,26 @@ func (ga *GearArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
 }
 
 
-func (ga *GearArgs) CreateLinks(c defaults.ExecCommand, version string) *ux.State {
+func (ga *LaunchArgs) CreateLinks(version string) *ux.State {
 	if state := ga.IsNil(); state.IsError() {
 		return state
 	}
 
 	for range OnlyOnce {
-		ga.State = ga.GearRef.GearConfig.CreateLinks(c, version)
+		ga.State = ga.GearRef.CreateLinks(version)
+	}
+
+	return ga.State
+}
+
+
+func (ga *LaunchArgs) RemoveLinks(version string) *ux.State {
+	if state := ga.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range OnlyOnce {
+		ga.State = ga.GearRef.RemoveLinks(version)
 	}
 
 	return ga.State
@@ -266,21 +213,21 @@ func DeterminePath(mp string) string {
 	return mp
 }
 
-func IsNoCreate(cmd *cobra.Command) bool {
-	var ok bool
-
-	for range OnlyOnce {
-		var err error
-
-		ok, err = cmd.Flags().GetBool(argNoCreate)
-		if err != nil {
-			ok = false
-			break
-		}
-	}
-
-	return ok
-}
+//func IsNoCreate(cmd *cobra.Command) bool {
+//	var ok bool
+//
+//	for range OnlyOnce {
+//		var err error
+//
+//		ok, err = cmd.Flags().GetBool(flagNoCreate)
+//		if err != nil {
+//			ok = false
+//			break
+//		}
+//	}
+//
+//	return ok
+//}
 
 func GetGearboxDir() string {
 	var d string

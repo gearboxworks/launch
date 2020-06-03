@@ -38,74 +38,56 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/kardianos/osext"
+	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"launch/defaults"
-	"github.com/newclarity/scribeHelpers/ux"
 	"os"
-	"path/filepath"
-	"regexp"
 	"strings"
 )
 
-const (
-	argConfig = "config"
-	//argHelp = "help"
-	argDebug = "debug"
-	argNoCreate = "no-create"
-	argExample = "example"
-
-	argProvider = "provider"
-	argProviderDefault = "docker"
-
-	argHost = "host"
-	argPort = "port"
-	argProject = "project"
-	argMount = "mount"
-	argCompletion = "completion"
-	argVersion = "version"
-	argQuiet = "quiet"
-	argTemporary = "temporary"
-	argStatus = "status"
-)
 
 func init() {
+	Cmd = New()
+
 	cobra.OnInitialize(initConfig)
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-	rootCmd.PersistentFlags().StringVar(&cfgFile, argConfig, GetLaunchConfig(), ux.SprintfBlue("Config file."))
+	rootCmd.PersistentFlags().StringVarP(&Cmd.Config, flagConfig, "c", GetLaunchConfig(), ux.SprintfBlue("Config file."))
 
-	rootCmd.PersistentFlags().BoolP(argExample, "e", false, ux.SprintfBlue("Help examples for command."))
-	rootCmd.PersistentFlags().BoolP(argNoCreate, "n", false, ux.SprintfBlue("Don't create container."))
+	rootCmd.PersistentFlags().BoolVarP(&Cmd.HelpExamples, flagExample, "e", false, ux.SprintfBlue("Help examples for command."))
+	rootCmd.PersistentFlags().BoolVarP(&Cmd.NoCreate, flagNoCreate, "n", false, ux.SprintfBlue("Don't create container."))
 
-	rootCmd.PersistentFlags().StringP(argProvider, "", defaults.DefaultProvider, ux.SprintfBlue("Set virtual provider"))
-	rootCmd.PersistentFlags().StringP(argHost, "", "", ux.SprintfBlue("Set virtual provider host."))
-	rootCmd.PersistentFlags().StringP(argPort, "", "", ux.SprintfBlue("Set virtual provider port."))
-	rootCmd.PersistentFlags().StringP(argProject, "p", defaults.DefaultPathNone, ux.SprintfBlue("Mount project directory."))
-	rootCmd.PersistentFlags().StringP(argMount, "m", defaults.DefaultPathNone, ux.SprintfBlue("Mount arbitrary directory via SSHFS."))
+	rootCmd.PersistentFlags().StringVarP(&Cmd.Provider, flagProvider, "", defaults.DefaultProvider, ux.SprintfBlue("Set virtual provider"))
+	rootCmd.PersistentFlags().StringVarP(&Cmd.Host, flagHost, "", "", ux.SprintfBlue("Set virtual provider host."))
+	rootCmd.PersistentFlags().StringVarP(&Cmd.Port, flagPort, "", "", ux.SprintfBlue("Set virtual provider port."))
+	rootCmd.PersistentFlags().StringVarP(&Cmd.Project, flagProject, "p", defaults.DefaultPathNone, ux.SprintfBlue("Mount project directory."))
+	rootCmd.PersistentFlags().StringVarP(&Cmd.Mount, flagMount, "m", defaults.DefaultPathNone, ux.SprintfBlue("Mount arbitrary directory via SSHFS."))
+	rootCmd.PersistentFlags().StringVarP(&Cmd.TmpDir, flagTmpDir, "", defaults.DefaultPathNone, ux.SprintfBlue("Alternate TMP dir mount point."))
 
-	rootCmd.Flags().BoolP(argTemporary, "t", false, ux.SprintfBlue("Temporary container - remove after running command."))
-	rootCmd.Flags().BoolP(argStatus, "s", false, ux.SprintfBlue("Show shell status line."))
-	rootCmd.Flags().BoolP(argDebug, "d", false, ux.SprintfBlue("Debug mode."))
-	rootCmd.Flags().BoolP(argQuiet, "q", false, ux.SprintfBlue("Silence all Gearbox messsages."))
+	rootCmd.Flags().BoolVarP(&Cmd.Temporary, flagTemporary, "t", false, ux.SprintfBlue("Temporary container - remove after running command."))
+	rootCmd.Flags().BoolVarP(&Cmd.Status, flagStatus, "s", false, ux.SprintfBlue("Show shell status line."))
+	rootCmd.Flags().BoolVarP(&Cmd.Debug, flagDebug, "d", false, ux.SprintfBlue("Debug mode."))
+	rootCmd.Flags().BoolVarP(&Cmd.Quiet, flagQuiet, "q", false, ux.SprintfBlue("Silence all launch messages."))
+
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP(argVersion, "v", false, ux.SprintfBlue("Display version of " + defaults.BinaryName))
-	rootCmd.Flags().BoolP(argCompletion, "b", false, ux.SprintfBlue("Generate BASH completion script."))
+	rootCmd.Flags().BoolVarP(&Cmd.Version, flagVersion, "v", false, ux.SprintfBlue("Display version of " + defaults.BinaryName))
+	rootCmd.Flags().BoolVarP(&Cmd.Completion, flagCompletion, "b", false, ux.SprintfBlue("Generate BASH completion script."))
 }
+
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	var err error
 
 	for range OnlyOnce {
-		if cfgFile != "" {
+		if Cmd.Config != "" {
 			// Use config file from the flag.
-			viper.SetConfigFile(cfgFile)
+			viper.SetConfigFile(Cmd.Config)
 		} else {
 			// Search config in home directory with name "launch" (without extension).
 			viper.AddConfigPath(GetGearboxDir())
@@ -124,8 +106,10 @@ func initConfig() {
 	}
 }
 
-var CmdState *ux.State
-var cfgFile string
+
+//var CmdState *ux.State
+//var cfgFile string
+var Cmd *TypeLaunchArgs
 
 
 // rootCmd represents the base command when called without any subcommands
@@ -140,36 +124,28 @@ var rootCmd = &cobra.Command {
 
 
 func gbRootFunc(cmd *cobra.Command, args []string) {
-	CmdState = ux.NewState(false)
-
 	for range OnlyOnce {
-		var err error
-		fl := cmd.Flags()
-		//ux.Printf("F5: %v\n", fl.Args())
-		//ux.Printf("F6: %v\n", args)
-
-		//quietFlag, _ = fl.GetBool(argQuiet)
-
-		var debugFlag bool
-		debugFlag, _ = fl.GetBool(argDebug)
-		CmdState.DebugSet(debugFlag)
-		if debugFlag {
-			showArgs(cmd, args)
-			flargs := fl.Args()
-			ux.Printf("flargs: %s\n", strings.Join(flargs, " "))
-			ux.Printf("args: %s\n", strings.Join(args, " "))
-		}
-
+		//var debugFlag bool
+		//debugFlag, _ = fl.GetBool(argDebug)
+		//CmdState.DebugSet(debugFlag)
+		//if debugFlag {
+		//	showArgs(cmd, args)
+		//	flargs := fl.Args()
+		//	ux.Printf("flargs: %s\n", strings.Join(flargs, " "))
+		//	ux.Printf("args: %s\n", strings.Join(args, " "))
+		//}
+		//
 		//tempFlag, _ = cmd.Flags().GetBool(argTemporary)
 
+		fl := cmd.Flags()
+
 		// Produce BASH completion script.
-		var ok bool
-		ok, err = fl.GetBool("completion")
+		ok, err := fl.GetBool("completion")
 		if ok {
 			var out bytes.Buffer
 			_ = cmd.GenBashCompletion(&out)
 			fmt.Printf("# Gearbox BASH completion:\n%s\n", out.String())
-			CmdState.Clear()
+			Cmd.State.Clear()
 			break
 			//os.Exit(0)
 		}
@@ -178,12 +154,12 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 		// Show version.
 		ok, err = fl.GetBool("version")
 		if err != nil {
-			CmdState.SetError("%s", err)
+			Cmd.State.SetError("%s", err)
 			break
 		}
 		if ok {
 			ux.Printf("%s: v%s\n", defaults.BinaryName, defaults.BinaryVersion)
-			CmdState.Clear()
+			Cmd.State.Clear()
 			break
 			//os.Exit(0)
 		}
@@ -201,14 +177,14 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 		// Show help if no commands specified.
 		if len(args) == 0 {
 			_ = cmd.Help()
-			CmdState.Clear()
+			Cmd.State.Clear()
 			break
 			//os.Exit(0)
 		}
 	}
 
-	if CmdState.IsNotOk() {
-		CmdState.PrintResponse()
+	if Cmd.State.IsNotOk() {
+		Cmd.State.PrintResponse()
 	}
 }
 
@@ -216,77 +192,61 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() *ux.State {
-	CmdState = CmdState.EnsureNotNil()
+	Cmd.State = Cmd.State.EnsureNotNil()
 
 	for range OnlyOnce {
-		var err error
-
 		SetHelp(rootCmd)
+
+		//// WARNING: Critical code area.
+		//// Support for running launch via symlink.
+		////defaults.RunAs.FullPath, err = filepath.Abs(os.Args[0])
+		//var err error
+		//defaults.RunAs.FullPath, err = osext.Executable()
+		//if err != nil {
+		//	CmdState.SetError("%s", err)
+		//	break
+		//}
+		////defaults.RunAs.FullPath = "/Users/mick/Documents/GitHub/gb-launch/bin/psql-9.4.26"
+		////defaults.RunAs.FullPath = "/Users/mick/Documents/GitHub/gb-launch/bin/postgresql-9.4.26"
+		//
+		//defaults.RunAs.Dir, defaults.RunAs.File = filepath.Split(defaults.RunAs.FullPath)
+		//
+		//ok, _ := regexp.MatchString("^" + defaults.BinaryName, defaults.RunAs.File)
+		//if !ok {
+		//	defaults.RunAs.AsLink = true
+		//	defaults.RunAs.File = strings.ReplaceAll(defaults.RunAs.File, "-", ":")
+		//	newArgs := []string{"run", defaults.RunAs.File}
+		//	newArgs = append(newArgs, os.Args[1:]...)
+		//	rootCmd.SetArgs(newArgs)
+		//
+		//	_ = rootCmd.Flags().Set(argQuiet, "true")
+		//	rootCmd.DisableFlagParsing = true
+		//}
+		//// WARNING: Critical code area.
 
 		// WARNING: Critical code area.
 		// Support for running launch via symlink.
-		//defaults.RunAs.FullPath, err = filepath.Abs(os.Args[0])
-		defaults.RunAs.FullPath, err = osext.Executable()
-		if err != nil {
-			CmdState.SetError("%s", err)
-			break
-		}
-		//defaults.RunAs.FullPath = "/Users/mick/Documents/GitHub/gb-launch/bin/psql-9.4.26"
-		//defaults.RunAs.FullPath = "/Users/mick/Documents/GitHub/gb-launch/bin/postgresql-9.4.26"
-
-		defaults.RunAs.Dir, defaults.RunAs.File = filepath.Split(defaults.RunAs.FullPath)
-
-		ok, _ := regexp.MatchString("^" + defaults.BinaryName, defaults.RunAs.File)
-		if !ok {
-			defaults.RunAs.AsLink = true
-			defaults.RunAs.File = strings.ReplaceAll(defaults.RunAs.File, "-", ":")
-			newArgs := []string{"run", defaults.RunAs.File}
+		if !Cmd.Runtime.IsRunningAs(defaults.BinaryName) {
+			//defaults.RunAs.AsLink = true
+			Cmd.Runtime.CmdFile = strings.ReplaceAll(Cmd.Runtime.CmdFile, "-", ":")
+			newArgs := []string{"run", Cmd.Runtime.CmdFile}
 			newArgs = append(newArgs, os.Args[1:]...)
 			rootCmd.SetArgs(newArgs)
 
-			_ = rootCmd.Flags().Set(argQuiet, "true")
+			_ = rootCmd.Flags().Set(flagQuiet, "true")
 			rootCmd.DisableFlagParsing = true
 		}
 		// WARNING: Critical code area.
 
-		err = rootCmd.Execute()
+		err := rootCmd.Execute()
 		if err != nil {
-			CmdState.SetError("%s", err)
+			Cmd.State.SetError("%s", err)
 			break
 		}
 	}
 
-	return CmdState
+	return Cmd.State
 }
-
-
-//func _SprintfBlue(c string) string {
-//	return ux.SprintfBlue(c)
-//}
-//
-//func _SprintfCyan(c string) string {
-//	return ux.SprintfCyan(c)
-//}
-//
-//func _SprintfWhite(c string) string {
-//	return ux.SprintfWhite(c)
-//}
-//
-//func _SprintfGreen(c string) string {
-//	return ux.SprintfGreen(c)
-//}
-//
-//func _SprintfMagenta(c string) string {
-//	return ux.SprintfMagenta(c)
-//}
-//
-//func _SprintfRed(c string) string {
-//	return ux.SprintfRed(c)
-//}
-//
-//func _SprintfYellow(c string) string {
-//	return ux.SprintfYellow(c)
-//}
 
 
 func _GetUsage(c *cobra.Command) string {
@@ -415,5 +375,5 @@ func SetHelp(c *cobra.Command) {
 //}
 
 func GetState() *ux.State {
-	return CmdState
+	return Cmd.State
 }
