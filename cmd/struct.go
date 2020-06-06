@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/newclarity/scribeHelpers/helperRuntime"
+	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/ux"
 	"launch/defaults"
 )
@@ -53,7 +53,7 @@ type TypeLaunchArgs struct {
 	HelpAll        bool
 	HelpExamples   bool
 
-	Runtime        *helperRuntime.TypeRuntime
+	Runtime        *toolRuntime.TypeRuntime
 	State          *ux.State
 	valid          bool
 }
@@ -84,7 +84,7 @@ func New() *TypeLaunchArgs {
 		HelpAll:      false,
 		HelpExamples: false,
 
-		Runtime:        helperRuntime.New(defaults.BinaryName, defaults.BinaryVersion, false),
+		Runtime:        toolRuntime.New(defaults.BinaryName, defaults.BinaryVersion, false),
 		State:          ux.NewState(defaults.BinaryName, false),
 		valid:          false,
 	}

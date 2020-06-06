@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/newclarity/scribeHelpers/helperGear"
+	"github.com/newclarity/scribeHelpers/toolGear"
 	"github.com/spf13/cobra"
 	"launch/defaults"
 	"github.com/newclarity/scribeHelpers/ux"
@@ -198,12 +198,12 @@ func (ga *LaunchArgs) gbInstallFunc() *ux.State {
 		}
 
 
-		if ga.Project != helperGear.DefaultPathNone {
-			ga.GearRef.AddVolume(ga.Project, helperGear.DefaultProject)
+		if ga.Project != toolGear.DefaultPathNone {
+			ga.GearRef.AddVolume(ga.Project, toolGear.DefaultProject)
 		}
 
-		if ga.TmpDir != helperGear.DefaultPathNone {
-			ga.GearRef.AddVolume(ga.TmpDir, helperGear.DefaultTmpDir)
+		if ga.TmpDir != toolGear.DefaultPathNone {
+			ga.GearRef.AddVolume(ga.TmpDir, toolGear.DefaultTmpDir)
 		}
 
 

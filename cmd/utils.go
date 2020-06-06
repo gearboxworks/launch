@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/newclarity/scribeHelpers/helperGear"
+	"github.com/newclarity/scribeHelpers/toolGear"
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"launch/defaults"
@@ -48,8 +48,8 @@ type LaunchArgs struct {
 	Debug     bool
 	NoCreate  bool
 
-	Provider  *helperGear.Provider
-	GearRef   *helperGear.Gear
+	Provider  *toolGear.Provider
+	GearRef   *toolGear.Gear
 
 	Valid     bool
 	State     *ux.State
@@ -116,14 +116,14 @@ func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
 			ga.TmpDir = DeterminePath(Cmd.TmpDir)
 		}
 
-		ga.Provider = helperGear.NewProvider(Cmd.Runtime)
+		ga.Provider = toolGear.NewProvider(Cmd.Runtime)
 		ga.State = ga.Provider.State
 		if ga.State.IsError() {
 			break
 		}
 		ga.State = ga.Provider.SetProvider(Cmd.Provider)
 
-		ga.GearRef = helperGear.NewGear(Cmd.Runtime)
+		ga.GearRef = toolGear.NewGear(Cmd.Runtime)
 		ga.State = ga.GearRef.State
 		if ga.State.IsError() {
 			break

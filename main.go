@@ -1,8 +1,8 @@
 package main
 
 import (
-	"launch/cmd"
 	"github.com/newclarity/scribeHelpers/ux"
+	"launch/cmd"
 	"os"
 )
 
@@ -68,7 +68,7 @@ func main() {
 @DONE - Add several sub-commands to 'uninstall' or have them as flags.
 @DONE -		'--image'	OR 'uninstall image'	- remove the image as well as the container.
 
-@DONE - Refactor JTC and include helperDocker under the JTC framework.
+@DONE - Refactor JTC and include toolDocker under the JTC framework.
 
 @DONE - Add several sub-commands to 'version' or have them as flags.
 @DONE -		'--update'	OR 'version update'	- update the current launch binary.
