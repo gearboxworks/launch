@@ -15,7 +15,7 @@ import (
 func showArgs(cmd *cobra.Command, args []string) {
 	// var err error
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		//if !debugFlag {
 		//	break
 		//}
@@ -69,7 +69,7 @@ func (ga *LaunchArgs) IsValid() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if !ga.Valid {
 			ga.State.SetError("gear args is not valid")
 			break
@@ -83,7 +83,7 @@ func (ga *LaunchArgs) IsValid() *ux.State {
 
 
 func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
-	for range OnlyOnce {
+	for range onlyOnce {
 		ga.State = ux.NewState(Cmd.Runtime.CmdName, Cmd.Debug)
 
 		ga.Args = args
@@ -141,7 +141,7 @@ func (ga *LaunchArgs) CreateLinks(version string) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ga.State = ga.GearRef.CreateLinks(version)
 	}
 
@@ -154,7 +154,7 @@ func (ga *LaunchArgs) RemoveLinks(version string) *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ga.State = ga.GearRef.RemoveLinks(version)
 	}
 
@@ -165,7 +165,7 @@ func (ga *LaunchArgs) RemoveLinks(version string) *ux.State {
 func DeterminePath(mp string) string {
 	var ok bool
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var err error
 		var cwd string
 
@@ -216,7 +216,7 @@ func DeterminePath(mp string) string {
 //func IsNoCreate(cmd *cobra.Command) bool {
 //	var ok bool
 //
-//	for range OnlyOnce {
+//	for range onlyOnce {
 //		var err error
 //
 //		ok, err = cmd.Flags().GetBool(flagNoCreate)
@@ -232,7 +232,7 @@ func DeterminePath(mp string) string {
 func GetGearboxDir() string {
 	var d string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		u, _ := user.Current()
 		d = filepath.Join(u.HomeDir, ".gearbox")
 	}
@@ -243,7 +243,7 @@ func GetGearboxDir() string {
 func GetLaunchConfig() string {
 	var d string
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		u, _ := user.Current()
 		d = filepath.Join(u.HomeDir, ".gearbox", "launch.json")
 	}

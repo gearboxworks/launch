@@ -38,7 +38,7 @@ var gbRunCmd = &cobra.Command{
 	Args: cobra.MinimumNArgs(1),
 }
 func gbRunFunc(cmd *cobra.Command, args []string) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
@@ -66,7 +66,7 @@ var gbShellCmd = &cobra.Command{
 	Args: cobra.MinimumNArgs(1),
 }
 func gbShellFunc(cmd *cobra.Command, args []string) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
@@ -100,7 +100,7 @@ var gbUnitTestCmd = &cobra.Command{
 	Args: cobra.MinimumNArgs(1),
 }
 func gbUnitTestFunc(cmd *cobra.Command, args []string) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
@@ -127,7 +127,7 @@ func (ga *LaunchArgs) gbRunFunc() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ga.Quiet = true
 
 		ga.State = ga.gbStartFunc()
@@ -168,7 +168,7 @@ func (ga *LaunchArgs) gbShellFunc() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ga.State = ga.gbStartFunc()
 		if !ga.State.IsRunning() {
 			ga.State.SetError("Cannot shell out to Gear '%s:%s.'", ga.Name, ga.Version)
@@ -193,7 +193,7 @@ func (ga *LaunchArgs) gbUnitTestFunc() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		ga.State = ga.gbStartFunc()
 		if !ga.State.IsRunning() {
 			ga.State.SetError("container not started")

@@ -38,6 +38,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/newclarity/scribeHelpers/loadTools"
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -47,15 +48,30 @@ import (
 )
 
 
+var Cmd *TypeLaunchArgs
+
+var CmdScribe *loadTools.TypeScribeArgs
+var ConfigFile string
+const 	flagConfigFile  	= "config"
+func SetCmd() {
+	if Cmd == nil {
+		Cmd = New()
+	}
+	if CmdScribe == nil {
+		CmdScribe = loadTools.New(defaults.BinaryName, defaults.BinaryVersion, false)
+		CmdScribe.Runtime.SetRepos(defaults.SourceRepo, defaults.BinaryRepo)
+	}
+}
+
+
 func init() {
-	Cmd = New()
+	SetCmd()
 
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-	rootCmd.PersistentFlags().StringVarP(&Cmd.Config, flagConfig, "c", GetLaunchConfig(), ux.SprintfBlue("Config file."))
+	//rootCmd.PersistentFlags().StringVarP(&Cmd.Config, flagConfig, "c", GetLaunchConfig(), ux.SprintfBlue("Config file."))
+	rootCmd.PersistentFlags().StringVar(&ConfigFile, flagConfigFile, fmt.Sprintf("%s-config.json", defaults.BinaryName), ux.SprintfBlue("%s: config file.", defaults.BinaryName))
+	_ = rootCmd.PersistentFlags().MarkHidden(flagConfigFile)
 
 	rootCmd.PersistentFlags().BoolVarP(&Cmd.HelpExamples, flagExample, "e", false, ux.SprintfBlue("Help examples for command."))
 	rootCmd.PersistentFlags().BoolVarP(&Cmd.NoCreate, flagNoCreate, "n", false, ux.SprintfBlue("Don't create container."))
@@ -84,7 +100,7 @@ func init() {
 func initConfig() {
 	var err error
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		if Cmd.Config != "" {
 			// Use config file from the flag.
 			viper.SetConfigFile(Cmd.Config)
@@ -107,11 +123,6 @@ func initConfig() {
 }
 
 
-//var CmdState *ux.State
-//var cfgFile string
-var Cmd *TypeLaunchArgs
-
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command {
 	Use:   defaults.BinaryName,
@@ -124,23 +135,20 @@ var rootCmd = &cobra.Command {
 
 
 func gbRootFunc(cmd *cobra.Command, args []string) {
-	for range OnlyOnce {
-		//var debugFlag bool
-		//debugFlag, _ = fl.GetBool(argDebug)
-		//CmdState.DebugSet(debugFlag)
-		//if debugFlag {
-		//	showArgs(cmd, args)
-		//	flargs := fl.Args()
-		//	ux.Printf("flargs: %s\n", strings.Join(flargs, " "))
-		//	ux.Printf("args: %s\n", strings.Join(args, " "))
-		//}
-		//
-		//tempFlag, _ = cmd.Flags().GetBool(argTemporary)
-
+	for range onlyOnce {
 		fl := cmd.Flags()
 
+		// ////////////////////////////////
+		// Show version.
+		ok, _ := fl.GetBool(loadTools.FlagVersion)
+		if ok {
+			VersionShow()
+			Cmd.State.Clear()
+			break
+		}
+
 		// Produce BASH completion script.
-		ok, err := fl.GetBool("completion")
+		ok, _ = fl.GetBool("completion")
 		if ok {
 			var out bytes.Buffer
 			_ = cmd.GenBashCompletion(&out)
@@ -150,36 +158,11 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 			//os.Exit(0)
 		}
 
-
-		// Show version.
-		ok, err = fl.GetBool("version")
-		if err != nil {
-			Cmd.State.SetError("%s", err)
-			break
-		}
-		if ok {
-			ux.Printf("%s: v%s\n", defaults.BinaryName, defaults.BinaryVersion)
-			Cmd.State.Clear()
-			break
-			//os.Exit(0)
-		}
-
-
-		// Create new provider connection.
-		//provider.Debug = debugFlag
-		//provider.Name, _ = fl.GetString(argProvider)
-		//provider.Host, _ = fl.GetString(argHost)
-		//provider.Port, _ = fl.GetString(argPort)
-		//provider.Project, _ = fl.GetString(argProject)
-		//state = provider.NewProvider()
-
-
 		// Show help if no commands specified.
 		if len(args) == 0 {
 			_ = cmd.Help()
 			Cmd.State.Clear()
 			break
-			//os.Exit(0)
 		}
 	}
 
@@ -194,8 +177,9 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 func Execute() *ux.State {
 	Cmd.State = Cmd.State.EnsureNotNil()
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		SetHelp(rootCmd)
+		SetCmd()
 
 		//// WARNING: Critical code area.
 		//// Support for running launch via symlink.

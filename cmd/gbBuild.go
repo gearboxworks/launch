@@ -33,7 +33,7 @@ var gbBuildCmd = &cobra.Command {
 	Args: cobra.ExactArgs(1),
 }
 func gbBuildFunc(cmd *cobra.Command, args []string) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
@@ -62,7 +62,7 @@ var gbPublishCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 func gbPublishFunc(cmd *cobra.Command, args []string) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)

@@ -19,6 +19,17 @@ func main() {
 
 /*
 
+@TODO - Strange issue when running a launch executable symlink via toolExec.
+@TODO -		Seems to run it as a non-symlink.
+@TODO -			# Running composer:
+@TODO -			    Additional Args: install
+@TODO -			    Working Dir:     /Users/mick/Documents/GitHub/deploywp-code/tests/target
+@TODO -			Gearbox[/etc/gearbox/bin/ssh-execute.sh]: # You have entered the docker-composer Docker container.
+@TODO -			Gearbox[/etc/gearbox/bin/ssh-execute.sh]: # All changes made outside of /home/gearbox/projects may not be permanent.
+@TODO -			Loading composer repositories with package information
+@TODO -			Updating dependencies (including require-dev)
+
+
 @TODO - Add '--sshfs-host' OR '--mount-host' flag, (string). When set to:
 @TODO -		'' - Connect via direct SSH to host, (host.docker.internal).
 @TODO -		'docker' - Connect via direct SSH to host, (host.docker.internal). (Enabled automatically when Docker server is local.)

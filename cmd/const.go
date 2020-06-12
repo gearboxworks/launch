@@ -1,3 +1,4 @@
 package cmd
 
-const OnlyOnce = "1"
+const onlyOnce = "1"
+var onlyTwice = []string{"", ""}

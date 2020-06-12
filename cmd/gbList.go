@@ -34,7 +34,7 @@ var gbListCmd = &cobra.Command{
 	Args: cobra.RangeArgs(0, 1),
 }
 func gbListFunc(cmd *cobra.Command, args []string) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
@@ -61,7 +61,7 @@ func (ga *LaunchArgs) gbListFunc() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		_, ga.State = ga.GearRef.Docker.ImageList(ga.Name)
 		if ga.State.IsError() {
 			break

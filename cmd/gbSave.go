@@ -34,7 +34,7 @@ var gbSaveCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 func gbSaveFunc(cmd *cobra.Command, args []string) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
@@ -64,7 +64,7 @@ var gbLoadCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 func gbLoadFunc(cmd *cobra.Command, args []string) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)

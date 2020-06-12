@@ -32,7 +32,7 @@ var gbStartCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 func gbStartFunc(cmd *cobra.Command, args []string) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
@@ -65,7 +65,7 @@ var gbStopCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 }
 func gbStopFunc(cmd *cobra.Command, args []string) {
-	for range OnlyOnce {
+	for range onlyOnce {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
@@ -92,7 +92,7 @@ func (ga *LaunchArgs) gbStartFunc() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var found bool
 		found, ga.State = ga.GearRef.FindContainer(ga.Name, ga.Version)
 		if ga.State.IsError() {
@@ -154,7 +154,7 @@ func (ga *LaunchArgs) gbStopFunc() *ux.State {
 		return state
 	}
 
-	for range OnlyOnce {
+	for range onlyOnce {
 		var found bool
 		found, ga.State = ga.GearRef.FindContainer(ga.Name, ga.Version)
 		if ga.State.IsError() {
