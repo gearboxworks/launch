@@ -5,32 +5,7 @@ import (
 	"github.com/newclarity/scribeHelpers/ux"
 )
 
-func init() {
-	rootCmd.AddCommand(gbStartCmd)
-	rootCmd.AddCommand(gbStopCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	//gbStartCmd.PersistentFlags().String("help", "", "Start and usage")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// gbStartCmd.Flags().BoolP("toggle", "t", false, "Start message for toggle")
-}
-
-
-// gbStartCmd represents the gbStart command
-var gbStartCmd = &cobra.Command{
-	Use:   "start <gear name>",
-	Short: ux.SprintfBlue("Start a Gearbox gear"),
-	Long: ux.SprintfBlue("Start a Gearbox gear."),
-	Example: ux.SprintfWhite("launch start golang"),
-	DisableFlagParsing: false,
-	Run: gbStartFunc,
-	Args: cobra.ExactArgs(1),
-}
 func gbStartFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -54,16 +29,6 @@ func gbStartFunc(cmd *cobra.Command, args []string) {
 }
 
 
-// gbStatusCmd represents the gbStatus command
-var gbStopCmd = &cobra.Command{
-	Use:   "stop <gear name>",
-	Short: ux.SprintfBlue("Stop a Gearbox gear"),
-	Long: ux.SprintfBlue("Stop a Gearbox gear."),
-	Example: ux.SprintfWhite("launch stop golang"),
-	DisableFlagParsing: false,
-	Run: gbStopFunc,
-	Args: cobra.ExactArgs(1),
-}
 func gbStopFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs

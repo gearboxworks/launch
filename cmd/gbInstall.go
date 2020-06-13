@@ -7,36 +7,7 @@ import (
 	"github.com/newclarity/scribeHelpers/ux"
 )
 
-func init() {
-	rootCmd.AddCommand(gbInstallCmd)
-	rootCmd.AddCommand(gbUninstallCmd)
-	rootCmd.AddCommand(gbReinstallCmd)
-	rootCmd.AddCommand(gbCleanCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	//gbInstallCmd.PersistentFlags().String("help", "", "Remove and usage")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// gbInstallCmd.Flags().BoolP("toggle", "t", false, "Remove message for toggle")
-}
-
-
-// gbInstallCmd represents the gbInstall command
-var gbInstallCmd = &cobra.Command{
-	Use:   "install <gear name>",
-	//Aliases: []string{"add"},
-	SuggestFor: []string{"download" ,"add"},
-	Short: ux.SprintfBlue("Install a Gearbox gear"),
-	Long: ux.SprintfBlue("Install a Gearbox gear."),
-	Example: ux.SprintfWhite("launch install golang"),
-	DisableFlagParsing: false,
-	Run: gbInstallFunc,
-	Args: cobra.ExactArgs(1),
-}
 func gbInstallFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -60,18 +31,6 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 }
 
 
-// gbInstallCmd represents the gbInstall command
-var gbUninstallCmd = &cobra.Command{
-	Use:   "uninstall <gear name>",
-	//Aliases: []string{"remove"},
-	SuggestFor: []string{"remove"},
-	Short: ux.SprintfBlue("Uninstall a Gearbox gear"),
-	Long: ux.SprintfBlue("Uninstall a Gearbox gear."),
-	Example: ux.SprintfWhite("launch uninstall golang"),
-	DisableFlagParsing: false,
-	Run: gbUninstallFunc,
-	Args: cobra.ExactArgs(1),
-}
 func gbUninstallFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -95,18 +54,6 @@ func gbUninstallFunc(cmd *cobra.Command, args []string) {
 }
 
 
-// gbReinstallCmd represents the gbInstall command
-var gbReinstallCmd = &cobra.Command{
-	Use:   "reinstall <gear name>",
-	//Aliases: []string{"update"},
-	SuggestFor: []string{"update"},
-	Short: ux.SprintfBlue("Update a Gearbox gear"),
-	Long: ux.SprintfBlue("Update a Gearbox gear."),
-	Example: ux.SprintfWhite("launch reinstall golang"),
-	DisableFlagParsing: false,
-	Run: gbReinstallFunc,
-	Args: cobra.ExactArgs(1),
-}
 func gbReinstallFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -130,18 +77,6 @@ func gbReinstallFunc(cmd *cobra.Command, args []string) {
 }
 
 
-// gbInstallCmd represents the gbInstall command
-var gbCleanCmd = &cobra.Command{
-	Use:   "clean <gear name>",
-	//Aliases: []string{"remove"},
-	SuggestFor: []string{},
-	Short: ux.SprintfBlue("Completely uninstall a Gearbox gear"),
-	Long: ux.SprintfBlue("Completely uninstall a Gearbox gear."),
-	Example: ux.SprintfWhite("launch uninstall golang"),
-	DisableFlagParsing: false,
-	Run: gbCleanFunc,
-	Args: cobra.ExactArgs(1),
-}
 func gbCleanFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs

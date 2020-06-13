@@ -66,6 +66,7 @@ func SetCmd() {
 
 func init() {
 	SetCmd()
+	defaults.New(rootCmd, CmdScribe)
 
 	cobra.OnInitialize(initConfig)
 
@@ -142,8 +143,7 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 		// Show version.
 		ok, _ := fl.GetBool(loadTools.FlagVersion)
 		if ok {
-			VersionShow()
-			Cmd.State.Clear()
+			Cmd.State = defaults.VersionShow()
 			break
 		}
 
