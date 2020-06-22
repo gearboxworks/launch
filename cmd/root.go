@@ -39,6 +39,8 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/newclarity/scribeHelpers/loadTools"
+	"github.com/newclarity/scribeHelpers/toolCobraHelp"
+	"github.com/newclarity/scribeHelpers/toolSelfUpdate"
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -49,24 +51,23 @@ import (
 
 
 var Cmd *TypeLaunchArgs
+var CobraHelp *toolCobraHelp.TypeCommands
 
+var CmdSelfUpdate *toolSelfUpdate.TypeSelfUpdate
 var CmdScribe *loadTools.TypeScribeArgs
 var ConfigFile string
 const 	flagConfigFile  	= "config"
-func SetCmd() {
-	if Cmd == nil {
-		Cmd = New()
-	}
-	if CmdScribe == nil {
-		CmdScribe = loadTools.New(defaults.BinaryName, defaults.BinaryVersion, false)
-		CmdScribe.Runtime.SetRepos(defaults.SourceRepo, defaults.BinaryRepo)
-	}
-}
 
 
 func init() {
 	SetCmd()
-	defaults.New(rootCmd, CmdScribe)
+	//defaults.New(rootCmd, CmdScribe)
+	//rootCmd.Flags().BoolVarP(&Cmd.Version, flagVersion, "v", false, ux.SprintfBlue("Display version of " + defaults.BinaryName))
+
+	CobraHelp.AddCommands("Manage", rootCmd, gbInstallCmd, gbUninstallCmd, gbReinstallCmd, gbCleanCmd, gbListCmd)
+	CobraHelp.AddCommands("Execute", rootCmd, gbRunCmd, gbShellCmd, gbUnitTestCmd)
+	CobraHelp.AddCommands("Run", rootCmd, gbStartCmd, gbStopCmd)
+	CobraHelp.AddCommands("Create", rootCmd, gbBuildCmd, gbPublishCmd, gbSaveCmd, gbLoadCmd)
 
 	cobra.OnInitialize(initConfig)
 
@@ -74,26 +75,24 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&ConfigFile, flagConfigFile, fmt.Sprintf("%s-config.json", defaults.BinaryName), ux.SprintfBlue("%s: config file.", defaults.BinaryName))
 	_ = rootCmd.PersistentFlags().MarkHidden(flagConfigFile)
 
-	rootCmd.PersistentFlags().BoolVarP(&Cmd.HelpExamples, flagExample, "e", false, ux.SprintfBlue("Help examples for command."))
-	rootCmd.PersistentFlags().BoolVarP(&Cmd.NoCreate, flagNoCreate, "n", false, ux.SprintfBlue("Don't create container."))
+	rootCmd.Flags().BoolVarP(&Cmd.HelpExamples, flagExample, "e", false, ux.SprintfBlue("Help examples for command."))
+	rootCmd.Flags().BoolVarP(&Cmd.NoCreate, flagNoCreate, "n", false, ux.SprintfBlue("Don't create container."))
 
-	rootCmd.PersistentFlags().StringVarP(&Cmd.Provider, flagProvider, "", defaults.DefaultProvider, ux.SprintfBlue("Set virtual provider"))
-	rootCmd.PersistentFlags().StringVarP(&Cmd.Host, flagHost, "", "", ux.SprintfBlue("Set virtual provider host."))
-	rootCmd.PersistentFlags().StringVarP(&Cmd.Port, flagPort, "", "", ux.SprintfBlue("Set virtual provider port."))
-	rootCmd.PersistentFlags().StringVarP(&Cmd.Project, flagProject, "p", defaults.DefaultPathNone, ux.SprintfBlue("Mount project directory."))
-	rootCmd.PersistentFlags().StringVarP(&Cmd.Mount, flagMount, "m", defaults.DefaultPathNone, ux.SprintfBlue("Mount arbitrary directory via SSHFS."))
-	rootCmd.PersistentFlags().StringVarP(&Cmd.TmpDir, flagTmpDir, "", defaults.DefaultPathNone, ux.SprintfBlue("Alternate TMP dir mount point."))
+	rootCmd.Flags().StringVarP(&Cmd.Provider, flagProvider, "", defaults.DefaultProvider, ux.SprintfBlue("Set virtual provider"))
+	rootCmd.Flags().StringVarP(&Cmd.Host, flagHost, "", "", ux.SprintfBlue("Set virtual provider host."))
+	rootCmd.Flags().StringVarP(&Cmd.Port, flagPort, "", "", ux.SprintfBlue("Set virtual provider port."))
+	rootCmd.Flags().StringVarP(&Cmd.Project, flagProject, "p", defaults.DefaultPathNone, ux.SprintfBlue("Mount project directory."))
+	rootCmd.Flags().StringVarP(&Cmd.Mount, flagMount, "m", defaults.DefaultPathNone, ux.SprintfBlue("Mount arbitrary directory via SSHFS."))
+	rootCmd.Flags().StringVarP(&Cmd.TmpDir, flagTmpDir, "", defaults.DefaultPathNone, ux.SprintfBlue("Alternate TMP dir mount point."))
 
 	rootCmd.Flags().BoolVarP(&Cmd.Temporary, flagTemporary, "t", false, ux.SprintfBlue("Temporary container - remove after running command."))
 	rootCmd.Flags().BoolVarP(&Cmd.Status, flagStatus, "s", false, ux.SprintfBlue("Show shell status line."))
 	rootCmd.Flags().BoolVarP(&Cmd.Debug, flagDebug, "d", false, ux.SprintfBlue("Debug mode."))
 	rootCmd.Flags().BoolVarP(&Cmd.Quiet, flagQuiet, "q", false, ux.SprintfBlue("Silence all launch messages."))
 
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolVarP(&Cmd.Version, flagVersion, "v", false, ux.SprintfBlue("Display version of " + defaults.BinaryName))
 	rootCmd.Flags().BoolVarP(&Cmd.Completion, flagCompletion, "b", false, ux.SprintfBlue("Generate BASH completion script."))
+
+	cobra.EnableCommandSorting = false
 }
 
 
@@ -124,14 +123,68 @@ func initConfig() {
 }
 
 
-// rootCmd represents the base command when called without any subcommands
+func SetCmd() {
+	for range onlyOnce {
+		if Cmd == nil {
+			Cmd = New()
+		}
+
+		if CobraHelp == nil {
+			CobraHelp = toolCobraHelp.New(Cmd.Runtime)
+			CobraHelp.SetHelp(rootCmd)
+		}
+
+		if CmdScribe == nil {
+			CmdScribe = loadTools.New(defaults.BinaryName, defaults.BinaryVersion, false)
+			CmdScribe.Runtime.SetRepos(defaults.SourceRepo, defaults.BinaryRepo)
+			if CmdScribe.State.IsNotOk() {
+				break
+			}
+
+			// Import additional tools.
+			//CmdScribe.ImportTools(&buildtools.GetHelpers)
+			//if CmdScribe.State.IsNotOk() {
+			//	break
+			//}
+
+			CmdScribe.LoadCommands(rootCmd, true)
+			if CmdScribe.State.IsNotOk() {
+				break
+			}
+
+			CmdScribe.Template.Ignore()
+			if CmdScribe.State.IsNotOk() {
+				break
+			}
+
+			CmdScribe.Json.Ignore()
+			if CmdScribe.State.IsNotOk() {
+				break
+			}
+
+			CmdScribe.Scribe.Ignore()
+			if CmdScribe.State.IsNotOk() {
+				break
+			}
+		}
+
+		if CmdSelfUpdate == nil {
+			CmdSelfUpdate = toolSelfUpdate.New(CmdScribe.Runtime)
+			CmdSelfUpdate.LoadCommands(rootCmd, false)
+			if CmdSelfUpdate.State.IsNotOk() {
+				break
+			}
+		}
+	}
+}
+
+
 var rootCmd = &cobra.Command {
 	Use:   defaults.BinaryName,
 	Short: ux.SprintfBlue("Gearbox gear launcher"),
 	Long: ux.SprintfBlue(`Gearbox gear launcher.`),
 	Run: gbRootFunc,
 	TraverseChildren: true,
-	//ValidArgs: []string{"run", "shell", "test"},
 }
 
 
@@ -139,29 +192,25 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		fl := cmd.Flags()
 
-		// ////////////////////////////////
-		// Show version.
-		ok, _ := fl.GetBool(loadTools.FlagVersion)
-		if ok {
-			Cmd.State = defaults.VersionShow()
+		if CmdSelfUpdate.FlagCheckVersion(nil) {
+			CmdScribe.State.SetOk()
 			break
 		}
 
 		// Produce BASH completion script.
-		ok, _ = fl.GetBool("completion")
+		ok, _ := fl.GetBool("completion")
 		if ok {
 			var out bytes.Buffer
 			_ = cmd.GenBashCompletion(&out)
 			fmt.Printf("# Gearbox BASH completion:\n%s\n", out.String())
-			Cmd.State.Clear()
+			Cmd.State.SetOk()
 			break
-			//os.Exit(0)
 		}
 
 		// Show help if no commands specified.
 		if len(args) == 0 {
 			_ = cmd.Help()
-			Cmd.State.Clear()
+			Cmd.State.SetOk()
 			break
 		}
 	}
@@ -178,35 +227,8 @@ func Execute() *ux.State {
 	Cmd.State = Cmd.State.EnsureNotNil()
 
 	for range onlyOnce {
-		SetHelp(rootCmd)
-		SetCmd()
-
-		//// WARNING: Critical code area.
-		//// Support for running launch via symlink.
-		////defaults.RunAs.FullPath, err = filepath.Abs(os.Args[0])
-		//var err error
-		//defaults.RunAs.FullPath, err = osext.Executable()
-		//if err != nil {
-		//	CmdState.SetError("%s", err)
-		//	break
-		//}
-		////defaults.RunAs.FullPath = "/Users/mick/Documents/GitHub/gb-launch/bin/psql-9.4.26"
-		////defaults.RunAs.FullPath = "/Users/mick/Documents/GitHub/gb-launch/bin/postgresql-9.4.26"
-		//
-		//defaults.RunAs.Dir, defaults.RunAs.File = filepath.Split(defaults.RunAs.FullPath)
-		//
-		//ok, _ := regexp.MatchString("^" + defaults.BinaryName, defaults.RunAs.File)
-		//if !ok {
-		//	defaults.RunAs.AsLink = true
-		//	defaults.RunAs.File = strings.ReplaceAll(defaults.RunAs.File, "-", ":")
-		//	newArgs := []string{"run", defaults.RunAs.File}
-		//	newArgs = append(newArgs, os.Args[1:]...)
-		//	rootCmd.SetArgs(newArgs)
-		//
-		//	_ = rootCmd.Flags().Set(argQuiet, "true")
-		//	rootCmd.DisableFlagParsing = true
-		//}
-		//// WARNING: Critical code area.
+		//SetHelp(rootCmd)
+		//SetCmd()
 
 		// WARNING: Critical code area.
 		// Support for running launch via symlink.

@@ -38,37 +38,37 @@ replace github.com/newclarity/scribeHelpers/toolSelfUpdate => ../scribeHelpers/t
 
 replace github.com/newclarity/scribeHelpers/toolGhr => ../scribeHelpers/toolGhr
 
+replace github.com/newclarity/scribeHelpers/toolCobraHelp => ../scribeHelpers/toolCobraHelp
+
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/go-openapi/errors v0.19.6 // indirect
 	github.com/gorilla/mux v1.7.4 // indirect
-	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/mitchellh/mapstructure v1.3.2 // indirect
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
-	github.com/newclarity/scribeHelpers/loadTools v0.0.0-20200610123834-81c68701de1a
-	github.com/newclarity/scribeHelpers/toolCopy v0.0.0-20200610123834-81c68701de1a // indirect
-	github.com/newclarity/scribeHelpers/toolExec v0.0.0-20200610123834-81c68701de1a // indirect
-	github.com/newclarity/scribeHelpers/toolGear v0.0.0-20200610123834-81c68701de1a
-	github.com/newclarity/scribeHelpers/toolGhr v0.0.0-00010101000000-000000000000 // indirect
-	github.com/newclarity/scribeHelpers/toolGit v0.0.0-20200610123834-81c68701de1a // indirect
-	github.com/newclarity/scribeHelpers/toolGitHub v0.0.0-20200610123834-81c68701de1a // indirect
-	github.com/newclarity/scribeHelpers/toolRuntime v0.0.0-20200611181056-b2e5f7fd5978
-	github.com/newclarity/scribeHelpers/toolSelfUpdate v0.0.0-00010101000000-000000000000
-	github.com/newclarity/scribeHelpers/toolService v0.0.0-20200610123834-81c68701de1a // indirect
-	github.com/newclarity/scribeHelpers/toolSystem v0.0.0-20200610123834-81c68701de1a // indirect
-	github.com/newclarity/scribeHelpers/toolUx v0.0.0-20200610123834-81c68701de1a // indirect
-	github.com/newclarity/scribeHelpers/ux v0.0.0-20200611181056-b2e5f7fd5978
+	github.com/newclarity/scribeHelpers/loadTools v0.0.0-20200621234507-ba6f08c6b68d
+	github.com/newclarity/scribeHelpers/toolCobraHelp v0.0.0-00010101000000-000000000000
+	github.com/newclarity/scribeHelpers/toolCopy v0.0.0-20200621234507-ba6f08c6b68d // indirect
+	github.com/newclarity/scribeHelpers/toolExec v0.0.0-20200621234507-ba6f08c6b68d // indirect
+	github.com/newclarity/scribeHelpers/toolGear v0.0.0-20200621234507-ba6f08c6b68d
+	github.com/newclarity/scribeHelpers/toolGhr v0.0.0-20200621234507-ba6f08c6b68d // indirect
+	github.com/newclarity/scribeHelpers/toolGit v0.0.0-20200621234507-ba6f08c6b68d // indirect
+	github.com/newclarity/scribeHelpers/toolGitHub v0.0.0-20200621234507-ba6f08c6b68d // indirect
+	github.com/newclarity/scribeHelpers/toolRuntime v0.0.0-20200621234507-ba6f08c6b68d
+	github.com/newclarity/scribeHelpers/toolSelfUpdate v0.0.0-20200621234507-ba6f08c6b68d
+	github.com/newclarity/scribeHelpers/toolService v0.0.0-20200621234507-ba6f08c6b68d // indirect
+	github.com/newclarity/scribeHelpers/toolSystem v0.0.0-20200621234507-ba6f08c6b68d // indirect
+	github.com/newclarity/scribeHelpers/toolUx v0.0.0-20200621234507-ba6f08c6b68d // indirect
+	github.com/newclarity/scribeHelpers/ux v0.0.0-20200621234507-ba6f08c6b68d
 	github.com/pelletier/go-toml v1.8.0 // indirect
-	github.com/spf13/afero v1.2.2 // indirect
+	github.com/spf13/afero v1.3.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.7.0
-	golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9 // indirect
-	golang.org/x/sys v0.0.0-20200610111108-226ff32320da // indirect
-	google.golang.org/genproto v0.0.0-20200610212329-df9b449b0ff2 // indirect
+	google.golang.org/genproto v0.0.0-20200620020550-bd6e04640131 // indirect
 	gopkg.in/ini.v1 v1.57.0 // indirect
 	gotest.tools v2.2.0+incompatible // indirect
 )
