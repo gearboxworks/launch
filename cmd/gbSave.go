@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/spf13/cobra"
 )
 
 
@@ -18,7 +18,6 @@ func gbSaveFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 
-		//showArgs(rootCmd, args)
 		ux.PrintfWarning("Command not yet implemented.\n")
 	}
 }
@@ -36,7 +35,6 @@ func gbLoadFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 
-		//showArgs(rootCmd, args)
 		ux.PrintfWarning("Command not yet implemented.\n")
 	}
 }

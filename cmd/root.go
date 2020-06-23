@@ -54,7 +54,10 @@ import (
 var Cmd *TypeLaunchArgs
 
 var CobraHelp *toolCobraHelp.TypeCommands
+
+//noinspection ALL
 var CmdSelfUpdate *toolSelfUpdate.TypeSelfUpdate
+//noinspection ALL
 var CmdScribe *loadTools.TypeScribeArgs
 
 var ConfigFile string
@@ -68,7 +71,6 @@ const DefaultTemplateString = `
 {{- $gear := NewGear }}
 {{- $gear.ParseGearConfig .Json }}
 {{- $gear.PrintGearConfig }}`
-// {{ $gear := NewGear }}{{ $gear.ParseGearConfig .Json }}{{ $gear.PrintGearConfig }}
 
 func init() {
 	SetCmd()
@@ -81,7 +83,6 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	cobra.EnableCommandSorting = false
 
-	//rootCmd.PersistentFlags().StringVarP(&Cmd.Config, flagConfig, "c", GetLaunchConfig(), ux.SprintfBlue("Config file."))
 	rootCmd.PersistentFlags().StringVar(&ConfigFile, flagConfigFile, fmt.Sprintf("%s-config.json", defaults.BinaryName), ux.SprintfBlue("%s: config file.", defaults.BinaryName))
 	_ = rootCmd.PersistentFlags().MarkHidden(flagConfigFile)
 
@@ -158,10 +159,6 @@ func SetCmd() {
 				break
 			}
 
-			////CmdScribe.FlagHide(loadTools.FlagScribeFile)
-			//CmdScribe.FlagSetDefault(loadTools.FlagJsonFile, "gearbox.json")
-			//CmdScribe.FlagSetDefault(loadTools.FlagTemplateFile, DefaultTemplateString)
-
 			CmdScribe.LoadCommands(rootCmd, true)
 			if CmdScribe.State.IsNotOk() {
 				break
@@ -171,25 +168,6 @@ func SetCmd() {
 			if CmdScribe.State.IsNotOk() {
 				break
 			}
-
-			////CmdScribe.FlagHide(loadTools.FlagScribeFile)
-			//CmdScribe.FlagSetDefault(loadTools.FlagJsonFile, "gearbox.json")
-			//CmdScribe.FlagSetDefault(loadTools.FlagTemplateFile, DefaultTemplateString)
-
-			//CmdScribe.Template.Ignore()
-			//if CmdScribe.State.IsNotOk() {
-			//	break
-			//}
-			//
-			//CmdScribe.Json.Ignore()
-			//if CmdScribe.State.IsNotOk() {
-			//	break
-			//}
-			//
-			//CmdScribe.Scribe.Ignore()
-			//if CmdScribe.State.IsNotOk() {
-			//	break
-			//}
 		}
 
 		if CmdSelfUpdate == nil {
@@ -251,9 +229,6 @@ func Execute() *ux.State {
 	Cmd.State = Cmd.State.EnsureNotNil()
 
 	for range onlyOnce {
-		//SetHelp(rootCmd)
-		//SetCmd()
-
 		// WARNING: Critical code area.
 		// Support for running launch via symlink.
 		if !Cmd.Runtime.IsRunningAs(defaults.BinaryName) {
@@ -306,133 +281,3 @@ func CheckReturns() *ux.State {
 	}
 	return state
 }
-
-
-//func _GetUsage(c *cobra.Command) string {
-//	var str string
-//
-//	if c.Parent() == nil {
-//		str += ux.SprintfCyan("%s [flags] ", c.Name())
-//	} else {
-//		str += ux.SprintfCyan("%s [flags] ", c.Parent().Name())
-//		str += ux.SprintfGreen("%s ", c.Use)
-//	}
-//
-//	if c.HasAvailableSubCommands() {
-//		str += ux.SprintfGreen("[command] ")
-//		str += ux.SprintfCyan("<gear name> ")
-//	}
-//
-//	//foo := c.Use
-//	//if c.Args == 1 {
-//	//	str += ux.SprintfWhite("")
-//	//} else {
-//	//	str += ux.SprintfWhite("%v", foo)
-//	//}
-//
-//	// .
-//
-//	return str
-//}
-//
-//func _GetVersion(c *cobra.Command) string {
-//	var str string
-//
-//	if c.Parent() == nil {
-//		str += ux.SprintfWhite("%s: v%s", defaults.BinaryName, defaults.BinaryVersion)
-//	}
-//
-//	return str
-//}
-//
-//func SetHelp(c *cobra.Command) {
-//	var tmplHelp string
-//	var tmplUsage string
-//
-//	//fmt.Printf("%s", rootCmd.UsageTemplate())
-//	//fmt.Printf("%s", rootCmd.HelpTemplate())
-//
-//	cobra.AddTemplateFunc("GetUsage", _GetUsage)
-//	cobra.AddTemplateFunc("GetVersion", _GetVersion)
-//
-//	cobra.AddTemplateFunc("SprintfBlue", ux.SprintfBlue)
-//	cobra.AddTemplateFunc("SprintfCyan", ux.SprintfCyan)
-//	cobra.AddTemplateFunc("SprintfGreen", ux.SprintfGreen)
-//	cobra.AddTemplateFunc("SprintfMagenta", ux.SprintfMagenta)
-//	cobra.AddTemplateFunc("SprintfRed", ux.SprintfRed)
-//	cobra.AddTemplateFunc("SprintfWhite", ux.SprintfWhite)
-//	cobra.AddTemplateFunc("SprintfYellow", ux.SprintfYellow)
-//
-//	// 	{{ with .Parent }}{{ SprintfCyan .Name }}{{ end }} {{ SprintfGreen .Name }} {{ if .HasAvailableSubCommands }}{{ SprintfGreen "[command]" }}{{ end }}
-//
-//	tmplUsage += `
-//{{ SprintfBlue "Usage: " }}
-//	{{ GetUsage . }}
-//
-//{{- if gt (len .Aliases) 0 }}
-//{{ SprintfBlue "\nAliases:" }} {{ .NameAndAliases }}
-//{{- end }}
-//
-//{{- if .HasExample }}
-//{{ SprintfBlue "\nExamples:" }}
-//	{{ .Example }}
-//{{- end }}
-//
-//{{- if .HasAvailableSubCommands }}
-//{{ SprintfBlue "\nWhere " }}{{ SprintfGreen "[command]" }}{{ SprintfBlue " is one of:" }}
-//{{- range .Commands }}
-//{{- if (or .IsAvailableCommand (eq .Name "help")) }}
-//	{{ rpad (SprintfGreen .Name) .NamePadding}}	- {{ .Short }}{{ end }}
-//{{- end }}
-//{{- end }}
-//
-//{{- if .HasAvailableLocalFlags }}
-//{{ SprintfBlue "\nFlags:" }}
-//{{ .LocalFlags.FlagUsages | trimTrailingWhitespaces }}
-//{{- end }}
-//
-//{{- if .HasAvailableInheritedFlags }}
-//{{ SprintfBlue "\nGlobal Flags:" }}
-//{{ .InheritedFlags.FlagUsages | trimTrailingWhitespaces }}
-//{{- end }}
-//
-//{{- if .HasHelpSubCommands }}
-//{{- SprintfBlue "\nAdditional help topics:" }}
-//{{- range .Commands }}
-//{{- if .IsAdditionalHelpTopicCommand }}
-//	{{ rpad (SprintfGreen .CommandPath) .CommandPathPadding }} {{ .Short }}
-//{{- end }}
-//{{- end }}
-//{{- end }}
-//
-//{{- if .HasAvailableSubCommands }}
-//{{ SprintfBlue "\nUse" }} {{ SprintfCyan .CommandPath }} {{ SprintfCyan "help" }} {{ SprintfGreen "[command]" }} {{ SprintfBlue "for more information about a command." }}
-//{{- end }}
-//`
-//
-//	tmplHelp = `{{ GetVersion . }}
-//
-//{{ SprintfBlue "Description:" }}
-//	{{ SprintfBlue .Use }}{{- SprintfBlue " - " }}
-//{{- with (or .Long .Short) }}
-//{{- . | trimTrailingWhitespaces }}
-//{{- end }}
-//
-//{{- if or .Runnable .HasSubCommands }}
-//{{ .UsageString }}
-//{{- end }}
-//`
-//
-//	//c.SetHelpCommand(c)
-//	//c.SetHelpFunc(PrintHelp)
-//	c.SetHelpTemplate(tmplHelp)
-//	c.SetUsageTemplate(tmplUsage)
-//}
-//
-//func PrintHelp(c *cobra.Command, args []string) {
-//
-//}
-//
-//func GetState() *ux.State {
-//	return Cmd.State
-//}

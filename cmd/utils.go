@@ -13,13 +13,7 @@ import (
 )
 
 func showArgs(cmd *cobra.Command, args []string) {
-	// var err error
-
 	for range onlyOnce {
-		//if !debugFlag {
-		//	break
-		//}
-
 		flargs := cmd.Flags().Args()
 		if flargs != nil {
 			ux.Printf("'%s' called with '%s'\n", cmd.CommandPath(), strings.Join(flargs, " "))
@@ -93,10 +87,6 @@ func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
 				spl := strings.Split(ga.Name, ":")
 				ga.Name = spl[0]
 				ga.Version = spl[1]
-				//} else if strings.Contains(ga.Name, "-") {
-				//	spl := strings.Split(ga.Name, "-")
-				//	ga.Name = spl[0]
-				//	ga.Version = spl[1]
 			}
 
 			if ga.Version == "" {
@@ -213,21 +203,6 @@ func DeterminePath(mp string) string {
 	return mp
 }
 
-//func IsNoCreate(cmd *cobra.Command) bool {
-//	var ok bool
-//
-//	for range onlyOnce {
-//		var err error
-//
-//		ok, err = cmd.Flags().GetBool(flagNoCreate)
-//		if err != nil {
-//			ok = false
-//			break
-//		}
-//	}
-//
-//	return ok
-//}
 
 func GetGearboxDir() string {
 	var d string
@@ -235,17 +210,6 @@ func GetGearboxDir() string {
 	for range onlyOnce {
 		u, _ := user.Current()
 		d = filepath.Join(u.HomeDir, ".gearbox")
-	}
-
-	return d
-}
-
-func GetLaunchConfig() string {
-	var d string
-
-	for range onlyOnce {
-		u, _ := user.Current()
-		d = filepath.Join(u.HomeDir, ".gearbox", "launch.json")
 	}
 
 	return d

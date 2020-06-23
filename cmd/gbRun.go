@@ -1,9 +1,9 @@
 package cmd
 
 import (
+	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"launch/defaults"
-	"github.com/newclarity/scribeHelpers/ux"
 	"strings"
 )
 

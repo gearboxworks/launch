@@ -8,7 +8,7 @@ import (
 
 
 const (
-	flagConfig   = "config"
+	//flagConfig   = "config"
 	flagDebug    = "debug"
 	flagNoCreate = "no-create"
 
@@ -23,7 +23,6 @@ const (
 	flagMount      = "mount"
 	flagTmpDir     = "tmp"
 	flagCompletion = "completion"
-	flagVersion    = "version"
 	flagQuiet      = "quiet"
 	flagTemporary  = "temporary"
 	flagStatus     = "status"

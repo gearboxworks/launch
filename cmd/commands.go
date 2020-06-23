@@ -8,7 +8,6 @@ import (
 
 var gbInstallCmd = &cobra.Command{
 	Use:   "install <gear name>",
-	//Aliases: []string{"add"},
 	SuggestFor: []string{"download" ,"add"},
 	Short: ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Install a Gearbox gear"),
 	Long: ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Install a Gearbox gear."),
@@ -19,7 +18,6 @@ var gbInstallCmd = &cobra.Command{
 }
 var gbUninstallCmd = &cobra.Command{
 	Use:   "uninstall <gear name>",
-	//Aliases: []string{"remove"},
 	SuggestFor: []string{"remove"},
 	Short: ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Uninstall a Gearbox gear"),
 	Long: ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Uninstall a Gearbox gear."),
@@ -30,7 +28,6 @@ var gbUninstallCmd = &cobra.Command{
 }
 var gbReinstallCmd = &cobra.Command{
 	Use:   "reinstall <gear name>",
-	//Aliases: []string{"update"},
 	SuggestFor: []string{"update"},
 	Short: ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Update a Gearbox gear"),
 	Long: ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Update a Gearbox gear."),
@@ -41,7 +38,6 @@ var gbReinstallCmd = &cobra.Command{
 }
 var gbCleanCmd = &cobra.Command{
 	Use:   "clean <gear name>",
-	//Aliases: []string{"remove"},
 	SuggestFor: []string{},
 	Short: ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Completely uninstall a Gearbox gear"),
 	Long: ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Completely uninstall a Gearbox gear."),
@@ -142,7 +138,6 @@ var gbPublishCmd = &cobra.Command{
 
 var gbSaveCmd = &cobra.Command{
 	Use:   "export <gear name>",
-	//Aliases: []string{"save"},
 	SuggestFor: []string{"save"},
 	Short: ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Save state of a Gearbox gear"),
 	Long: ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Save state of a Gearbox gear."),
@@ -153,7 +148,6 @@ var gbSaveCmd = &cobra.Command{
 }
 var gbLoadCmd = &cobra.Command{
 	Use:   "import <gear name>",
-	//Aliases: []string{"load"},
 	SuggestFor: []string{"load"},
 	Short: ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Load a Gearbox gear"),
 	Long: ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Load a Gearbox gear."),
