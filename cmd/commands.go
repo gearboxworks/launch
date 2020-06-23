@@ -5,29 +5,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//type TypeCmds map[string][]*cobra.Command
-
-
-func init() {
-	//rootCmd.AddCommand(gbInstallCmd)
-	//rootCmd.AddCommand(gbUninstallCmd)
-	//rootCmd.AddCommand(gbReinstallCmd)
-	//rootCmd.AddCommand(gbCleanCmd)
-	//rootCmd.AddCommand(gbListCmd)
-	//
-	//rootCmd.AddCommand(gbRunCmd)
-	//rootCmd.AddCommand(gbShellCmd)
-	//rootCmd.AddCommand(gbUnitTestCmd)
-	//
-	//rootCmd.AddCommand(gbStartCmd)
-	//rootCmd.AddCommand(gbStopCmd)
-	//
-	//rootCmd.AddCommand(gbBuildCmd)
-	//rootCmd.AddCommand(gbPublishCmd)
-	//rootCmd.AddCommand(gbSaveCmd)
-	//rootCmd.AddCommand(gbLoadCmd)
-}
-
 
 var gbInstallCmd = &cobra.Command{
 	Use:   "install <gear name>",

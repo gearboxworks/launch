@@ -1,9 +1,8 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"launch/defaults"
 	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/spf13/cobra"
 )
 
 
@@ -31,22 +30,15 @@ func gbListFunc(cmd *cobra.Command, args []string) {
 
 
 func (ga *LaunchArgs) gbListFunc() *ux.State {
-	if state := ga.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
 	}
 
 	for range onlyOnce {
-		_, ga.State = ga.GearRef.Docker.ImageList(ga.Name)
+		ga.State = ga.GearRef.Docker.List(ga.Name)
 		if ga.State.IsError() {
 			break
 		}
-
-		_, ga.State = ga.GearRef.Docker.ContainerList(ga.Name)
-		if ga.State.IsError() {
-			break
-		}
-
-		ga.State = ga.GearRef.Docker.NetworkList(defaults.GearboxNetwork)
 	}
 
 	if !ga.Quiet {

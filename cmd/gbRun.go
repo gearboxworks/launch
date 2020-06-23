@@ -72,7 +72,7 @@ func gbUnitTestFunc(cmd *cobra.Command, args []string) {
 
 
 func (ga *LaunchArgs) gbRunFunc() *ux.State {
-	if state := ga.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
 	}
 
@@ -113,7 +113,7 @@ func (ga *LaunchArgs) gbRunFunc() *ux.State {
 }
 
 func (ga *LaunchArgs) gbShellFunc() *ux.State {
-	if state := ga.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
 	}
 
@@ -138,7 +138,7 @@ func (ga *LaunchArgs) gbShellFunc() *ux.State {
 }
 
 func (ga *LaunchArgs) gbUnitTestFunc() *ux.State {
-	if state := ga.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
 	}
 

@@ -12,6 +12,9 @@ func init() {
 
 func main() {
 	state := cmd.Execute()
+	if state.IsNotOk() {
+		state.PrintResponse()
+	}
 	ux.Close()
 	os.Exit(state.ExitCode)
 }

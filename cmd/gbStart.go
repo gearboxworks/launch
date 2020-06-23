@@ -53,7 +53,7 @@ func gbStopFunc(cmd *cobra.Command, args []string) {
 
 
 func (ga *LaunchArgs) gbStartFunc() *ux.State {
-	if state := ga.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
 	}
 
@@ -115,7 +115,7 @@ func (ga *LaunchArgs) gbStartFunc() *ux.State {
 
 
 func (ga *LaunchArgs) gbStopFunc() *ux.State {
-	if state := ga.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
 	}
 

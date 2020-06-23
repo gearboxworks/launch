@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"github.com/newclarity/scribeHelpers/toolGear"
+	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"launch/defaults"
-	"github.com/newclarity/scribeHelpers/ux"
 )
 
 
@@ -101,7 +101,7 @@ func gbCleanFunc(cmd *cobra.Command, args []string) {
 
 
 func (ga *LaunchArgs) gbInstallFunc() *ux.State {
-	if state := ga.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
 	}
 
@@ -180,7 +180,7 @@ func (ga *LaunchArgs) gbInstallFunc() *ux.State {
 
 
 func (ga *LaunchArgs) gbUninstallFunc() *ux.State {
-	if state := ga.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
 	}
 
@@ -244,7 +244,7 @@ func (ga *LaunchArgs) gbUninstallFunc() *ux.State {
 
 
 func (ga *LaunchArgs) gbReinstallFunc() *ux.State {
-	if state := ga.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
 	}
 
@@ -268,7 +268,7 @@ func (ga *LaunchArgs) gbReinstallFunc() *ux.State {
 
 
 func (ga *LaunchArgs) gbCleanFunc() *ux.State {
-	if state := ga.IsNil(); state.IsError() {
+	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
 	}
 
