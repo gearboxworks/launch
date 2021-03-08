@@ -65,7 +65,7 @@ func (ga *LaunchArgs) IsValid() *ux.State {
 
 	for range onlyOnce {
 		if !ga.Valid {
-			ga.State.SetError("gear args is not valid")
+			ga.State.SetError("%s args are not valid", defaults.LanguageContainerName)
 			break
 		}
 
@@ -80,6 +80,12 @@ func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
 	for range onlyOnce {
 		ga.State = ux.NewState(Cmd.Runtime.CmdName, Cmd.Debug)
 
+		//fmt.Printf("cmd.Args:%v\nargs:%v\nCmd.Runtime.Args:%v\nCmd.Runtime.FullArgs:%v\n",
+		//	cmd.Args,
+		//	args,
+		//	Cmd.Runtime.Args,
+		//	Cmd.Runtime.FullArgs,
+		//	)
 		ga.Args = args
 		if len(ga.Args) > 0 {
 			ga.Name = ga.Args[0]
@@ -111,7 +117,16 @@ func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
 		if ga.State.IsError() {
 			break
 		}
+
 		ga.State = ga.Provider.SetProvider(Cmd.Provider)
+		if ga.State.IsError() {
+			break
+		}
+
+		ga.State = ga.Provider.SetHost(Cmd.Host, Cmd.Port)
+		if ga.State.IsError() {
+			break
+		}
 
 		ga.GearRef = toolGear.NewGear(Cmd.Runtime)
 		ga.State = ga.GearRef.State
@@ -120,6 +135,24 @@ func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
 		}
 
 		ga.Valid = true
+	}
+
+	return ga.State
+}
+
+
+func (ga *LaunchArgs) ListLinks(version string) *ux.State {
+	if state := ga.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		var dcs toolGear.TypeDockerGears
+		dcs, ga.State = ga.GearRef.Docker.GetContainers(ga.Name)
+
+		for _, dc := range dcs {
+			ga.State = dc.Container.GearConfig.ListLinks(dc.Container.Version)
+		}
 	}
 
 	return ga.State

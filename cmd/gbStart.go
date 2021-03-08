@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
+	"launch/defaults"
 )
 
 
@@ -69,13 +70,13 @@ func (ga *LaunchArgs) gbStartFunc() *ux.State {
 			}
 
 			if ga.NoCreate {
-				ga.State.SetError("Not creating Gear '%s:%s'.", ga.Name, ga.Version)
+				ga.State.SetError("Not creating %s '%s:%s'.", defaults.LanguageContainerName, ga.Name, ga.Version)
 				break
 			}
 
 			ga.gbInstallFunc()
 			if ga.State.IsError() {
-				ga.State.SetError("Cannot start Gear '%s:%s'.", ga.Name, ga.Version)
+				ga.State.SetError("Cannot start %s '%s:%s'.", defaults.LanguageContainerName, ga.Name, ga.Version)
 				break
 			}
 
@@ -83,28 +84,28 @@ func (ga *LaunchArgs) gbStartFunc() *ux.State {
 		}
 
 		if ga.State.IsRunning() {
-			ga.State.SetOk("Gear '%s:%s' already started.", ga.Name, ga.Version)
+			ga.State.SetOk("%s '%s:%s' already started.", defaults.LanguageContainerName, ga.Name, ga.Version)
 			ga.State.SetOutput("")
 			break
 		}
 
 
 		if !ga.Quiet {
-			ux.PrintflnNormal("Starting gear '%s:%s': ", ga.Name, ga.Version)
+			ux.PrintflnNormal("Starting %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
 		ga.State = ga.GearRef.Docker.Container.Start()
 		if ga.State.IsError() {
-			ga.State.SetError("Gear '%s:%s' start error - %s", ga.Name, ga.Version, ga.State.GetError())
+			ga.State.SetError("%s '%s:%s' start error - %s", defaults.LanguageContainerName, ga.Name, ga.Version, ga.State.GetError())
 			break
 		}
 
 		if ga.State.IsRunning() {
-			ga.State.SetOk("Gear '%s:%s' started OK", ga.Name, ga.Version)
+			ga.State.SetOk("%s '%s:%s' started OK", defaults.LanguageContainerName, ga.Name, ga.Version)
 			ga.State.SetOutput("")
 			break
 		}
 
-		ga.State.SetError("Gear '%s:%s' cannot be started", ga.Name, ga.Version)
+		ga.State.SetError("%s '%s:%s' cannot be started", defaults.LanguageContainerName, ga.Name, ga.Version)
 	}
 
 	if !ga.Quiet {
@@ -129,34 +130,34 @@ func (ga *LaunchArgs) gbStopFunc() *ux.State {
 			break
 		}
 		if ga.State.IsExited() {
-			ga.State.SetOk("Gear image '%s:%s' already stopped.", ga.Name, ga.Version)
+			ga.State.SetOk("%s '%s:%s' already stopped.", defaults.LanguageImageName, ga.Name, ga.Version)
 			ga.State.SetOutput("")
 			break
 		}
 
 
 		if !ga.Quiet {
-			ux.PrintflnNormal("Stopping gear '%s:%s': ", ga.Name, ga.Version)
+			ux.PrintflnNormal("Stopping %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
 		ga.State = ga.GearRef.Docker.Container.Stop()
 		if ga.State.IsError() {
-			ga.State.SetError("Gear '%s:%s' stop error - %s", ga.Name, ga.Version, ga.State.GetError())
+			ga.State.SetError("%s '%s:%s' stop error - %s", defaults.LanguageContainerName, ga.Name, ga.Version, ga.State.GetError())
 			break
 		}
 
 		if ga.State.IsExited() {
-			ga.State.SetOk("Gear '%s:%s' stopped OK", ga.Name, ga.Version)
+			ga.State.SetOk("%s '%s:%s' stopped OK", defaults.LanguageContainerName, ga.Name, ga.Version)
 			ga.State.SetOutput("")
 			break
 		}
 
 		if ga.State.IsCreated() {
-			ga.State.SetOk("Gear '%s:%s' stopped OK", ga.Name, ga.Version)
+			ga.State.SetOk("%s '%s:%s' stopped OK", defaults.LanguageContainerName, ga.Name, ga.Version)
 			ga.State.SetOutput("")
 			break
 		}
 
-		ga.State.SetWarning("Gear '%s:%s' cannot be stopped", ga.Name, ga.Version)
+		ga.State.SetWarning("%s '%s:%s' cannot be stopped", defaults.LanguageContainerName, ga.Name, ga.Version)
 	}
 
 	if !ga.Quiet {

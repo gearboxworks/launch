@@ -3,11 +3,12 @@ package main
 import (
 	"github.com/newclarity/scribeHelpers/ux"
 	"launch/cmd"
+	"launch/defaults"
 	"os"
 )
 
 func init() {
-	_ = ux.Open("Gearbox: ")
+	_, _ = ux.Open(defaults.BinaryName, true)
 }
 
 func main() {
@@ -21,6 +22,13 @@ func main() {
 
 
 /*
+@TODO - BUGS
+
+@TODO - symlinks dont work on LinuxARM.
+
+@TODO - '--host' and '--port' flags don't work.
+
+@TODO - When piping, don't print ANSI codes.
 
 @TODO - Strange issue when running a launch executable symlink via toolExec.
 @TODO -		Seems to run it as a non-symlink.
@@ -32,6 +40,10 @@ func main() {
 @TODO -			Loading composer repositories with package information
 @TODO -			Updating dependencies (including require-dev)
 
+*/
+
+/*
+@TODO - FEATURES
 
 @TODO - Add '--sshfs-host' OR '--mount-host' flag, (string). When set to:
 @TODO -		'' - Connect via direct SSH to host, (host.docker.internal).
@@ -69,8 +81,7 @@ func main() {
 */
 
 /*
-# Completed issues:
-@DONE - When piping, don't print ANSI codes.
+@TODO - COMPLETED
 
 @DONE - Needs to be a better way to determine correct image/container validity. The current method works, but is a little fragile.
 

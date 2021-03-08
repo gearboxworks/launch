@@ -66,7 +66,6 @@ const flagConfigFile  	= "config"
 const DefaultJsonFile = "gearbox.json"
 const DefaultJsonString = "{}"
 const DefaultTemplateFile = "gearbox.tmpl"
-//const DefaultTemplateString = "{{ $gear := NewGear }}{{ $gear.List }}"
 const DefaultTemplateString = `
 {{- $gear := NewGear }}
 {{- $gear.ParseGearConfig .Json }}
@@ -75,7 +74,7 @@ const DefaultTemplateString = `
 func init() {
 	SetCmd()
 
-	CobraHelp.AddCommands("Manage", rootCmd, gbInstallCmd, gbUninstallCmd, gbReinstallCmd, gbCleanCmd, gbListCmd)
+	CobraHelp.AddCommands("Manage", rootCmd, gbInstallCmd, gbUninstallCmd, gbReinstallCmd, gbCleanCmd, gbListCmd, gbLsCmd)
 	CobraHelp.AddCommands("Execute", rootCmd, gbRunCmd, gbShellCmd, gbUnitTestCmd)
 	CobraHelp.AddCommands("Run", rootCmd, gbStartCmd, gbStopCmd)
 	CobraHelp.AddCommands("Create", rootCmd, gbBuildCmd, gbPublishCmd, gbSaveCmd, gbLoadCmd)
@@ -183,8 +182,8 @@ func SetCmd() {
 
 var rootCmd = &cobra.Command {
 	Use:   defaults.BinaryName,
-	Short: ux.SprintfBlue("Gearbox gear launcher"),
-	Long: ux.SprintfBlue(`Gearbox gear launcher.`),
+	Short: ux.SprintfBlue("%s %s launcher", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long: ux.SprintfBlue("%s %s launcher", defaults.LanguageAppName, defaults.LanguageContainerName),
 	Run: gbRootFunc,
 	TraverseChildren: true,
 }
@@ -204,7 +203,7 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 		if ok {
 			var out bytes.Buffer
 			_ = cmd.GenBashCompletion(&out)
-			fmt.Printf("# Gearbox BASH completion:\n%s\n", out.String())
+			fmt.Printf("# %s BASH completion:\n%s\n", defaults.LanguageAppName, out.String())
 			Cmd.State.SetOk()
 			break
 		}

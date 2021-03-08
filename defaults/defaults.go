@@ -17,6 +17,11 @@ const (
 	DefaultPathEmpty = ""
 	DefaultProvider = "docker"
 
-	LanguageContainerName = "Gear"
-	LanguageImageName = "Gear image"
+	LanguageAppName = "Launch"
+	LanguageContainerName = "Container"
+	LanguageImageName = "Container image"
+
+	//LanguageAppName = "Gearbox"
+	//LanguageContainerName = "Gear"
+	//LanguageImageName = "Gear image"
 )

@@ -81,7 +81,7 @@ func (ga *LaunchArgs) gbRunFunc() *ux.State {
 
 		ga.State = ga.gbStartFunc()
 		if !ga.State.IsRunning() {
-			ga.State.SetError("container not started")
+			ga.State.SetError("%s not started", defaults.LanguageContainerName)
 			break
 		}
 
@@ -120,7 +120,7 @@ func (ga *LaunchArgs) gbShellFunc() *ux.State {
 	for range onlyOnce {
 		ga.State = ga.gbStartFunc()
 		if !ga.State.IsRunning() {
-			ga.State.SetError("Cannot shell out to Gear '%s:%s.'", ga.Name, ga.Version)
+			ga.State.SetError("Cannot shell out to %s '%s:%s.'", defaults.LanguageContainerName, ga.Name, ga.Version)
 			break
 		}
 
@@ -145,7 +145,7 @@ func (ga *LaunchArgs) gbUnitTestFunc() *ux.State {
 	for range onlyOnce {
 		ga.State = ga.gbStartFunc()
 		if !ga.State.IsRunning() {
-			ga.State.SetError("container not started")
+			ga.State.SetError("%s not started", defaults.LanguageContainerName)
 			break
 		}
 

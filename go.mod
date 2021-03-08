@@ -56,12 +56,12 @@ require (
 	github.com/newclarity/scribeHelpers/toolGhr v0.0.0-20200621234507-ba6f08c6b68d // indirect
 	github.com/newclarity/scribeHelpers/toolGit v0.0.0-20200621234507-ba6f08c6b68d // indirect
 	github.com/newclarity/scribeHelpers/toolGitHub v0.0.0-20200621234507-ba6f08c6b68d // indirect
-	github.com/newclarity/scribeHelpers/toolRuntime v0.0.0-20200621234507-ba6f08c6b68d
+	github.com/newclarity/scribeHelpers/toolRuntime v0.0.0-20200623081955-45abb1cbefe9
 	github.com/newclarity/scribeHelpers/toolSelfUpdate v0.0.0-20200621234507-ba6f08c6b68d
 	github.com/newclarity/scribeHelpers/toolService v0.0.0-20200621234507-ba6f08c6b68d // indirect
 	github.com/newclarity/scribeHelpers/toolSystem v0.0.0-20200621234507-ba6f08c6b68d // indirect
 	github.com/newclarity/scribeHelpers/toolUx v0.0.0-20200621234507-ba6f08c6b68d // indirect
-	github.com/newclarity/scribeHelpers/ux v0.0.0-20200621234507-ba6f08c6b68d
+	github.com/newclarity/scribeHelpers/ux v0.0.0-20200623081955-45abb1cbefe9
 	github.com/pelletier/go-toml v1.8.0 // indirect
 	github.com/spf13/afero v1.3.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect

@@ -121,11 +121,10 @@ func (ga *LaunchArgs) gbInstallFunc() *ux.State {
 				}
 			}
 
-			ga.State.SetOk("Gear '%s:%s' already installed.", ga.Name, ga.Version)
+			ga.State.SetOk("%s '%s:%s' already installed.", defaults.LanguageContainerName, ga.Name, ga.Version)
 			ga.State.SetOutput("")
 			break
 		}
-
 
 		ga.State = ga.GearRef.Docker.NetworkCreate(defaults.GearboxNetwork)
 		if ga.State.IsError() {
@@ -143,7 +142,7 @@ func (ga *LaunchArgs) gbInstallFunc() *ux.State {
 
 
 		if !ga.Quiet {
-			ux.PrintflnNormal("Installing Gear '%s:%s'.", ga.Name, ga.Version)
+			ux.PrintflnNormal("Installing %s '%s:%s'.", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
 		ga.State = ga.GearRef.ContainerCreate(ga.Name, ga.Version)
 		if ga.State.IsError() {
@@ -164,12 +163,12 @@ func (ga *LaunchArgs) gbInstallFunc() *ux.State {
 			// Create symlinks.
 			ga.State = ga.CreateLinks(ga.Version)
 
-			ga.State.SetOk("Installed Gear '%s:%s' OK.", ga.Name, ga.Version)
+			ga.State.SetOk("Installed %s '%s:%s' OK.", defaults.LanguageContainerName, ga.Name, ga.Version)
 			ga.State.SetOutput("")
 			break
 		}
 
-		ga.State.SetWarning("Gear '%s:%s' cannot be installed", ga.Name, ga.Version)
+		ga.State.SetWarning("%s '%s:%s' cannot be installed", defaults.LanguageContainerName, ga.Name, ga.Version)
 	}
 
 	if !ga.Quiet {
@@ -199,7 +198,7 @@ func (ga *LaunchArgs) gbUninstallFunc() *ux.State {
 				}
 			}
 
-			ga.State.SetOk("Gear '%s:%s' already removed.", ga.Name, ga.Version)
+			ga.State.SetOk("%s '%s:%s' already removed.", defaults.LanguageContainerName, ga.Name, ga.Version)
 			ga.State.SetOutput("")
 			break
 		}
@@ -211,11 +210,11 @@ func (ga *LaunchArgs) gbUninstallFunc() *ux.State {
 		}
 
 		if !ga.Quiet {
-			ux.PrintflnNormal("Removing gear '%s:%s'.\n", ga.Name, ga.Version)
+			ux.PrintflnNormal("Removing %s '%s:%s'.\n", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
 		ga.State = ga.GearRef.Docker.Container.Remove()
 		if ga.State.IsError() {
-			ga.State.SetError("Gear '%s:%s' remove error - %s", ga.Name, ga.Version, ga.State.GetError())
+			ga.State.SetError("%s '%s:%s' remove error - %s", defaults.LanguageContainerName, ga.Name, ga.Version, ga.State.GetError())
 			break
 		}
 
@@ -228,12 +227,12 @@ func (ga *LaunchArgs) gbUninstallFunc() *ux.State {
 			// Remove symlinks.
 			ga.RemoveLinks(ga.Version)
 
-			ga.State.SetOk("Gear '%s:%s' removed OK", ga.Name, ga.Version)
+			ga.State.SetOk("%s '%s:%s' removed OK", defaults.LanguageContainerName, ga.Name, ga.Version)
 			ga.State.SetOutput("")
 			break
 		}
 
-		ga.State.SetWarning("Gear '%s:%s' cannot be removed", ga.Name, ga.Version)
+		ga.State.SetWarning("%s '%s:%s' cannot be removed", defaults.LanguageContainerName, ga.Name, ga.Version)
 	}
 
 	if !ga.Quiet {
@@ -259,7 +258,7 @@ func (ga *LaunchArgs) gbReinstallFunc() *ux.State {
 			break
 		}
 
-		ga.State.SetOk("Gear '%s:%s' reinstalled.", ga.Name, ga.Version)
+		ga.State.SetOk("%s '%s:%s' reinstalled.", defaults.LanguageContainerName, ga.Name, ga.Version)
 		ga.State.SetOutput("")
 	}
 
@@ -284,18 +283,18 @@ func (ga *LaunchArgs) gbCleanFunc() *ux.State {
 			break
 		}
 		if !found {
-			ga.State.SetOk("Gear image '%s:%s' already removed.", ga.Name, ga.Version)
+			ga.State.SetOk("%s '%s:%s' already removed.", defaults.LanguageImageName, ga.Name, ga.Version)
 			ga.State.SetOutput("")
 			break
 		}
 		ga.State.Clear()
 
 		if !ga.Quiet {
-			ux.PrintflnNormal("Removing gear '%s:%s': ", ga.Name, ga.Version)
+			ux.PrintflnNormal("Removing %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
 		ga.State = ga.GearRef.Docker.Image.Remove()
 		if ga.State.IsError() {
-			ga.State.SetError("Gear image '%s:%s' remove error - %s", ga.Name, ga.Version, ga.State.GetError())
+			ga.State.SetError("%s '%s:%s' remove error - %s", defaults.LanguageImageName, ga.Name, ga.Version, ga.State.GetError())
 			break
 		}
 
@@ -305,12 +304,12 @@ func (ga *LaunchArgs) gbCleanFunc() *ux.State {
 				break
 			}
 
-			ga.State.SetOk("Gear image '%s:%s' removed OK", ga.Name, ga.Version)
+			ga.State.SetOk("%s '%s:%s' removed OK", defaults.LanguageImageName, ga.Name, ga.Version)
 			ga.State.SetOutput("")
 			break
 		}
 
-		ga.State.SetWarning("Gear image '%s:%s' cannot be removed", ga.Name, ga.Version)
+		ga.State.SetWarning("%s '%s:%s' cannot be removed", defaults.LanguageImageName, ga.Name, ga.Version)
 	}
 
 	if !ga.Quiet {
