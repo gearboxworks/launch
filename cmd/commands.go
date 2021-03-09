@@ -62,15 +62,15 @@ var gbListCmd = &cobra.Command{
 	Args:					cobra.RangeArgs(0, 1),
 }
 
-var gbLsCmd = &cobra.Command{
-	Use:					fmt.Sprintf("ls [%s name]", defaults.LanguageContainerName),
-	//Aliases:				[]string{"ls", "show"},
+var gbLinksCmd = &cobra.Command{
+	Use:					fmt.Sprintf("ls [-c] [%s name]", defaults.LanguageContainerName),
+	Aliases:				[]string{"links"},
 	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - List files provided by a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
 	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - List files provided by a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch list golang"),
+	Example:				ux.SprintfWhite("launch ls golang"),
 	DisableFlagParsing:		false,
 	DisableFlagsInUseLine:	false,
-	Run:					gbLsFunc,
+	Run:					gbLinksFunc,
 	Args:					cobra.RangeArgs(0, 1),
 }
 

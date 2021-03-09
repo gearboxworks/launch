@@ -141,7 +141,7 @@ func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
 }
 
 
-func (ga *LaunchArgs) ListLinks(version string) *ux.State {
+func (ga *LaunchArgs) ListLinks(create bool) *ux.State {
 	if state := ga.IsNil(); state.IsError() {
 		return state
 	}
@@ -151,6 +151,9 @@ func (ga *LaunchArgs) ListLinks(version string) *ux.State {
 		dcs, ga.State = ga.GearRef.Docker.GetContainers(ga.Name)
 
 		for _, dc := range dcs {
+			if create {
+				ga.State = dc.Container.GearConfig.CreateLinks(dc.Container.Version)
+			}
 			ga.State = dc.Container.GearConfig.ListLinks(dc.Container.Version)
 		}
 	}

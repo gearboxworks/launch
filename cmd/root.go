@@ -74,7 +74,7 @@ const DefaultTemplateString = `
 func init() {
 	SetCmd()
 
-	CobraHelp.AddCommands("Manage", rootCmd, gbInstallCmd, gbUninstallCmd, gbReinstallCmd, gbCleanCmd, gbListCmd, gbLsCmd)
+	CobraHelp.AddCommands("Manage", rootCmd, gbInstallCmd, gbUninstallCmd, gbReinstallCmd, gbCleanCmd, gbListCmd, gbLinksCmd)
 	CobraHelp.AddCommands("Execute", rootCmd, gbRunCmd, gbShellCmd, gbUnitTestCmd)
 	CobraHelp.AddCommands("Run", rootCmd, gbStartCmd, gbStopCmd)
 	CobraHelp.AddCommands("Create", rootCmd, gbBuildCmd, gbPublishCmd, gbSaveCmd, gbLoadCmd)
