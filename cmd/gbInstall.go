@@ -107,14 +107,14 @@ func (ga *LaunchArgs) gbInstallFunc() *ux.State {
 
 	for range onlyOnce {
 		var found bool
-		found, ga.State = ga.GearRef.FindContainer(ga.Name, ga.Version)
+		found, ga.State = ga.Gears.FindContainer(ga.Name, ga.Version)
 		if ga.State.IsError() {
 			break
 		}
 
 		if found {
 			if !ga.Temporary {
-				found, ga.State = ga.GearRef.FindImage(ga.Name, ga.Version)
+				found, ga.State = ga.Gears.FindImage(ga.Name, ga.Version)
 				if found {
 					// Create symlinks.
 					ga.CreateLinks(ga.Version)
@@ -126,35 +126,30 @@ func (ga *LaunchArgs) gbInstallFunc() *ux.State {
 			break
 		}
 
-		ga.State = ga.GearRef.Docker.NetworkCreate(defaults.GearboxNetwork)
+		ga.State = ga.Gears.NetworkCreate(defaults.GearboxNetwork)
 		if ga.State.IsError() {
 			break
 		}
 
 
 		if ga.Project != toolGear.DefaultPathNone {
-			ga.GearRef.AddVolume(ga.Project, toolGear.DefaultProject)
+			ga.Gears.Selected.AddVolume(ga.Project, toolGear.DefaultProject)
 		}
 
 		if ga.TmpDir != toolGear.DefaultPathNone {
-			ga.GearRef.AddVolume(ga.TmpDir, toolGear.DefaultTmpDir)
+			ga.Gears.Selected.AddVolume(ga.TmpDir, toolGear.DefaultTmpDir)
 		}
 
 
 		if !ga.Quiet {
 			ux.PrintflnNormal("Installing %s '%s:%s'.", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
-		ga.State = ga.GearRef.ContainerCreate(ga.Name, ga.Version)
+		ga.State = ga.Gears.ContainerCreate(ga.Name, ga.Version)
 		if ga.State.IsError() {
 			break
 		}
 
 		if ga.State.IsCreated() {
-			ga.State = ga.GearRef.Status()
-			if ga.State.IsError() {
-				break
-			}
-
 			if ga.Temporary {
 				ga.State.Clear()
 				break
@@ -185,13 +180,13 @@ func (ga *LaunchArgs) gbUninstallFunc() *ux.State {
 
 	for range onlyOnce {
 		var found bool
-		found, ga.State = ga.GearRef.FindContainer(ga.Name, ga.Version)
+		found, ga.State = ga.Gears.FindContainer(ga.Name, ga.Version)
 		if ga.State.IsError() {
 			break
 		}
 		if !found {
 			if !ga.Temporary {
-				found, ga.State = ga.GearRef.FindImage(ga.Name, ga.Version)
+				found, ga.State = ga.Gears.FindImage(ga.Name, ga.Version)
 				if found {
 					// Remove symlinks.
 					ga.RemoveLinks(ga.Version)
@@ -212,7 +207,7 @@ func (ga *LaunchArgs) gbUninstallFunc() *ux.State {
 		if !ga.Quiet {
 			ux.PrintflnNormal("Removing %s '%s:%s'.\n", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
-		ga.State = ga.GearRef.Docker.Container.Remove()
+		ga.State = ga.Gears.Selected.Container.Remove()
 		if ga.State.IsError() {
 			ga.State.SetError("%s '%s:%s' remove error - %s", defaults.LanguageContainerName, ga.Name, ga.Version, ga.State.GetError())
 			break
@@ -278,7 +273,7 @@ func (ga *LaunchArgs) gbCleanFunc() *ux.State {
 		}
 
 		var found bool
-		found, ga.State = ga.GearRef.FindImage(ga.Name, ga.Version)
+		found, ga.State = ga.Gears.FindImage(ga.Name, ga.Version)
 		if ga.State.IsError() {
 			break
 		}
@@ -292,7 +287,7 @@ func (ga *LaunchArgs) gbCleanFunc() *ux.State {
 		if !ga.Quiet {
 			ux.PrintflnNormal("Removing %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
-		ga.State = ga.GearRef.Docker.Image.Remove()
+		ga.State = ga.Gears.Selected.Image.Remove()
 		if ga.State.IsError() {
 			ga.State.SetError("%s '%s:%s' remove error - %s", defaults.LanguageImageName, ga.Name, ga.Version, ga.State.GetError())
 			break

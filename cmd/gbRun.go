@@ -88,7 +88,7 @@ func (ga *LaunchArgs) gbRunFunc() *ux.State {
 		// Yuck!
 		sp := strings.Split(ga.Args[0], ":")
 		ga.Args[0] = sp[0]
-		ga.Args = ga.GearRef.Docker.Container.GearConfig.GetCommand(ga.Args)
+		ga.Args = ga.Gears.Selected.GetCommand(ga.Args)
 		if len(ga.Args) == 0 {
 			ga.State.SetError("ERROR: no default command defined in gearbox.json")
 			break
@@ -99,7 +99,7 @@ func (ga *LaunchArgs) gbRunFunc() *ux.State {
 			ga.Mount = DeterminePath(".")
 		}
 
-		ga.State = ga.GearRef.Docker.ContainerSsh(false, ga.SshStatus, ga.Mount, ga.Args)
+		ga.State = ga.Gears.Selected.ContainerSsh(false, ga.SshStatus, ga.Mount, ga.Args)
 		if !ga.State.IsError() {
 			break
 		}
@@ -124,7 +124,7 @@ func (ga *LaunchArgs) gbShellFunc() *ux.State {
 			break
 		}
 
-		ga.State = ga.GearRef.Docker.ContainerSsh(true, ga.SshStatus, ga.Mount, ga.Args[1:])
+		ga.State = ga.Gears.Selected.ContainerSsh(true, ga.SshStatus, ga.Mount, ga.Args[1:])
 
 		if ga.Temporary {
 			ga.State = ga.gbUninstallFunc()
@@ -150,7 +150,7 @@ func (ga *LaunchArgs) gbUnitTestFunc() *ux.State {
 		}
 
 		ga.Args = []string{defaults.DefaultUnitTestCmd}
-		ga.State = ga.GearRef.Docker.ContainerSsh(true, ga.SshStatus, ga.Mount, ga.Args)
+		ga.State = ga.Gears.Selected.ContainerSsh(true, ga.SshStatus, ga.Mount, ga.Args)
 
 		if ga.Temporary {
 			ga.State = ga.gbUninstallFunc()

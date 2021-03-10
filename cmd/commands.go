@@ -29,11 +29,11 @@ var gbUninstallCmd = &cobra.Command{
 	Args:					cobra.ExactArgs(1),
 }
 var gbReinstallCmd = &cobra.Command{
-	Use:					fmt.Sprintf("reinstall <%s name>", defaults.LanguageContainerName),
-	SuggestFor:				[]string{"update"},
+	Use:					fmt.Sprintf("update <%s name>", defaults.LanguageContainerName),
+	SuggestFor:				[]string{"reinstall"},
 	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Update a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
 	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Update a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch reinstall golang"),
+	Example:				ux.SprintfWhite("launch update golang"),
 	DisableFlagParsing:		false,
 	Run:					gbReinstallFunc,
 	Args:					cobra.ExactArgs(1),
@@ -43,7 +43,7 @@ var gbCleanCmd = &cobra.Command{
 	SuggestFor:				[]string{},
 	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Completely uninstall a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
 	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Completely uninstall a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch uninstall golang"),
+	Example:				ux.SprintfWhite("launch clean golang"),
 	DisableFlagParsing:		false,
 	Run:					gbCleanFunc,
 	Args:					cobra.ExactArgs(1),
@@ -51,26 +51,47 @@ var gbCleanCmd = &cobra.Command{
 
 
 var gbListCmd = &cobra.Command{
-	Use:					fmt.Sprintf("list [%s name]", defaults.LanguageContainerName),
+	Use:					"list",
 	Aliases:				[]string{"show"},
 	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - List a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
 	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - List a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch list golang"),
+	Example:				ux.SprintfWhite("launch list all"),
 	DisableFlagParsing:		false,
 	DisableFlagsInUseLine:	false,
 	Run:					gbListFunc,
 	Args:					cobra.RangeArgs(0, 1),
 }
-
+var gbPortsCmd = &cobra.Command{
+	Use:					fmt.Sprintf("ports [%s name]", defaults.LanguageContainerName),
+	//Aliases:				[]string{"links"},
+	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - List ports provided by a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - List ports provided by a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch list ports golang"),
+	DisableFlagParsing:		false,
+	DisableFlagsInUseLine:	false,
+	Run:					gbPortsFunc,
+	Args:					cobra.RangeArgs(0, 1),
+}
 var gbLinksCmd = &cobra.Command{
-	Use:					fmt.Sprintf("ls [-c] [%s name]", defaults.LanguageContainerName),
-	Aliases:				[]string{"links"},
+	Use:					fmt.Sprintf("files [%s name]", defaults.LanguageContainerName),
+	Aliases:				[]string{"links", "ls"},
 	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - List files provided by a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
 	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - List files provided by a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch ls golang"),
+	Example:				ux.SprintfWhite("launch list files golang"),
 	DisableFlagParsing:		false,
 	DisableFlagsInUseLine:	false,
 	Run:					gbLinksFunc,
+	Args:					cobra.RangeArgs(0, 1),
+}
+var gbDetailsCmd = &cobra.Command{
+	Use:					"all",
+	Aliases:				[]string{"details"},
+	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - List all details provided by a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - List all details provided by a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch list all golang"),
+	DisableFlagParsing:		false,
+	DisableFlagsInUseLine:	false,
+	Run:					gbDetailsFunc,
 	Args:					cobra.RangeArgs(0, 1),
 }
 

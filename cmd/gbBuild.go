@@ -60,7 +60,7 @@ func (ga *LaunchArgs) gbBuildFunc() *ux.State {
 
 	for range onlyOnce {
 		var found bool
-		found, ga.State = ga.GearRef.FindContainer(ga.Name, ga.Version)
+		found, ga.State = ga.Gears.FindContainer(ga.Name, ga.Version)
 		if ga.State.IsError() {
 			break
 		}
@@ -93,7 +93,7 @@ func (ga *LaunchArgs) gbBuildFunc() *ux.State {
 		if !ga.Quiet {
 			ux.PrintflnNormal("Starting %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
-		ga.State = ga.GearRef.Docker.Container.Start()
+		ga.State = ga.Gears.Selected.Container.Start()
 		if ga.State.IsError() {
 			ga.State.SetError("%s '%s:%s' start error - %s", defaults.LanguageContainerName, ga.Name, ga.Version, ga.State.GetError())
 			break
@@ -122,7 +122,7 @@ func (ga *LaunchArgs) gbPublishFunc() *ux.State {
 
 	for range onlyOnce {
 		var found bool
-		found, ga.State = ga.GearRef.FindContainer(ga.Name, ga.Version)
+		found, ga.State = ga.Gears.FindContainer(ga.Name, ga.Version)
 		if ga.State.IsError() {
 			break
 		}
@@ -139,7 +139,7 @@ func (ga *LaunchArgs) gbPublishFunc() *ux.State {
 		if !ga.Quiet {
 			ux.PrintflnNormal("Stopping %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
-		ga.State = ga.GearRef.Docker.Container.Stop()
+		ga.State = ga.Gears.Selected.Container.Stop()
 		if ga.State.IsError() {
 			ga.State.SetError("%s '%s:%s' stop error - %s", defaults.LanguageContainerName, ga.Name, ga.Version, ga.State.GetError())
 			break

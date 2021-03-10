@@ -12,6 +12,7 @@ import (
 	"strings"
 )
 
+
 func showArgs(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		flargs := cmd.Flags().Args()
@@ -43,7 +44,8 @@ type LaunchArgs struct {
 	NoCreate  bool
 
 	Provider  *toolGear.Provider
-	GearRef   *toolGear.Gear
+	//GearRef   *toolGear.Gear
+	Gears     toolGear.Gears
 
 	Valid     bool
 	State     *ux.State
@@ -80,12 +82,6 @@ func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
 	for range onlyOnce {
 		ga.State = ux.NewState(Cmd.Runtime.CmdName, Cmd.Debug)
 
-		//fmt.Printf("cmd.Args:%v\nargs:%v\nCmd.Runtime.Args:%v\nCmd.Runtime.FullArgs:%v\n",
-		//	cmd.Args,
-		//	args,
-		//	Cmd.Runtime.Args,
-		//	Cmd.Runtime.FullArgs,
-		//	)
 		ga.Args = args
 		if len(ga.Args) > 0 {
 			ga.Name = ga.Args[0]
@@ -128,11 +124,19 @@ func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
 			break
 		}
 
-		ga.GearRef = toolGear.NewGear(Cmd.Runtime)
-		ga.State = ga.GearRef.State
+		ga.Gears = toolGear.NewGears(Cmd.Runtime)
+		ga.State = ga.Gears.State
 		if ga.State.IsError() {
 			break
 		}
+
+		ga.State = ga.Gears.SetLanguage(defaults.LanguageAppName, defaults.LanguageImageName, defaults.LanguageContainerName)
+
+		//ga.GearRef = toolGear.NewGear(Cmd.Runtime)
+		//ga.State = ga.GearRef.State
+		//if ga.State.IsError() {
+		//	break
+		//}
 
 		ga.Valid = true
 	}
@@ -147,14 +151,91 @@ func (ga *LaunchArgs) ListLinks(create bool) *ux.State {
 	}
 
 	for range onlyOnce {
-		var dcs toolGear.TypeDockerGears
-		dcs, ga.State = ga.GearRef.Docker.GetContainers(ga.Name)
+		ga.State = ga.Gears.GetContainers(ga.Name)
 
-		for _, dc := range dcs {
-			if create {
-				ga.State = dc.Container.GearConfig.CreateLinks(dc.Container.Version)
+		for _, dc := range ga.Gears.Array {
+			if dc.Container.ID == "" {
+				continue
 			}
-			ga.State = dc.Container.GearConfig.ListLinks(dc.Container.Version)
+
+			if create {
+				ga.State = dc.GearConfig.CreateLinks(dc.Container.Version)
+			}
+
+			if ga.Name == "" {
+				ga.State = dc.ListLinks(dc.Container.Version)
+				continue
+			}
+
+			if ga.Name != dc.Container.Name {
+				continue
+			}
+
+			if ga.Version == "all" {
+				ga.State = dc.ListLinks(dc.Container.Version)
+				continue
+			}
+
+			if ga.Version == "latest" {
+				if dc.Container.IsLatest {
+					ga.State = dc.ListLinks(dc.Container.Version)
+				}
+				continue
+			}
+
+			if ga.Version == "" {
+				ga.State = dc.ListLinks(dc.Container.Version)
+				continue
+			}
+
+			if dc.Container.Version == ga.Version {
+				ga.State = dc.ListLinks(dc.Container.Version)
+				continue
+			}
+		}
+	}
+
+	return ga.State
+}
+
+
+func (ga *LaunchArgs) ListPorts(remote bool) *ux.State {
+	if state := ga.IsNil(); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		for _, dc := range ga.Gears.Array {
+			if ga.Name == "" {
+				ga.State = dc.ListContainerPorts()
+				continue
+			}
+
+			if ga.Name != dc.Container.Name {
+				continue
+			}
+
+			if ga.Version == "all" {
+				ga.State = dc.ListContainerPorts()
+				continue
+			}
+
+			if ga.Version == "latest" {
+				if dc.Container.IsLatest {
+					ga.State = dc.ListContainerPorts()
+				}
+				continue
+			}
+
+			if ga.Version == "" {
+				ga.State = dc.ListContainerPorts()
+				continue
+			}
+
+			if dc.Container.Version == ga.Version {
+				ga.State = dc.ListContainerPorts()
+				continue
+			}
 		}
 	}
 
@@ -168,7 +249,7 @@ func (ga *LaunchArgs) CreateLinks(version string) *ux.State {
 	}
 
 	for range onlyOnce {
-		ga.State = ga.GearRef.CreateLinks(version)
+		ga.State = ga.Gears.Selected.CreateLinks(version)
 	}
 
 	return ga.State
@@ -181,7 +262,7 @@ func (ga *LaunchArgs) RemoveLinks(version string) *ux.State {
 	}
 
 	for range onlyOnce {
-		ga.State = ga.GearRef.RemoveLinks(version)
+		ga.State = ga.Gears.Selected.RemoveLinks(version)
 	}
 
 	return ga.State
