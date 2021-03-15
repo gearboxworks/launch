@@ -11,6 +11,7 @@ var Functions = map[string]reflect.Value{
 }
 
 var Variables = map[string]reflect.Value{
+	"PROFILE": reflect.ValueOf(&PROFILE),
 }
 
 var Consts = map[string]reflect.Value{

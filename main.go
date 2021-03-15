@@ -2,21 +2,52 @@ package main
 
 import (
 	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/pkg/profile"
 	"launch/cmd"
 	"launch/defaults"
 	"os"
 )
 
+var PROFILE = false
+
+
 func init() {
-	_, _ = ux.Open(defaults.BinaryName, true)
+	if fileInfo, _ := os.Stdout.Stat(); (fileInfo.Mode() & os.ModeCharDevice) != 0 {
+		//fmt.Println("terminal")
+		_, _ = ux.Open(defaults.BinaryName, true)
+	} else {
+		//fmt.Println("pipe")
+		_, _ = ux.Open(defaults.BinaryName, false)
+	}
+
+
+	// Not reliable enough.
+	//fi, _ := os.Stdin.Stat()
+	//if (fi.Mode() & os.ModeCharDevice) == 0 {
+	//	//fmt.Println("pipe")
+	//	_, _ = ux.Open(defaults.BinaryName, false)
+	//} else {
+	//	//fmt.Println("terminal")
+	//	_, _ = ux.Open(defaults.BinaryName, true)
+	//}
 }
 
 func main() {
+	if PROFILE {
+		p := profile.Start(profile.GoroutineProfile, profile.ProfilePath(os.Getenv("PWD")))
+		defer p.Stop()
+		//defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
+	}
+
 	state := cmd.Execute()
 	if state.IsNotOk() {
 		state.PrintResponse()
 	}
 	ux.Close()
+
+	//if PROFILE {
+	//	p.Stop()
+	//}
 	os.Exit(state.ExitCode)
 }
 

@@ -20,6 +20,8 @@ const (
 	LanguageAppName = "Launch"
 	LanguageContainerName = "Container"
 	LanguageImageName = "Container image"
+	LanguageContainerPluralName = "Containers"
+	LanguageImagePluralName = "Container images"
 
 	//LanguageAppName = "Gearbox"
 	//LanguageContainerName = "Gear"

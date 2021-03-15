@@ -10,7 +10,7 @@ replace github.com/newclarity/scribeHelpers/toolCopy => ../scribeHelpers/toolCop
 
 replace github.com/docker/docker => github.com/docker/engine v1.4.2-0.20190717161051-705d9623b7c1
 
-replace github.com/newclarity/scribeHelpers/toolDocker => ../scribeHelpers/toolDocker
+// replace github.com/newclarity/scribeHelpers/toolDocker => ../scribeHelpers/toolDocker
 
 replace github.com/newclarity/scribeHelpers/toolExec => ../scribeHelpers/toolExec
 
@@ -42,7 +42,6 @@ replace github.com/newclarity/scribeHelpers/toolCobraHelp => ../scribeHelpers/to
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
-	github.com/docker/docker v1.13.1
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-openapi/errors v0.19.6 // indirect
 	github.com/gorilla/mux v1.7.4 // indirect
@@ -64,6 +63,7 @@ require (
 	github.com/newclarity/scribeHelpers/toolUx v0.0.0-20200621234507-ba6f08c6b68d // indirect
 	github.com/newclarity/scribeHelpers/ux v0.0.0-20200623081955-45abb1cbefe9
 	github.com/pelletier/go-toml v1.8.0 // indirect
+	github.com/pkg/profile v1.5.0
 	github.com/spf13/afero v1.3.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v1.0.0

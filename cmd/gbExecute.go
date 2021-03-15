@@ -24,7 +24,6 @@ func gbRunFunc(cmd *cobra.Command, args []string) {
 	}
 }
 
-
 func gbShellFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -38,29 +37,6 @@ func gbShellFunc(cmd *cobra.Command, args []string) {
 		}
 
 		Cmd.State = ga.gbShellFunc()
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
-			break
-		}
-	}
-}
-
-
-func gbUnitTestFunc(cmd *cobra.Command, args []string) {
-	for range onlyOnce {
-		var ga LaunchArgs
-
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
-			break
-		}
-
-		Cmd.State = ga.gbUnitTestFunc()
 		if Cmd.State.IsError() {
 			if Cmd.State.IsNotOk() {
 				Cmd.State.PrintResponse()
@@ -125,32 +101,6 @@ func (ga *LaunchArgs) gbShellFunc() *ux.State {
 		}
 
 		ga.State = ga.Gears.Selected.ContainerSsh(true, ga.SshStatus, ga.Mount, ga.Args[1:])
-
-		if ga.Temporary {
-			ga.State = ga.gbUninstallFunc()
-		}
-	}
-
-	if !ga.Quiet {
-		ga.State.PrintResponse()
-	}
-	return ga.State
-}
-
-func (ga *LaunchArgs) gbUnitTestFunc() *ux.State {
-	if state := ux.IfNilReturnError(ga); state.IsError() {
-		return state
-	}
-
-	for range onlyOnce {
-		ga.State = ga.gbStartFunc()
-		if !ga.State.IsRunning() {
-			ga.State.SetError("%s not started", defaults.LanguageContainerName)
-			break
-		}
-
-		ga.Args = []string{defaults.DefaultUnitTestCmd}
-		ga.State = ga.Gears.Selected.ContainerSsh(true, ga.SshStatus, ga.Mount, ga.Args)
 
 		if ga.Temporary {
 			ga.State = ga.gbUninstallFunc()

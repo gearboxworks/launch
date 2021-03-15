@@ -13,6 +13,7 @@ const (
 	flagNoCreate = "no-create"
 
 	flagExample  = "help-examples"
+	flagHelp  = "flags"
 
 	flagProvider        = "provider"
 	flagProviderDefault = "docker"
@@ -51,6 +52,7 @@ type TypeLaunchArgs struct {
 
 	HelpAll        bool
 	HelpExamples   bool
+	HelpFlags   bool
 
 	Runtime        *toolRuntime.TypeRuntime
 	State          *ux.State
@@ -82,6 +84,7 @@ func New() *TypeLaunchArgs {
 
 		HelpAll:      false,
 		HelpExamples: false,
+		HelpFlags:    false,
 
 		Runtime:        toolRuntime.New(defaults.BinaryName, defaults.BinaryVersion, false),
 		State:          ux.NewState(defaults.BinaryName, false),

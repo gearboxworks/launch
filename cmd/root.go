@@ -71,13 +71,46 @@ const DefaultTemplateString = `
 {{- $gear.ParseGearConfig .Json }}
 {{- $gear.PrintGearConfig }}`
 
+
+type redirectHelp struct {
+	Text    string
+	MovedTo string
+}
+var courtesyHelp = map[string]redirectHelp {
+	// Moved to sub-command "manage"
+	"install": { Text: "manage install", MovedTo: "manage"},     // gbManageCmd },
+	"uninstall": { Text: "manage uninstall", MovedTo: "manage"}, // gbManageCmd },
+	"reinstall": { Text: "manage reinstall", MovedTo: "manage"}, // gbManageCmd },
+	"clean": { Text: "manage clean", MovedTo: "manage"},         // gbManageCmd },
+	"list": { Text: "manage list", MovedTo: "manage"},           // gbListCmd },
+	"start": { Text: "manage start", MovedTo: "manage"},         // gbManageCmd },
+	"stop": { Text: "manage stop", MovedTo: "manage"},           // gbManageCmd },
+
+	// Moved to sub-command "create"
+	"build": { Text: "create build", MovedTo: "create"},     // gbCreateCmd },
+	"publish": { Text: "create publish", MovedTo: "create"}, // gbCreateCmd },
+	"save": { Text: "create save", MovedTo: "create"},       // gbCreateCmd },
+	"load": { Text: "create load", MovedTo: "create"},       // gbCreateCmd },
+}
+
+
 func init() {
 	SetCmd()
 
-	CobraHelp.AddCommands("Manage", rootCmd, gbInstallCmd, gbUninstallCmd, gbReinstallCmd, gbCleanCmd, gbListCmd)
-	CobraHelp.AddCommands("Execute", rootCmd, gbRunCmd, gbShellCmd, gbUnitTestCmd)
-	CobraHelp.AddCommands("Run", rootCmd, gbStartCmd, gbStopCmd)
-	CobraHelp.AddCommands("Create", rootCmd, gbBuildCmd, gbPublishCmd, gbSaveCmd, gbLoadCmd)
+	CobraHelp.ChangeHelp(rootCmd, tmplUsage, tmplHelp)
+
+
+	// Level 1 commands.
+	CobraHelp.AddCommands("Manage", rootCmd, gbManageCmd)
+	CobraHelp.AddCommands("Execute", rootCmd, gbRunCmd, gbShellCmd)
+	//CobraHelp.AddCommands("Run", rootCmd, gbStartCmd, gbStopCmd)
+	CobraHelp.AddCommands("Create", rootCmd, gbCreateCmd)
+
+	// Level 2 commands.
+	CobraHelp.AddCommands("Create", gbCreateCmd, gbBuildCmd, gbUnitTestCmd, gbPublishCmd, gbSaveCmd, gbLoadCmd)
+	CobraHelp.AddCommands("Manage", gbManageCmd, gbInstallCmd, gbUninstallCmd, gbReinstallCmd, gbCleanCmd, gbListCmd, gbLogsCmd, gbStartCmd, gbStopCmd)
+
+	// Level 3 commands.
 	CobraHelp.AddCommands("List", gbListCmd, gbDetailsCmd, gbLinksCmd, gbPortsCmd)
 
 	cobra.OnInitialize(initConfig)
@@ -86,7 +119,9 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&ConfigFile, flagConfigFile, fmt.Sprintf("%s-config.json", defaults.BinaryName), ux.SprintfBlue("%s: config file.", defaults.BinaryName))
 	_ = rootCmd.PersistentFlags().MarkHidden(flagConfigFile)
 
-	rootCmd.Flags().BoolVarP(&Cmd.HelpExamples, flagExample, "e", false, ux.SprintfBlue("Help examples for command."))
+	rootCmd.Flags().BoolVarP(&Cmd.HelpExamples, flagExample, "", false, ux.SprintfBlue("Help examples for command."))
+	rootCmd.Flags().BoolVarP(&Cmd.HelpFlags, flagHelp, "", false, ux.SprintfBlue("Show help on flags."))
+
 	rootCmd.Flags().BoolVarP(&Cmd.NoCreate, flagNoCreate, "n", false, ux.SprintfBlue("Don't create container."))
 
 	rootCmd.Flags().StringVarP(&Cmd.Provider, flagProvider, "", defaults.DefaultProvider, ux.SprintfBlue("Set virtual provider"))
@@ -200,7 +235,7 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 		}
 
 		// Produce BASH completion script.
-		ok, _ := fl.GetBool("completion")
+		ok, _ := fl.GetBool(flagCompletion)
 		if ok {
 			var out bytes.Buffer
 			_ = cmd.GenBashCompletion(&out)
@@ -209,17 +244,73 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 
-		// Show help if no commands specified.
-		if len(args) == 0 {
+		// Show flag help.
+		ok, _ = fl.GetBool(flagHelp)
+		if ok {
+			CobraHelp.ChangeHelp(cmd, tmplFlagUsage, tmplFlagHelp)
 			_ = cmd.Help()
 			Cmd.State.SetOk()
 			break
 		}
+
+		Cmd.State.SetOk()
+
+		if len(args) == 0 {
+			_ = cmd.Help()
+			break
+		}
+
+
+		cla := ""
+		if len(args) > 1 {
+			cla = " " + strings.Join(args[1:], " ")
+		}
+
+		if _, ok := courtesyHelp[args[0]]; ok {
+			ux.PrintflnWarning("Did you mean '%s%s'?", courtesyHelp[args[0]].Text, cla)
+
+			for _, v := range cmd.Commands() {
+				if v.Use != courtesyHelp[args[0]].MovedTo {
+					continue
+				}
+
+				_ = v.Help()
+				break
+			}
+
+			Cmd.State.SetExitCode(2)
+			break
+		}
+
+		ux.PrintflnError("Unknown command: '%s'", strings.Join(args, " "))
+		Cmd.State.SetError()
+		Cmd.State.SetExitCode(1)
+
+		//switch {
+		//	case len(args) == 0:
+		//		_ = cmd.Help()
+		//
+		//	case len(args) == 1:
+		//		if _, ok := courtesyHelp[args[0]]; ok {
+		//			ux.PrintflnWarning("Did you mean '%s'?", courtesyHelp[args[0]].Text)
+		//		} else {
+		//			ux.PrintflnWarning("Unknown command: '%s'", strings.Join(args, " "))
+		//		}
+		//
+		//	case len(args) > 1:
+		//		if _, ok := courtesyHelp[args[0]]; ok {
+		//			ux.PrintflnWarning("Did you mean '%s'?", courtesyHelp[args[0]].Text, strings.Join(args[1:], " "))
+		//		} else {
+		//			ux.PrintflnWarning("Unknown command: '%s'", strings.Join(args, " "))
+		//		}
+		//}
+		//
+		//break
 	}
 
-	if Cmd.State.IsNotOk() {
-		Cmd.State.PrintResponse()
-	}
+	//if Cmd.State.IsNotOk() {
+	//	Cmd.State.PrintResponse()
+	//}
 }
 
 

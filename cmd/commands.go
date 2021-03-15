@@ -48,8 +48,47 @@ var gbCleanCmd = &cobra.Command{
 	Run:					gbCleanFunc,
 	Args:					cobra.ExactArgs(1),
 }
+var gbLogsCmd = &cobra.Command{
+	Use:					fmt.Sprintf("log <%s name>", defaults.LanguageContainerName),
+	SuggestFor:				[]string{"logs"},
+	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Show logs of %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Show logs of %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch log golang"),
+	DisableFlagParsing:		false,
+	Run:					gbLogsFunc,
+	Args:					cobra.ExactArgs(1),
+}
+var gbStartCmd = &cobra.Command{
+	Use:					fmt.Sprintf("start <%s name>", defaults.LanguageContainerName),
+	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Start a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Start a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch start golang"),
+	DisableFlagParsing:		false,
+	Run:					gbStartFunc,
+	Args:					cobra.ExactArgs(1),
+}
+var gbStopCmd = &cobra.Command{
+	Use:					fmt.Sprintf("stop <%s name>", defaults.LanguageContainerName),
+	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Stop a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Stop a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch stop golang"),
+	DisableFlagParsing:		false,
+	Run:					gbStopFunc,
+	Args:					cobra.ExactArgs(1),
+}
 
 
+var gbManageCmd = &cobra.Command{
+	Use:					"manage",
+	//Aliases:				[]string{"show"},
+	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Manage %s %s", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
+	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Manage %s %s.", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
+	Example:				ux.SprintfWhite("launch manage"),
+	DisableFlagParsing:		false,
+	DisableFlagsInUseLine:	false,
+	Run:					gbManageFunc,
+	Args:					cobra.RangeArgs(0, 2),
+}
 var gbListCmd = &cobra.Command{
 	Use:					"list",
 	Aliases:				[]string{"show"},
@@ -117,38 +156,19 @@ var gbShellCmd = &cobra.Command{
 	Run:					gbShellFunc,
 	Args:					cobra.MinimumNArgs(1),
 }
-var gbUnitTestCmd = &cobra.Command{
-	Use:					fmt.Sprintf("test <%s name>", defaults.LanguageContainerName),
-	Short:					ux.SprintfMagenta("Execute") + ux.SprintfBlue(" - Execute unit tests in %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Execute") + ux.SprintfBlue(" - Execute unit tests in %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch unit tests terminus"),
-	DisableFlagParsing:		true,
-	DisableFlagsInUseLine:	true,
-	Run:					gbUnitTestFunc,
-	Args:					cobra.MinimumNArgs(1),
-}
 
 
-var gbStartCmd = &cobra.Command{
-	Use:					fmt.Sprintf("start <%s name>", defaults.LanguageContainerName),
-	Short:					ux.SprintfMagenta("Run") + ux.SprintfBlue(" - Start a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Run") + ux.SprintfBlue(" - Start a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch start golang"),
+var gbCreateCmd = &cobra.Command{
+	Use:					"create",
+	//Aliases:				[]string{"show"},
+	Short:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Create %s %s", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
+	Long:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Create %s %s.", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
+	Example:				ux.SprintfWhite("launch create"),
 	DisableFlagParsing:		false,
-	Run:					gbStartFunc,
-	Args:					cobra.ExactArgs(1),
+	DisableFlagsInUseLine:	false,
+	Run:					gbCreateFunc,
+	Args:					cobra.RangeArgs(0, 2),
 }
-var gbStopCmd = &cobra.Command{
-	Use:					fmt.Sprintf("stop <%s name>", defaults.LanguageContainerName),
-	Short:					ux.SprintfMagenta("Run") + ux.SprintfBlue(" - Stop a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Run") + ux.SprintfBlue(" - Stop a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch stop golang"),
-	DisableFlagParsing:		false,
-	Run:					gbStopFunc,
-	Args:					cobra.ExactArgs(1),
-}
-
-
 var gbBuildCmd = &cobra.Command {
 	Use:					fmt.Sprintf("build <%s name>", defaults.LanguageContainerName),
 	SuggestFor:				[]string{ "compile", "generate" },
@@ -168,6 +188,16 @@ var gbPublishCmd = &cobra.Command{
 	DisableFlagParsing:		false,
 	Run:					gbPublishFunc,
 	Args:					cobra.ExactArgs(1),
+}
+var gbUnitTestCmd = &cobra.Command{
+	Use:					fmt.Sprintf("test <%s name>", defaults.LanguageContainerName),
+	Short:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Execute unit tests in %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Execute unit tests in %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch unit tests terminus"),
+	DisableFlagParsing:		true,
+	DisableFlagsInUseLine:	true,
+	Run:					gbUnitTestFunc,
+	Args:					cobra.MinimumNArgs(1),
 }
 
 

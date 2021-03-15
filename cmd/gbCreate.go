@@ -7,7 +7,7 @@ import (
 )
 
 
-func gbStartFunc(cmd *cobra.Command, args []string) {
+func gbCreateFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
@@ -19,18 +19,14 @@ func gbStartFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 
-		Cmd.State = ga.gbStartFunc()
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
-			break
+		switch {
+		case len(args) == 0:
+			_ = cmd.Help()
 		}
 	}
 }
 
-
-func gbStopFunc(cmd *cobra.Command, args []string) {
+func gbBuildFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
@@ -42,7 +38,83 @@ func gbStopFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 
-		Cmd.State = ga.gbStopFunc()
+		Cmd.State = ga.gbBuildFunc()
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
+			}
+			break
+		}
+	}
+}
+
+func gbPublishFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
+			}
+			break
+		}
+
+		Cmd.State = ga.gbPublishFunc()
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
+			}
+			break
+		}
+	}
+}
+
+func gbSaveFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
+			}
+			break
+		}
+
+		ux.PrintfWarning("Command not yet implemented.\n")
+	}
+}
+
+func gbLoadFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
+			}
+			break
+		}
+
+		ux.PrintfWarning("Command not yet implemented.\n")
+	}
+}
+
+func gbUnitTestFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
+			}
+			break
+		}
+
+		Cmd.State = ga.gbUnitTestFunc()
 		if Cmd.State.IsError() {
 			if Cmd.State.IsNotOk() {
 				Cmd.State.PrintResponse()
@@ -53,7 +125,7 @@ func gbStopFunc(cmd *cobra.Command, args []string) {
 }
 
 
-func (ga *LaunchArgs) gbStartFunc() *ux.State {
+func (ga *LaunchArgs) gbBuildFunc() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
 	}
@@ -93,7 +165,7 @@ func (ga *LaunchArgs) gbStartFunc() *ux.State {
 		if !ga.Quiet {
 			ux.PrintflnNormal("Starting %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
-		ga.State = ga.Gears.Selected.Start()
+		ga.State = ga.Gears.Selected.Container.Start()
 		if ga.State.IsError() {
 			ga.State.SetError("%s '%s:%s' start error - %s", defaults.LanguageContainerName, ga.Name, ga.Version, ga.State.GetError())
 			break
@@ -114,8 +186,7 @@ func (ga *LaunchArgs) gbStartFunc() *ux.State {
 	return ga.State
 }
 
-
-func (ga *LaunchArgs) gbStopFunc() *ux.State {
+func (ga *LaunchArgs) gbPublishFunc() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
 	}
@@ -139,7 +210,7 @@ func (ga *LaunchArgs) gbStopFunc() *ux.State {
 		if !ga.Quiet {
 			ux.PrintflnNormal("Stopping %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
-		ga.State = ga.Gears.Selected.Stop()
+		ga.State = ga.Gears.Selected.Container.Stop()
 		if ga.State.IsError() {
 			ga.State.SetError("%s '%s:%s' stop error - %s", defaults.LanguageContainerName, ga.Name, ga.Version, ga.State.GetError())
 			break
@@ -158,6 +229,32 @@ func (ga *LaunchArgs) gbStopFunc() *ux.State {
 		}
 
 		ga.State.SetWarning("%s '%s:%s' cannot be stopped", defaults.LanguageContainerName, ga.Name, ga.Version)
+	}
+
+	if !ga.Quiet {
+		ga.State.PrintResponse()
+	}
+	return ga.State
+}
+
+func (ga *LaunchArgs) gbUnitTestFunc() *ux.State {
+	if state := ux.IfNilReturnError(ga); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		ga.State = ga.gbStartFunc()
+		if !ga.State.IsRunning() {
+			ga.State.SetError("%s not started", defaults.LanguageContainerName)
+			break
+		}
+
+		ga.Args = []string{defaults.DefaultUnitTestCmd}
+		ga.State = ga.Gears.Selected.ContainerSsh(true, ga.SshStatus, ga.Mount, ga.Args)
+
+		if ga.Temporary {
+			ga.State = ga.gbUninstallFunc()
+		}
 	}
 
 	if !ga.Quiet {
