@@ -1,0 +1,14 @@
+{{ PrintfBlue "HELLO" }}
+
+{{- $gears := Gearbox .Json "tcp://macpro.local:2375" }}
+{{- $state := $gears.FindImage "mountebank" "2.4.0" }}
+{{- $gear := $gears.Selected }}
+{{ $gear.Logs.GetOutput }}
+
+{{- $version := FindInMap .Json.versions .Env.GB_VERSION }}
+{{ $version }}
+
+{{- range $k, $v := .Json.versions }}
+{{ $v }}
+{{- end }}
+

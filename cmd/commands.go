@@ -158,7 +158,7 @@ var gbShellCmd = &cobra.Command{
 }
 
 
-var gbCreateCmd = &cobra.Command{
+var gbCreateCmd = &cobra.Command {
 	Use:					"create",
 	//Aliases:				[]string{"show"},
 	Short:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Create %s %s", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
@@ -169,31 +169,41 @@ var gbCreateCmd = &cobra.Command{
 	Run:					gbCreateFunc,
 	Args:					cobra.RangeArgs(0, 2),
 }
+var gbBuildCleanCmd = &cobra.Command {
+	Use:					fmt.Sprintf("clean <%s name>", defaults.LanguageContainerName),
+	SuggestFor:				[]string{},
+	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Remove a %s %s build", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Remove a %s %s build.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch create clean golang"),
+	DisableFlagParsing:		false,
+	Run:					gbBuildCleanFunc,
+	Args:					cobra.ExactArgs(1),
+}
 var gbBuildCmd = &cobra.Command {
 	Use:					fmt.Sprintf("build <%s name>", defaults.LanguageContainerName),
 	SuggestFor:				[]string{ "compile", "generate" },
 	Short:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Build a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
 	Long:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Allows building of arbitrary containers as a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch build golang"),
+	Example:				ux.SprintfWhite("launch create build golang"),
 	DisableFlagParsing:		false,
 	Run:					gbBuildFunc,
 	Args:					cobra.ExactArgs(1),
 }
-var gbPublishCmd = &cobra.Command{
+var gbPublishCmd = &cobra.Command {
 	Use:					fmt.Sprintf("publish <%s name>", defaults.LanguageContainerName),
 	SuggestFor:				[]string{"upload"},
 	Short:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Publish a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
 	Long:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Publish a %s %s to GitHub or DockerHub.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch publish golang"),
+	Example:				ux.SprintfWhite("launch create publish golang"),
 	DisableFlagParsing:		false,
 	Run:					gbPublishFunc,
 	Args:					cobra.ExactArgs(1),
 }
-var gbUnitTestCmd = &cobra.Command{
+var gbUnitTestCmd = &cobra.Command {
 	Use:					fmt.Sprintf("test <%s name>", defaults.LanguageContainerName),
 	Short:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Execute unit tests in %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
 	Long:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Execute unit tests in %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch unit tests terminus"),
+	Example:				ux.SprintfWhite("launch create test terminus"),
 	DisableFlagParsing:		true,
 	DisableFlagsInUseLine:	true,
 	Run:					gbUnitTestFunc,

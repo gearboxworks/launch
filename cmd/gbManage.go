@@ -13,10 +13,7 @@ func gbManageFunc(cmd *cobra.Command, args []string) {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 
@@ -33,18 +30,12 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 
 		Cmd.State = ga.gbInstallFunc()
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 	}
@@ -55,18 +46,12 @@ func gbUninstallFunc(cmd *cobra.Command, args []string) {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 
 		Cmd.State = ga.gbUninstallFunc()
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 	}
@@ -77,18 +62,12 @@ func gbReinstallFunc(cmd *cobra.Command, args []string) {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 
 		Cmd.State = ga.gbReinstallFunc()
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 	}
@@ -99,18 +78,12 @@ func gbCleanFunc(cmd *cobra.Command, args []string) {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 
 		Cmd.State = ga.gbCleanFunc()
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 	}
@@ -121,18 +94,12 @@ func gbStartFunc(cmd *cobra.Command, args []string) {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 
 		Cmd.State = ga.gbStartFunc()
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 	}
@@ -143,18 +110,12 @@ func gbStopFunc(cmd *cobra.Command, args []string) {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 
 		Cmd.State = ga.gbStopFunc()
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 	}
@@ -196,7 +157,8 @@ func (ga *LaunchArgs) gbInstallFunc() *ux.State {
 
 		if found {
 			if !ga.Temporary {
-				found, ga.State = ga.Gears.FindImage(ga.Name, ga.Version)
+				ga.State = ga.Gears.FindImage(ga.Name, ga.Version)
+				found = ga.Gears.State.GetResponseAsBool()
 				if found {
 					// Create symlinks.
 					ga.CreateLinks(ga.Version)
@@ -267,7 +229,8 @@ func (ga *LaunchArgs) gbUninstallFunc() *ux.State {
 		}
 		if !found {
 			if !ga.Temporary {
-				found, ga.State = ga.Gears.FindImage(ga.Name, ga.Version)
+				ga.State = ga.Gears.FindImage(ga.Name, ga.Version)
+				found = ga.Gears.State.GetResponseAsBool()
 				if found {
 					// Remove symlinks.
 					ga.RemoveLinks(ga.Version)
@@ -352,10 +315,11 @@ func (ga *LaunchArgs) gbCleanFunc() *ux.State {
 		}
 
 		var found bool
-		found, ga.State = ga.Gears.FindImage(ga.Name, ga.Version)
+		ga.State = ga.Gears.FindImage(ga.Name, ga.Version)
 		if ga.State.IsError() {
 			break
 		}
+		found = ga.Gears.State.GetResponseAsBool()
 		if !found {
 			ga.State.SetOk("%s '%s:%s' already removed.", defaults.LanguageImageName, ga.Name, ga.Version)
 			ga.State.SetOutput("")

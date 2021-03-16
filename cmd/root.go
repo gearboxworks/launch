@@ -66,10 +66,12 @@ const flagConfigFile  	= "config"
 const DefaultJsonFile = "gearbox.json"
 const DefaultJsonString = "{}"
 const DefaultTemplateFile = "gearbox.tmpl"
-const DefaultTemplateString = `
-{{- $gear := NewGear }}
-{{- $gear.ParseGearConfig .Json }}
-{{- $gear.PrintGearConfig }}`
+//const DefaultTemplateString = `
+//{{- $gear := NewGear }}
+//{{- $gear.ParseGearConfig .Json }}
+//{{- $gear.PrintGearConfig }}
+//`
+const DefaultTemplateString = ""
 
 
 type redirectHelp struct {
@@ -99,6 +101,16 @@ func init() {
 
 	CobraHelp.ChangeHelp(rootCmd, tmplUsage, tmplHelp)
 
+	//test1 := `{{ PrintfBlue "HELLO" }}\t-\n`
+	//test2 := `{{ PrintfBlue 'HELLO' }}\t-\n`
+	//test3 := "{{ PrintfBlue 'HELLO' }}\t-\n"
+	//test1 = loadTools.UnescapeString(test1)
+	//fmt.Printf("%v", test1)
+	//test2 = loadTools.UnescapeString(test2)
+	//fmt.Printf("%v", test2)
+	//test3 = loadTools.UnescapeString(test3)
+	//fmt.Printf("%v", test3)
+
 
 	// Level 1 commands.
 	CobraHelp.AddCommands("Manage", rootCmd, gbManageCmd)
@@ -107,7 +119,7 @@ func init() {
 	CobraHelp.AddCommands("Create", rootCmd, gbCreateCmd)
 
 	// Level 2 commands.
-	CobraHelp.AddCommands("Create", gbCreateCmd, gbBuildCmd, gbUnitTestCmd, gbPublishCmd, gbSaveCmd, gbLoadCmd)
+	CobraHelp.AddCommands("Create", gbCreateCmd, gbBuildCmd, gbUnitTestCmd, gbPublishCmd, gbBuildCleanCmd, gbSaveCmd, gbLoadCmd)
 	CobraHelp.AddCommands("Manage", gbManageCmd, gbInstallCmd, gbUninstallCmd, gbReinstallCmd, gbCleanCmd, gbListCmd, gbLogsCmd, gbStartCmd, gbStopCmd)
 
 	// Level 3 commands.

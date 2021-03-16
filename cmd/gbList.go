@@ -11,10 +11,7 @@ func gbListFunc(cmd *cobra.Command, args []string) {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 
@@ -31,18 +28,12 @@ func gbDetailsFunc(cmd *cobra.Command, args []string) {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 
 		Cmd.State = ga.gbListFunc()
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 	}
@@ -53,18 +44,12 @@ func gbLinksFunc(cmd *cobra.Command, args []string) {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 
 		Cmd.State = ga.gbLinksFunc()
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 	}
@@ -75,18 +60,12 @@ func gbPortsFunc(cmd *cobra.Command, args []string) {
 		var ga LaunchArgs
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 
 		Cmd.State = ga.gbPortsFunc()
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+		if Cmd.State.IsNotOk() {
 			break
 		}
 	}

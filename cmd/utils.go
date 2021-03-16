@@ -108,21 +108,21 @@ func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
 			ga.TmpDir = DeterminePath(Cmd.TmpDir)
 		}
 
-		ga.Provider = toolGear.NewProvider(Cmd.Runtime)
-		ga.State = ga.Provider.State
-		if ga.State.IsError() {
-			break
-		}
-
-		ga.State = ga.Provider.SetProvider(Cmd.Provider)
-		if ga.State.IsError() {
-			break
-		}
-
-		ga.State = ga.Provider.SetHost(Cmd.Host, Cmd.Port)
-		if ga.State.IsError() {
-			break
-		}
+		//ga.Provider = toolGear.NewProvider(Cmd.Runtime)
+		//ga.State = ga.Provider.State
+		//if ga.State.IsError() {
+		//	break
+		//}
+		//
+		//ga.State = ga.Provider.SetProvider(Cmd.Provider)
+		//if ga.State.IsError() {
+		//	break
+		//}
+		//
+		//ga.State = ga.Provider.SetHost(Cmd.Host, Cmd.Port)
+		//if ga.State.IsError() {
+		//	break
+		//}
 
 		ga.Gears = toolGear.NewGears(Cmd.Runtime)
 		ga.State = ga.Gears.State
@@ -131,6 +131,21 @@ func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
 		}
 
 		ga.State = ga.Gears.SetLanguage(defaults.LanguageAppName, defaults.LanguageImageName, defaults.LanguageContainerName)
+
+		ga.State = ga.Gears.SetProvider(Cmd.Provider)
+		if ga.State.IsError() {
+			break
+		}
+
+		ga.State = ga.Gears.SetProviderHost(Cmd.Host, Cmd.Port)
+		if ga.State.IsError() {
+			break
+		}
+
+		ga.State = ga.Gears.Get()
+		if ga.State.IsNotOk() {
+			break
+		}
 
 		//ga.GearRef = toolGear.NewGear(Cmd.Runtime)
 		//ga.State = ga.GearRef.State
