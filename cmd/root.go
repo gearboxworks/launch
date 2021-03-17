@@ -36,7 +36,6 @@ launch
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/newclarity/scribeHelpers/loadTools"
 	"github.com/newclarity/scribeHelpers/toolCobraHelp"
@@ -101,29 +100,22 @@ func init() {
 
 	CobraHelp.ChangeHelp(rootCmd, tmplUsage, tmplHelp)
 
-	//test1 := `{{ PrintfBlue "HELLO" }}\t-\n`
-	//test2 := `{{ PrintfBlue 'HELLO' }}\t-\n`
-	//test3 := "{{ PrintfBlue 'HELLO' }}\t-\n"
-	//test1 = loadTools.UnescapeString(test1)
-	//fmt.Printf("%v", test1)
-	//test2 = loadTools.UnescapeString(test2)
-	//fmt.Printf("%v", test2)
-	//test3 = loadTools.UnescapeString(test3)
-	//fmt.Printf("%v", test3)
-
-
 	// Level 1 commands.
-	CobraHelp.AddCommands("Manage", rootCmd, gbManageCmd)
+	CobraHelp.AddCommands("Manage", rootCmd, gbSearchCmd, gbListCmd, gbInstallCmd, gbUninstallCmd, gbReinstallCmd, gbCleanCmd, gbLogsCmd, gbStartCmd, gbStopCmd)
 	CobraHelp.AddCommands("Execute", rootCmd, gbRunCmd, gbShellCmd)
-	//CobraHelp.AddCommands("Run", rootCmd, gbStartCmd, gbStopCmd)
-	CobraHelp.AddCommands("Create", rootCmd, gbCreateCmd)
+	CobraHelp.AddCommands("Build", rootCmd, gbBuildCmd)
+	CobraHelp.AddCommands("Guru", rootCmd, gbCompletionCmd)
+	CobraHelp.AddCommands("Help", rootCmd, gbHelpCmd)
 
 	// Level 2 commands.
-	CobraHelp.AddCommands("Create", gbCreateCmd, gbBuildCmd, gbUnitTestCmd, gbPublishCmd, gbBuildCleanCmd, gbSaveCmd, gbLoadCmd)
-	CobraHelp.AddCommands("Manage", gbManageCmd, gbInstallCmd, gbUninstallCmd, gbReinstallCmd, gbCleanCmd, gbListCmd, gbLogsCmd, gbStartCmd, gbStopCmd)
-
-	// Level 3 commands.
+	CobraHelp.AddCommands("Build", gbBuildCmd, gbBuildCreateCmd, gbUnitTestCmd, gbPublishCmd, gbBuildCleanCmd, gbSaveCmd, gbLoadCmd)
 	CobraHelp.AddCommands("List", gbListCmd, gbDetailsCmd, gbLinksCmd, gbPortsCmd)
+	CobraHelp.AddCommands("Help", gbHelpCmd, gbHelpFlagsCmd, gbHelpExamplesCmd, gbHelpBasicCmd, gbHelpAdvancedCmd, gbHelpAllCmd)
+
+	CobraHelp.SetLevelDefault(gbRunCmd, gbShellCmd, gbListCmd, gbSearchCmd, CmdSelfUpdate.GetCmd())
+	CobraHelp.SetLevelAdvanced(gbInstallCmd, gbUninstallCmd, gbReinstallCmd, gbCleanCmd, gbLogsCmd, gbStartCmd, gbStopCmd)
+	CobraHelp.SetLevelAdvanced(gbBuildCmd, gbCompletionCmd, CmdScribe.GetCmd())
+	CobraHelp.SetType("Guru", CmdScribe.GetCmd(), CmdSelfUpdate.GetCmd())
 
 	cobra.OnInitialize(initConfig)
 	cobra.EnableCommandSorting = false
@@ -148,7 +140,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&Cmd.Debug, flagDebug, "d", false, ux.SprintfBlue("Debug mode."))
 	rootCmd.Flags().BoolVarP(&Cmd.Quiet, flagQuiet, "q", false, ux.SprintfBlue("Silence all launch messages."))
 
-	rootCmd.Flags().BoolVarP(&Cmd.Completion, flagCompletion, "b", false, ux.SprintfBlue("Generate BASH completion script."))
+	//rootCmd.Flags().BoolVarP(&Cmd.Completion, flagCompletion, "b", false, ux.SprintfBlue("Generate BASH completion script."))
 }
 
 
@@ -239,31 +231,31 @@ var rootCmd = &cobra.Command {
 
 func gbRootFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
-		fl := cmd.Flags()
-
 		if CmdSelfUpdate.FlagCheckVersion(nil) {
 			CmdScribe.State.SetOk()
 			break
 		}
 
-		// Produce BASH completion script.
-		ok, _ := fl.GetBool(flagCompletion)
-		if ok {
-			var out bytes.Buffer
-			_ = cmd.GenBashCompletion(&out)
-			fmt.Printf("# %s BASH completion:\n%s\n", defaults.LanguageAppName, out.String())
-			Cmd.State.SetOk()
-			break
-		}
-
-		// Show flag help.
-		ok, _ = fl.GetBool(flagHelp)
-		if ok {
-			CobraHelp.ChangeHelp(cmd, tmplFlagUsage, tmplFlagHelp)
-			_ = cmd.Help()
-			Cmd.State.SetOk()
-			break
-		}
+		//fl := cmd.Flags()
+		//
+		//// Produce BASH completion script.
+		//ok, _ := fl.GetBool(flagCompletion)
+		//if ok {
+		//	var out bytes.Buffer
+		//	_ = cmd.GenBashCompletion(&out)
+		//	fmt.Printf("# %s BASH completion:\n%s\n", defaults.LanguageAppName, out.String())
+		//	Cmd.State.SetOk()
+		//	break
+		//}
+		//
+		//// Show flag help.
+		//ok, _ := fl.GetBool(flagHelp)
+		//if ok {
+		//	CobraHelp.ChangeHelp(cmd, tmplFlagUsage, tmplFlagHelp)
+		//	_ = cmd.Help()
+		//	Cmd.State.SetOk()
+		//	break
+		//}
 
 		Cmd.State.SetOk()
 

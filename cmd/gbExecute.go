@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"launch/defaults"
@@ -8,6 +9,20 @@ import (
 )
 
 
+// ******************************************************************************** //
+var gbRunCmd = &cobra.Command{
+	Use:					fmt.Sprintf("run <%s name> [%s args]", defaults.LanguageContainerName, defaults.LanguageContainerName),
+	Aliases:				[]string{},
+	Short:					ux.SprintfBlue("Run default %s %s command", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfBlue("Run default %s %s command.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch run golang build"),
+	DisableFlagParsing:		true,
+	DisableFlagsInUseLine:	true,
+	Run:					gbRunFunc,
+	Args:					cobra.MinimumNArgs(1),
+}
+
+//goland:noinspection GoUnusedParameter
 func gbRunFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -23,29 +38,6 @@ func gbRunFunc(cmd *cobra.Command, args []string) {
 		}
 	}
 }
-
-func gbShellFunc(cmd *cobra.Command, args []string) {
-	for range onlyOnce {
-		var ga LaunchArgs
-
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
-			break
-		}
-
-		Cmd.State = ga.gbShellFunc()
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
-			break
-		}
-	}
-}
-
 
 func (ga *LaunchArgs) gbRunFunc() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
@@ -86,6 +78,42 @@ func (ga *LaunchArgs) gbRunFunc() *ux.State {
 	}
 
 	return ga.State
+}
+
+
+// ******************************************************************************** //
+var gbShellCmd = &cobra.Command{
+	Use:					fmt.Sprintf("shell <%s name> [command] [args]", defaults.LanguageContainerName),
+	Short:					ux.SprintfBlue("Execute shell in %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfBlue("Execute shell in %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch shell mysql ps -eaf"),
+	DisableFlagParsing:		true,
+	DisableFlagsInUseLine:	true,
+	Run:					gbShellFunc,
+	Args:					cobra.MinimumNArgs(1),
+}
+
+//goland:noinspection GoUnusedParameter
+func gbShellFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
+			}
+			break
+		}
+
+		Cmd.State = ga.gbShellFunc()
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
+			}
+			break
+		}
+	}
 }
 
 func (ga *LaunchArgs) gbShellFunc() *ux.State {

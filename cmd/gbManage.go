@@ -1,12 +1,26 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/newclarity/scribeHelpers/toolGear"
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"launch/defaults"
 )
 
+
+// ******************************************************************************** //
+var gbManageCmd = &cobra.Command {
+	Use:					"manage",
+	//Aliases:				[]string{"show"},
+	Short:					ux.Sprintf("Manage %s %s", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
+	Long:					ux.SprintfBlue("Manage %s %s.", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
+	Example:				ux.SprintfWhite("launch manage"),
+	DisableFlagParsing:		false,
+	DisableFlagsInUseLine:	false,
+	Run:					gbManageFunc,
+	Args:					cobra.RangeArgs(0, 2),
+}
 
 func gbManageFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
@@ -25,6 +39,73 @@ func gbManageFunc(cmd *cobra.Command, args []string) {
 }
 
 
+// ******************************************************************************** //
+var gbSearchCmd = &cobra.Command {
+	Use:					"search",
+	Aliases:				[]string{"available", "find", "avail"},
+	Short:					ux.SprintfBlue("Search for available %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfBlue("Search for available %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch manage search"),
+	DisableFlagParsing:		false,
+	DisableFlagsInUseLine:	false,
+	Run:					gbSearchFunc,
+	Args:					cobra.RangeArgs(0, 1),
+}
+
+//goland:noinspection GoUnusedParameter
+func gbSearchFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsNotOk() {
+			break
+		}
+
+		Cmd.State = ga.gbSearchFunc(args)
+		if Cmd.State.IsNotOk() {
+			break
+		}
+	}
+}
+
+func (ga *LaunchArgs) gbSearchFunc(args []string) *ux.State {
+	if state := ux.IfNilReturnError(ga); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		term := "gearboxworks"
+		if len(args) > 0 {
+			term = args[0]
+		}
+
+		ga.State = ga.Gears.Search(term, "")
+		if ga.State.IsError() {
+			break
+		}
+	}
+
+	if !ga.Quiet {
+		ga.State.PrintResponse()
+	}
+	return ga.State
+}
+
+
+// ******************************************************************************** //
+var gbInstallCmd = &cobra.Command {
+	Use:					fmt.Sprintf("install <%s name>", defaults.LanguageContainerName),
+	SuggestFor:				[]string{"download" ,"add"},
+	Short:					ux.SprintfBlue("Install a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfBlue("Install a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch install golang"),
+	DisableFlagParsing:		false,
+	Run:					gbInstallFunc,
+	Args:					cobra.ExactArgs(1),
+}
+
+//goland:noinspection GoUnusedParameter
 func gbInstallFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -40,108 +121,6 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 		}
 	}
 }
-
-func gbUninstallFunc(cmd *cobra.Command, args []string) {
-	for range onlyOnce {
-		var ga LaunchArgs
-
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsNotOk() {
-			break
-		}
-
-		Cmd.State = ga.gbUninstallFunc()
-		if Cmd.State.IsNotOk() {
-			break
-		}
-	}
-}
-
-func gbReinstallFunc(cmd *cobra.Command, args []string) {
-	for range onlyOnce {
-		var ga LaunchArgs
-
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsNotOk() {
-			break
-		}
-
-		Cmd.State = ga.gbReinstallFunc()
-		if Cmd.State.IsNotOk() {
-			break
-		}
-	}
-}
-
-func gbCleanFunc(cmd *cobra.Command, args []string) {
-	for range onlyOnce {
-		var ga LaunchArgs
-
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsNotOk() {
-			break
-		}
-
-		Cmd.State = ga.gbCleanFunc()
-		if Cmd.State.IsNotOk() {
-			break
-		}
-	}
-}
-
-func gbStartFunc(cmd *cobra.Command, args []string) {
-	for range onlyOnce {
-		var ga LaunchArgs
-
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsNotOk() {
-			break
-		}
-
-		Cmd.State = ga.gbStartFunc()
-		if Cmd.State.IsNotOk() {
-			break
-		}
-	}
-}
-
-func gbStopFunc(cmd *cobra.Command, args []string) {
-	for range onlyOnce {
-		var ga LaunchArgs
-
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsNotOk() {
-			break
-		}
-
-		Cmd.State = ga.gbStopFunc()
-		if Cmd.State.IsNotOk() {
-			break
-		}
-	}
-}
-
-func gbLogsFunc(cmd *cobra.Command, args []string) {
-	for range onlyOnce {
-		var ga LaunchArgs
-
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
-			break
-		}
-
-		if len(args) == 0 {
-			Cmd.State.SetError("Need to specify a %s.", defaults.LanguageContainerName)
-			break
-		}
-
-		Cmd.State = ga.gbLogsFunc()
-	}
-}
-
 
 func (ga *LaunchArgs) gbInstallFunc() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
@@ -216,6 +195,36 @@ func (ga *LaunchArgs) gbInstallFunc() *ux.State {
 	return ga.State
 }
 
+
+// ******************************************************************************** //
+var gbUninstallCmd = &cobra.Command {
+	Use:					fmt.Sprintf("uninstall <%s name>", defaults.LanguageContainerName),
+	SuggestFor:				[]string{"remove"},
+	Short:					ux.SprintfBlue("Uninstall a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfBlue("Uninstall a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch uninstall golang"),
+	DisableFlagParsing:		false,
+	Run:					gbUninstallFunc,
+	Args:					cobra.ExactArgs(1),
+}
+
+//goland:noinspection GoUnusedParameter
+func gbUninstallFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsNotOk() {
+			break
+		}
+
+		Cmd.State = ga.gbUninstallFunc()
+		if Cmd.State.IsNotOk() {
+			break
+		}
+	}
+}
+
 func (ga *LaunchArgs) gbUninstallFunc() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
@@ -280,6 +289,36 @@ func (ga *LaunchArgs) gbUninstallFunc() *ux.State {
 	return ga.State
 }
 
+
+// ******************************************************************************** //
+var gbReinstallCmd = &cobra.Command {
+	Use:					fmt.Sprintf("update <%s name>", defaults.LanguageContainerName),
+	SuggestFor:				[]string{"reinstall"},
+	Short:					ux.SprintfBlue("Update a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfBlue("Update a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch update golang"),
+	DisableFlagParsing:		false,
+	Run:					gbReinstallFunc,
+	Args:					cobra.ExactArgs(1),
+}
+
+//goland:noinspection GoUnusedParameter
+func gbReinstallFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsNotOk() {
+			break
+		}
+
+		Cmd.State = ga.gbReinstallFunc()
+		if Cmd.State.IsNotOk() {
+			break
+		}
+	}
+}
+
 func (ga *LaunchArgs) gbReinstallFunc() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
@@ -301,6 +340,36 @@ func (ga *LaunchArgs) gbReinstallFunc() *ux.State {
 	}
 
 	return ga.State
+}
+
+
+// ******************************************************************************** //
+var gbCleanCmd = &cobra.Command{
+	Use:					fmt.Sprintf("clean <%s name>", defaults.LanguageContainerName),
+	SuggestFor:				[]string{},
+	Short:					ux.SprintfBlue("Completely uninstall a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfBlue("Completely uninstall a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch clean golang"),
+	DisableFlagParsing:		false,
+	Run:					gbCleanFunc,
+	Args:					cobra.ExactArgs(1),
+}
+
+//goland:noinspection GoUnusedParameter
+func gbCleanFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsNotOk() {
+			break
+		}
+
+		Cmd.State = ga.gbCleanFunc()
+		if Cmd.State.IsNotOk() {
+			break
+		}
+	}
 }
 
 func (ga *LaunchArgs) gbCleanFunc() *ux.State {
@@ -354,6 +423,35 @@ func (ga *LaunchArgs) gbCleanFunc() *ux.State {
 		ga.State.PrintResponse()
 	}
 	return ga.State
+}
+
+
+// ******************************************************************************** //
+var gbStartCmd = &cobra.Command{
+	Use:					fmt.Sprintf("start <%s name>", defaults.LanguageContainerName),
+	Short:					ux.SprintfBlue("Start a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfBlue("Start a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch start golang"),
+	DisableFlagParsing:		false,
+	Run:					gbStartFunc,
+	Args:					cobra.ExactArgs(1),
+}
+
+//goland:noinspection GoUnusedParameter
+func gbStartFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsNotOk() {
+			break
+		}
+
+		Cmd.State = ga.gbStartFunc()
+		if Cmd.State.IsNotOk() {
+			break
+		}
+	}
 }
 
 func (ga *LaunchArgs) gbStartFunc() *ux.State {
@@ -417,6 +515,35 @@ func (ga *LaunchArgs) gbStartFunc() *ux.State {
 	return ga.State
 }
 
+
+// ******************************************************************************** //
+var gbStopCmd = &cobra.Command{
+	Use:					fmt.Sprintf("stop <%s name>", defaults.LanguageContainerName),
+	Short:					ux.SprintfBlue("Stop a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfBlue("Stop a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch stop golang"),
+	DisableFlagParsing:		false,
+	Run:					gbStopFunc,
+	Args:					cobra.ExactArgs(1),
+}
+
+//goland:noinspection GoUnusedParameter
+func gbStopFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsNotOk() {
+			break
+		}
+
+		Cmd.State = ga.gbStopFunc()
+		if Cmd.State.IsNotOk() {
+			break
+		}
+	}
+}
+
 func (ga *LaunchArgs) gbStopFunc() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
@@ -466,6 +593,41 @@ func (ga *LaunchArgs) gbStopFunc() *ux.State {
 		ga.State.PrintResponse()
 	}
 	return ga.State
+}
+
+
+// ******************************************************************************** //
+var gbLogsCmd = &cobra.Command{
+	Use:					fmt.Sprintf("log <%s name>", defaults.LanguageContainerName),
+	SuggestFor:				[]string{"logs"},
+	Short:					ux.SprintfBlue("Show logs of %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfBlue("Show logs of %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch log golang"),
+	DisableFlagParsing:		false,
+	Run:					gbLogsFunc,
+	Args:					cobra.ExactArgs(1),
+}
+
+//goland:noinspection GoUnusedParameter
+func gbLogsFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsError() {
+			if Cmd.State.IsNotOk() {
+				Cmd.State.PrintResponse()
+			}
+			break
+		}
+
+		if len(args) == 0 {
+			Cmd.State.SetError("Need to specify a %s.", defaults.LanguageContainerName)
+			break
+		}
+
+		Cmd.State = ga.gbLogsFunc()
+	}
 }
 
 func (ga *LaunchArgs) gbLogsFunc() *ux.State {

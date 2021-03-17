@@ -1,233 +1,445 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"launch/defaults"
+	"strings"
 )
 
 
-var gbInstallCmd = &cobra.Command{
-	Use:					fmt.Sprintf("install <%s name>", defaults.LanguageContainerName),
-	SuggestFor:				[]string{"download" ,"add"},
-	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Install a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Install a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch install golang"),
+var tmplUsageCmd = `
+{{ SprintfBlue "Usage: " }}    	{{ GetUsage . }}
+
+{{- if gt (len .Aliases) 0 }}
+{{ SprintfBlue "\nAliases:" }}	{{ .NameAndAliases }}
+{{- end }}
+
+{{- if .HasExample }}
+{{ SprintfBlue "\nExamples:" }}
+	{{ .Example }}
+{{- end }}
+
+{{- if .HasAvailableSubCommands }}
+{{ SprintfBlue "\nWhere " }}{{ SprintfGreen "[command]" }}{{ SprintfBlue " is one of:" }}
+{{- range $key, $value := .Commands }}
+{{- if (and $value.IsAvailableCommand (ne $value.Name "help")) }}
+{{- with $value.Annotations }}
+	{{ rpad (SprintfGreen $value.Name) $value.NamePadding}}     	{{ with $value.Annotations.area }}- {{ SprintfMagenta . }}  	{{ end }}- {{ SprintfWhite $value.Short }}{{ end }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{ SprintfBlue "For assistance use " }}
+{{- SprintfCyan "assist flags" }}{{ SprintfBlue ", " }}
+{{- SprintfCyan "assist examples" }}{{ SprintfBlue ", " }}
+{{- SprintfCyan "assist basic" }}{{ SprintfBlue ", " }}
+{{- SprintfCyan "assist advanced" }}{{ SprintfBlue ", " }}
+{{- SprintfCyan "assist all" }}{{ SprintfBlue "." }}
+{{- if .HasHelpSubCommands }}
+{{ SprintfBlue "Additional help topics:" }}
+{{- range .Commands }}
+{{- if .IsAdditionalHelpTopicCommand }}
+	{{ rpad (SprintfGreen .CommandPath) .CommandPathPadding }} {{ .Short }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if .HasAvailableSubCommands }}
+{{- GetCmdHelp . }}
+{{- end }}
+`
+
+var tmplHelpCmd = `{{ GetVersion . }}
+
+{{ SprintfBlue "Command:" }}	{{ SprintfCyan .CommandPath }}
+
+{{ SprintfBlue "Description:" }}	{{ with (or .Long .Short) }}
+{{- . | trimTrailingWhitespaces }}
+{{- end }}
+
+{{- if or .Runnable .HasSubCommands }}
+{{ .UsageString }}
+{{- end }}
+`
+
+
+var tmplUsageSmall = `{{ SprintfGreen .CommandPath }}
+	- {{ GetUsage . }}
+	- {{ with (or .Long .Short) }}{{- . | trimTrailingWhitespaces }}{{- end }}
+
+{{- if .HasAvailableSubCommands }}
+{{ SprintfBlue "\nWhere " }}{{ SprintfGreen "[command]" }}{{ SprintfBlue " is one of:" }}
+{{- range $key, $value := .Commands }}
+{{- if (and $value.IsAvailableCommand (ne $value.Name "help")) }}
+{{- with $value.Annotations }}
+	{{ rpad (SprintfGreen $value.Name) $value.NamePadding}}     	{{ with $value.Annotations.area }}- {{ SprintfMagenta . }}  	{{ end }}- {{ SprintfWhite $value.Short }}{{ end }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- if .HasHelpSubCommands }}
+{{ SprintfBlue "\nAdditional help topics:" }}
+{{- range .Commands }}
+{{- if .IsAdditionalHelpTopicCommand }}
+	{{ rpad (SprintfGreen .CommandPath) .CommandPathPadding }} {{ .Short }}
+{{- end }}
+{{- end }}
+{{- end }}
+`
+
+var tmplHelpSmall = `{{- if or .Runnable .HasSubCommands }}
+{{ .UsageString }}
+{{- end }}
+`
+
+
+var tmplFlagUsage = `
+{{ SprintfBlue "Usage: " }}
+	{{ GetUsage . }}
+
+{{- if .HasAvailableLocalFlags }}
+{{ SprintfBlue "\nFlags:" }}
+{{ .LocalFlags.FlagUsages | trimTrailingWhitespaces }}
+{{- end }}
+{{- if .HasAvailableInheritedFlags }}
+{{ SprintfBlue "\nGlobal Flags:" }}
+{{ .InheritedFlags.FlagUsages | trimTrailingWhitespaces }}
+{{- end }}
+
+{{ SprintfBlue "For assistance use " }}
+{{- SprintfCyan "assist flags" }}{{ SprintfBlue ", " }}
+{{- SprintfCyan "assist examples" }}{{ SprintfBlue ", " }}
+{{- SprintfCyan "assist basic" }}{{ SprintfBlue ", " }}
+{{- SprintfCyan "assist advanced" }}{{ SprintfBlue ", " }}
+{{- SprintfCyan "assist all" }}{{ SprintfBlue "." }}
+{{- if .HasAvailableSubCommands }}
+{{- GetCmdHelp . }}
+{{- end }}
+`
+
+var tmplFlagHelp = `{{ GetVersion . }}
+
+{{ SprintfBlue "Command:" }}	{{ SprintfCyan .CommandPath }}
+
+{{ SprintfBlue "Description:" }}	{{ with (or .Long .Short) }}
+{{- . | trimTrailingWhitespaces }}
+{{- end }}
+
+{{- if or .Runnable .HasSubCommands }}
+{{ .UsageString }}
+{{- end }}
+`
+
+var tmplFlagUsageSmall = `
+{{ SprintfBlue "Usage: " }}    	{{ GetUsage . }}
+
+{{- if .HasAvailableLocalFlags }}
+{{ SprintfBlue "\nFlags:" }}
+{{ .LocalFlags.FlagUsages | trimTrailingWhitespaces }}
+{{- end }}
+{{- if .HasAvailableInheritedFlags }}
+{{ SprintfBlue "\nGlobal Flags:" }}
+{{ .InheritedFlags.FlagUsages | trimTrailingWhitespaces }}
+{{- end }}
+
+{{- if .HasAvailableSubCommands }}
+{{ GetCmdHelp . }}
+{{- end }}
+`
+
+var tmplFlagHelpSmall = `{{ SprintfWhite "####################################################################" }}
+{{- if or .Runnable .HasSubCommands }}
+{{ .UsageString }}
+{{- end }}
+`
+
+
+// ******************************************************************************** //
+var gbHelpCmd = &cobra.Command {
+	Use:					"assist",
+	//Aliases:				[]string{"flags"},
+	Short:					"Show additional help",
+	Long:					"Show additional help",
+	Example:				ux.SprintfWhite("launch assist"),
 	DisableFlagParsing:		false,
-	Run:					gbInstallFunc,
-	Args:					cobra.ExactArgs(1),
+	DisableFlagsInUseLine:	false,
+	Run:					gbHelpFunc,
+	Args:					cobra.RangeArgs(0, 1),
 }
-var gbUninstallCmd = &cobra.Command{
-	Use:					fmt.Sprintf("uninstall <%s name>", defaults.LanguageContainerName),
-	SuggestFor:				[]string{"remove"},
-	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Uninstall a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Uninstall a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch uninstall golang"),
-	DisableFlagParsing:		false,
-	Run:					gbUninstallFunc,
-	Args:					cobra.ExactArgs(1),
-}
-var gbReinstallCmd = &cobra.Command{
-	Use:					fmt.Sprintf("update <%s name>", defaults.LanguageContainerName),
-	SuggestFor:				[]string{"reinstall"},
-	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Update a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Update a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch update golang"),
-	DisableFlagParsing:		false,
-	Run:					gbReinstallFunc,
-	Args:					cobra.ExactArgs(1),
-}
-var gbCleanCmd = &cobra.Command{
-	Use:					fmt.Sprintf("clean <%s name>", defaults.LanguageContainerName),
-	SuggestFor:				[]string{},
-	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Completely uninstall a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Completely uninstall a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch clean golang"),
-	DisableFlagParsing:		false,
-	Run:					gbCleanFunc,
-	Args:					cobra.ExactArgs(1),
-}
-var gbLogsCmd = &cobra.Command{
-	Use:					fmt.Sprintf("log <%s name>", defaults.LanguageContainerName),
-	SuggestFor:				[]string{"logs"},
-	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Show logs of %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Show logs of %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch log golang"),
-	DisableFlagParsing:		false,
-	Run:					gbLogsFunc,
-	Args:					cobra.ExactArgs(1),
-}
-var gbStartCmd = &cobra.Command{
-	Use:					fmt.Sprintf("start <%s name>", defaults.LanguageContainerName),
-	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Start a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Start a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch start golang"),
-	DisableFlagParsing:		false,
-	Run:					gbStartFunc,
-	Args:					cobra.ExactArgs(1),
-}
-var gbStopCmd = &cobra.Command{
-	Use:					fmt.Sprintf("stop <%s name>", defaults.LanguageContainerName),
-	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Stop a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Stop a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch stop golang"),
-	DisableFlagParsing:		false,
-	Run:					gbStopFunc,
-	Args:					cobra.ExactArgs(1),
+
+func gbHelpFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsNotOk() {
+			break
+		}
+
+		if len(args) == 0 {
+			CobraHelp.ChangeHelp(rootCmd, tmplUsageCmd, tmplHelpCmd)
+			_ = rootCmd.Help()
+			ux.PrintfWhite("####################################################################\n")
+			_ = cmd.Help()
+			break
+		}
+
+		switch args[0] {
+			case "scribe":
+				c := CmdScribe.GetCmd()
+				//CobraHelp.ChangeHelp(c, tmplUsage, tmplHelp)
+				_ = c.Help()
+				CobraHelp.ChangeHelp(c, tmplUsageSmall, tmplHelpSmall)
+				DangerousHelpLoop(c, false)
+
+			case "version":
+				c := CmdSelfUpdate.GetCmd()
+				CobraHelp.ChangeHelp(c, tmplUsage, tmplHelp)
+				_ = c.Help()
+				CobraHelp.ChangeHelp(c, tmplUsageSmall, tmplHelpSmall)
+				DangerousHelpLoop(c, false)
+
+			default:
+				CobraHelp.ChangeHelp(rootCmd, tmplUsageCmd, tmplHelpCmd)
+				_ = rootCmd.Help()
+				ux.PrintfWhite("####################################################################\n")
+				_ = cmd.Help()
+		}
+	}
+	Cmd.State.SetOk()
 }
 
 
-var gbManageCmd = &cobra.Command{
-	Use:					"manage",
-	//Aliases:				[]string{"show"},
-	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Manage %s %s", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
-	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Manage %s %s.", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
-	Example:				ux.SprintfWhite("launch manage"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbManageFunc,
-	Args:					cobra.RangeArgs(0, 2),
-}
-var gbListCmd = &cobra.Command{
-	Use:					"list",
-	Aliases:				[]string{"show"},
-	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - List a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - List a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch list all"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbListFunc,
-	Args:					cobra.RangeArgs(0, 1),
-}
-var gbPortsCmd = &cobra.Command{
-	Use:					fmt.Sprintf("ports [%s name]", defaults.LanguageContainerName),
-	//Aliases:				[]string{"links"},
-	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - List ports provided by a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - List ports provided by a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch list ports golang"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbPortsFunc,
-	Args:					cobra.RangeArgs(0, 1),
-}
-var gbLinksCmd = &cobra.Command{
-	Use:					fmt.Sprintf("files [%s name]", defaults.LanguageContainerName),
-	Aliases:				[]string{"links", "ls"},
-	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - List files provided by a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - List files provided by a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch list files golang"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbLinksFunc,
-	Args:					cobra.RangeArgs(0, 1),
-}
-var gbDetailsCmd = &cobra.Command{
+// ******************************************************************************** //
+var gbHelpAllCmd = &cobra.Command {
 	Use:					"all",
-	Aliases:				[]string{"details"},
-	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - List all details provided by a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - List all details provided by a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch list all golang"),
+	//Aliases:				[]string{"flags"},
+	Short:					"Show all help",
+	Long:					"Show all help",
+	Example:				ux.SprintfWhite("launch assist all"),
 	DisableFlagParsing:		false,
 	DisableFlagsInUseLine:	false,
-	Run:					gbDetailsFunc,
-	Args:					cobra.RangeArgs(0, 1),
+	Run:					gbHelpAllFunc,
+	//Args:					cobra.RangeArgs(0, 2),
+}
+
+func gbHelpAllFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsNotOk() {
+			break
+		}
+
+		parent := cmd.Root()
+
+		ux.PrintfWhite("####################################################################\n")
+		CobraHelp.ChangeHelp(rootCmd, tmplUsageCmd, tmplHelpCmd)
+		_ = parent.Help()
+		CobraHelp.ChangeHelp(rootCmd, tmplFlagUsageSmall, tmplFlagHelpSmall)
+		_ = parent.Help()
+
+		CobraHelp.ChangeHelp(rootCmd, tmplUsageSmall, tmplHelpSmall)
+		for _, c := range parent.Commands() {
+			if strings.HasPrefix(c.CommandPath(), Cmd.Runtime.CmdName + " help") {
+				continue
+			}
+			if strings.HasPrefix(c.CommandPath(), Cmd.Runtime.CmdName + " scribe") {
+				continue
+			}
+			DangerousHelpLoop(c, true)
+			ux.PrintfWhite("####################################################################\n")
+		}
+
+		//gbHelpFlagsFunc(rootCmd, args)
+		//gbHelpExamplesFunc(rootCmd, args)
+	}
+}
+
+func DangerousHelpLoop(cmd *cobra.Command, skip bool) *cobra.Command {
+	for range onlyOnce {
+		if cmd == nil {
+			break
+		}
+
+		if skip {
+			if strings.HasPrefix(cmd.CommandPath(), Cmd.Runtime.CmdName + " help") {
+				break
+			}
+			if strings.HasPrefix(cmd.CommandPath(), Cmd.Runtime.CmdName + " version") {
+				break
+			}
+			if strings.HasPrefix(cmd.CommandPath(), Cmd.Runtime.CmdName + " scribe") {
+				break
+			}
+		}
+
+		_ = cmd.Help()
+		if cmd.HasSubCommands() {
+			for _, c := range  cmd.Commands() {
+				DangerousHelpLoop(c, skip)
+			}
+		}
+	}
+	return cmd
 }
 
 
-var gbRunCmd = &cobra.Command{
-	Use:					fmt.Sprintf("run <%s name> [%s args]", defaults.LanguageContainerName, defaults.LanguageContainerName),
-	Aliases:				[]string{},
-	Short:					ux.SprintfMagenta("Execute") + ux.SprintfBlue(" - Run default %s %s command", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Execute") + ux.SprintfBlue(" - Run default %s %s command.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch run golang build"),
-	DisableFlagParsing:		true,
-	DisableFlagsInUseLine:	true,
-	Run:					gbRunFunc,
-	Args:					cobra.MinimumNArgs(1),
-}
-var gbShellCmd = &cobra.Command{
-	Use:					fmt.Sprintf("shell <%s name> [command] [args]", defaults.LanguageContainerName),
-	Short:					ux.SprintfMagenta("Execute") + ux.SprintfBlue(" - Execute shell in %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Execute") + ux.SprintfBlue(" - Execute shell in %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch shell mysql ps -eaf"),
-	DisableFlagParsing:		true,
-	DisableFlagsInUseLine:	true,
-	Run:					gbShellFunc,
-	Args:					cobra.MinimumNArgs(1),
-}
-
-
-var gbCreateCmd = &cobra.Command {
-	Use:					"create",
-	//Aliases:				[]string{"show"},
-	Short:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Create %s %s", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
-	Long:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Create %s %s.", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
-	Example:				ux.SprintfWhite("launch create"),
+// ******************************************************************************** //
+var gbHelpBasicCmd = &cobra.Command {
+	Use:					"basic",
+	//Aliases:				[]string{"flags"},
+	Short:					"Show basic help",
+	Long:					"Show basic help",
+	Example:				ux.SprintfWhite("launch assist basic"),
 	DisableFlagParsing:		false,
 	DisableFlagsInUseLine:	false,
-	Run:					gbCreateFunc,
-	Args:					cobra.RangeArgs(0, 2),
+	Run:					gbHelpBasicFunc,
+	//Args:					cobra.RangeArgs(0, 2),
 }
-var gbBuildCleanCmd = &cobra.Command {
-	Use:					fmt.Sprintf("clean <%s name>", defaults.LanguageContainerName),
-	SuggestFor:				[]string{},
-	Short:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Remove a %s %s build", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Manage") + ux.SprintfBlue(" - Remove a %s %s build.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch create clean golang"),
-	DisableFlagParsing:		false,
-	Run:					gbBuildCleanFunc,
-	Args:					cobra.ExactArgs(1),
-}
-var gbBuildCmd = &cobra.Command {
-	Use:					fmt.Sprintf("build <%s name>", defaults.LanguageContainerName),
-	SuggestFor:				[]string{ "compile", "generate" },
-	Short:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Build a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Allows building of arbitrary containers as a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch create build golang"),
-	DisableFlagParsing:		false,
-	Run:					gbBuildFunc,
-	Args:					cobra.ExactArgs(1),
-}
-var gbPublishCmd = &cobra.Command {
-	Use:					fmt.Sprintf("publish <%s name>", defaults.LanguageContainerName),
-	SuggestFor:				[]string{"upload"},
-	Short:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Publish a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Publish a %s %s to GitHub or DockerHub.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch create publish golang"),
-	DisableFlagParsing:		false,
-	Run:					gbPublishFunc,
-	Args:					cobra.ExactArgs(1),
-}
-var gbUnitTestCmd = &cobra.Command {
-	Use:					fmt.Sprintf("test <%s name>", defaults.LanguageContainerName),
-	Short:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Execute unit tests in %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Execute unit tests in %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch create test terminus"),
-	DisableFlagParsing:		true,
-	DisableFlagsInUseLine:	true,
-	Run:					gbUnitTestFunc,
-	Args:					cobra.MinimumNArgs(1),
+
+func gbHelpBasicFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsNotOk() {
+			break
+		}
+
+		parent := cmd.Root()
+		for _, v := range parent.Commands() {
+			if CobraHelp.IsBasic(v) {
+				ux.PrintfWhite("####################################################################\n")
+				_ = v.Help()
+			}
+		}
+	}
 }
 
 
-var gbSaveCmd = &cobra.Command{
-	Use:					fmt.Sprintf("export <%s name>", defaults.LanguageContainerName),
-	SuggestFor:				[]string{"save"},
-	Short:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Save state of a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Save state of a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch save golang"),
+// ******************************************************************************** //
+var gbHelpAdvancedCmd = &cobra.Command {
+	Use:					"advanced",
+	Aliases:				[]string{"guru"},
+	Short:					"Show advanced help",
+	Long:					"Show advanced help",
+	Example:				ux.SprintfWhite("launch assist advanced"),
 	DisableFlagParsing:		false,
-	Run:					gbSaveFunc,
-	Args:					cobra.ExactArgs(1),
+	DisableFlagsInUseLine:	false,
+	Run:					gbHelpAdvancedFunc,
+	//Args:					cobra.RangeArgs(0, 2),
 }
-var gbLoadCmd = &cobra.Command{
-	Use:					fmt.Sprintf("import <%s name>", defaults.LanguageContainerName),
-	SuggestFor:				[]string{"load"},
-	Short:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Load a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfMagenta("Create") + ux.SprintfBlue(" - Load a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch load golang"),
+
+func gbHelpAdvancedFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsNotOk() {
+			break
+		}
+
+		parent := cmd.Root()
+		for _, v := range parent.Commands() {
+			if CobraHelp.IsAdvanced(v) {
+				ux.PrintfWhite("####################################################################\n")
+				_ = v.Help()
+			}
+		}
+	}
+}
+
+
+// ******************************************************************************** //
+var gbHelpFlagsCmd = &cobra.Command {
+	Use:					"flags",
+	//Aliases:				[]string{"flags"},
+	Short:					"Show additional flags",
+	Long:					"Show additional flags",
+	Example:				ux.SprintfWhite("launch assist flags"),
 	DisableFlagParsing:		false,
-	Run:					gbLoadFunc,
-	Args:					cobra.ExactArgs(1),
+	DisableFlagsInUseLine:	false,
+	Run:					gbHelpFlagsFunc,
+	//Args:					cobra.RangeArgs(0, 2),
+}
+
+//goland:noinspection GoUnusedParameter
+func gbHelpFlagsFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsNotOk() {
+			break
+		}
+
+		CobraHelp.ChangeHelp(rootCmd, tmplFlagUsage, tmplFlagHelp)
+		_ = rootCmd.Help()
+		Cmd.State.SetOk()
+	}
+}
+
+
+// ******************************************************************************** //
+var gbHelpExamplesCmd = &cobra.Command {
+	Use:					"examples",
+	//Aliases:				[]string{"flags"},
+	Short:					"Show examples",
+	Long:					"Show examples",
+	Example:				ux.SprintfWhite("launch assist examples"),
+	DisableFlagParsing:		false,
+	DisableFlagsInUseLine:	false,
+	Run:					gbHelpExamplesFunc,
+	//Args:					cobra.RangeArgs(0, 2),
+}
+
+//goland:noinspection GoUnusedParameter
+func gbHelpExamplesFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsNotOk() {
+			break
+		}
+
+		//CobraHelp.ChangeHelp(rootCmd, tmplFlagUsage, tmplFlagHelp)
+		//_ = rootCmd.Help()
+		ux.PrintfWarning("Command not yet implemented.\n")
+		Cmd.State.SetOk()
+	}
+}
+
+
+// ******************************************************************************** //
+var gbCompletionCmd = &cobra.Command {
+	Use:					"completion",
+	//Aliases:				[]string{"bash"},
+	Short:					"Generate BASH completion file",
+	Long:					"Generate BASH completion file",
+	Example:				ux.SprintfWhite("launch completion"),
+	DisableFlagParsing:		false,
+	DisableFlagsInUseLine:	false,
+	Run:					gbCompletionFunc,
+	//Args:					cobra.RangeArgs(0, 2),
+}
+
+func gbCompletionFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		if Cmd.State.IsNotOk() {
+			break
+		}
+
+		var out bytes.Buffer
+		_ = cmd.GenBashCompletion(&out)
+		fmt.Printf("# %s BASH completion:\n%s\n", defaults.LanguageAppName, out.String())
+		Cmd.State.SetOk()
+	}
 }

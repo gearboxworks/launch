@@ -13,6 +13,7 @@ import (
 )
 
 
+//goland:noinspection GoUnusedParameter
 func showArgs(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		flargs := cmd.Flags().Args()
@@ -78,6 +79,7 @@ func (ga *LaunchArgs) IsValid() *ux.State {
 }
 
 
+//goland:noinspection GoUnusedParameter
 func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
 	for range onlyOnce {
 		ga.State = ux.NewState(Cmd.Runtime.CmdName, Cmd.Debug)
@@ -178,7 +180,7 @@ func (ga *LaunchArgs) ListLinks(create bool) *ux.State {
 			}
 
 			if ga.Name == "" {
-				ga.State = dc.ListLinks(dc.Container.Version)
+				ga.State = dc.ListLinks()	// dc.Container.Version)
 				continue
 			}
 
@@ -187,24 +189,24 @@ func (ga *LaunchArgs) ListLinks(create bool) *ux.State {
 			}
 
 			if ga.Version == "all" {
-				ga.State = dc.ListLinks(dc.Container.Version)
+				ga.State = dc.ListLinks()	// dc.Container.Version)
 				continue
 			}
 
 			if ga.Version == "latest" {
 				if dc.Container.IsLatest {
-					ga.State = dc.ListLinks(dc.Container.Version)
+					ga.State = dc.ListLinks()	// dc.Container.Version)
 				}
 				continue
 			}
 
 			if ga.Version == "" {
-				ga.State = dc.ListLinks(dc.Container.Version)
+				ga.State = dc.ListLinks()	// dc.Container.Version)
 				continue
 			}
 
 			if dc.Container.Version == ga.Version {
-				ga.State = dc.ListLinks(dc.Container.Version)
+				ga.State = dc.ListLinks()	// dc.Container.Version)
 				continue
 			}
 		}
@@ -214,6 +216,7 @@ func (ga *LaunchArgs) ListLinks(create bool) *ux.State {
 }
 
 
+//goland:noinspection GoUnusedParameter
 func (ga *LaunchArgs) ListPorts(remote bool) *ux.State {
 	if state := ga.IsNil(); state.IsError() {
 		return state
