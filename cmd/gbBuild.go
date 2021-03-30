@@ -177,7 +177,7 @@ func (ga *LaunchArgs) gbPublishFunc() *ux.State {
 		if !ga.Quiet {
 			ux.PrintflnNormal("Stopping %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
-		ga.State = ga.Gears.Selected.Container.Stop()
+		ga.State = ga.Gears.SelectedStop()
 		if ga.State.IsError() {
 			ga.State.SetError("%s '%s:%s' stop error - %s", defaults.LanguageContainerName, ga.Name, ga.Version, ga.State.GetError())
 			break
@@ -301,7 +301,7 @@ func (ga *LaunchArgs) gbUnitTestFunc() *ux.State {
 		}
 
 		ga.Args = []string{defaults.DefaultUnitTestCmd}
-		ga.State = ga.Gears.Selected.ContainerSsh(true, ga.SshStatus, ga.Mount, ga.Args)
+		ga.State = ga.Gears.SelectedSsh(true, ga.SshStatus, ga.Mount, ga.Args)
 
 		if ga.Temporary {
 			ga.State = ga.gbUninstallFunc()

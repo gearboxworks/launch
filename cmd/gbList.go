@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/newclarity/scribeHelpers/toolGear"
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"launch/defaults"
@@ -53,7 +54,7 @@ func (ga *LaunchArgs) gbListFunc() *ux.State {
 			break
 		}
 
-		ga.State = ga.Gears.NetworkList("gearboxnet")
+		ga.State = ga.Gears.NetworkList(toolGear.DefaultNetwork)
 		if ga.State.IsError() {
 			break
 		}

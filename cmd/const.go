@@ -3,7 +3,6 @@ package cmd
 const onlyOnce = "1"
 var onlyTwice = []string{"", ""}
 
-
 var tmplUsage = `
 {{ SprintfBlue "Usage: " }}    	{{ GetUsage . }}
 

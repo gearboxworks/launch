@@ -1,3 +1,22 @@
+// @TODO - Reverse SSHFS
+https://github.com/rom1v/rsshfs/blob/master/rsshfs
+https://superuser.com/questions/1310019/reverse-sshfs-over-ssh
+https://blog.dhampir.no/content/reverse-sshfs-mounts-fs-push
+https://stackoverflow.com/questions/39799415/go-bidirectional-communication-with-another-process
+
+// @TODO - Docker plugin
+https://docs.docker.com/engine/reference/commandline/plugin_create/#examples
+https://www.inovex.de/blog/docker-plugins/
+https://github.com/docker/go-plugins-helpers
+https://github.com/muthu-r/horcrux
+https://github.com/logzio/docker-logging-plugin
+https://github.com/progrium/docker-plugins
+https://hub.docker.com/search?q=simple&type=plugin
+
+// @TODO - Better DockerHub registry queries.
+https://pkg.go.dev/github.com/CenturyLinkLabs/docker-reg-client/registry
+
+
 // @TODO - Add '--strict' flag to fail early, (fail as soon as something isn't right EG: don't create or install).
 
 // @TODO - Add 'wait for' code to get around delays in an image/container appearing within docker just after a creation.

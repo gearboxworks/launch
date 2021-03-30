@@ -67,7 +67,7 @@ func (ga *LaunchArgs) gbRunFunc() *ux.State {
 			ga.Mount = DeterminePath(".")
 		}
 
-		ga.State = ga.Gears.Selected.ContainerSsh(false, ga.SshStatus, ga.Mount, ga.Args)
+		ga.State = ga.Gears.SelectedSsh(false, ga.SshStatus, ga.Mount, ga.Args)
 		if !ga.State.IsError() {
 			break
 		}
@@ -100,17 +100,17 @@ func gbShellFunc(cmd *cobra.Command, args []string) {
 
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
 		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+			//if Cmd.State.IsNotOk() {
+			//	Cmd.State.PrintResponse()
+			//}
 			break
 		}
 
 		Cmd.State = ga.gbShellFunc()
 		if Cmd.State.IsError() {
-			if Cmd.State.IsNotOk() {
-				Cmd.State.PrintResponse()
-			}
+			//if Cmd.State.IsNotOk() {
+			//	Cmd.State.PrintResponse()
+			//}
 			break
 		}
 	}
@@ -122,13 +122,17 @@ func (ga *LaunchArgs) gbShellFunc() *ux.State {
 	}
 
 	for range onlyOnce {
+		if len(ga.Args) > 0 {
+			ga.Quiet = true
+		}
+
 		ga.State = ga.gbStartFunc()
 		if !ga.State.IsRunning() {
 			ga.State.SetError("Cannot shell out to %s '%s:%s.'", defaults.LanguageContainerName, ga.Name, ga.Version)
 			break
 		}
 
-		ga.State = ga.Gears.Selected.ContainerSsh(true, ga.SshStatus, ga.Mount, ga.Args[1:])
+		ga.State = ga.Gears.SelectedSsh(true, ga.SshStatus, ga.Mount, ga.Args[1:])
 
 		if ga.Temporary {
 			ga.State = ga.gbUninstallFunc()

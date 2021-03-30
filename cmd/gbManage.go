@@ -10,33 +10,33 @@ import (
 
 
 // ******************************************************************************** //
-var gbManageCmd = &cobra.Command {
-	Use:					"manage",
-	//Aliases:				[]string{"show"},
-	Short:					ux.Sprintf("Manage %s %s", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
-	Long:					ux.SprintfBlue("Manage %s %s.", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
-	Example:				ux.SprintfWhite("launch manage"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbManageFunc,
-	Args:					cobra.RangeArgs(0, 2),
-}
-
-func gbManageFunc(cmd *cobra.Command, args []string) {
-	for range onlyOnce {
-		var ga LaunchArgs
-
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
-		if Cmd.State.IsNotOk() {
-			break
-		}
-
-		//switch {
-		//	case len(args) == 0:
-				_ = cmd.Help()
-		//}
-	}
-}
+//var gbManageCmd = &cobra.Command {
+//	Use:					"manage",
+//	//Aliases:				[]string{"show"},
+//	Short:					ux.Sprintf("Manage %s %s", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
+//	Long:					ux.SprintfBlue("Manage %s %s.", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
+//	Example:				ux.SprintfWhite("launch manage"),
+//	DisableFlagParsing:		false,
+//	DisableFlagsInUseLine:	false,
+//	Run:					gbManageFunc,
+//	Args:					cobra.RangeArgs(0, 2),
+//}
+//
+//func gbManageFunc(cmd *cobra.Command, args []string) {
+//	for range onlyOnce {
+//		var ga LaunchArgs
+//
+//		Cmd.State = ga.ProcessArgs(rootCmd, args)
+//		if Cmd.State.IsNotOk() {
+//			break
+//		}
+//
+//		//switch {
+//		//	case len(args) == 0:
+//				_ = cmd.Help()
+//		//}
+//	}
+//}
 
 
 // ******************************************************************************** //
@@ -75,7 +75,7 @@ func (ga *LaunchArgs) gbSearchFunc(args []string) *ux.State {
 	}
 
 	for range onlyOnce {
-		term := "gearboxworks"
+		term := toolGear.DefaultOrganization
 		if len(args) > 0 {
 			term = args[0]
 		}
@@ -156,11 +156,11 @@ func (ga *LaunchArgs) gbInstallFunc() *ux.State {
 
 
 		if ga.Project != toolGear.DefaultPathNone {
-			ga.Gears.Selected.AddVolume(ga.Project, toolGear.DefaultProject)
+			ga.Gears.SelectedAddVolume(ga.Project, toolGear.DefaultProject)
 		}
 
 		if ga.TmpDir != toolGear.DefaultPathNone {
-			ga.Gears.Selected.AddVolume(ga.TmpDir, toolGear.DefaultTmpDir)
+			ga.Gears.SelectedAddVolume(ga.TmpDir, toolGear.DefaultTmpDir)
 		}
 
 
@@ -260,7 +260,7 @@ func (ga *LaunchArgs) gbUninstallFunc() *ux.State {
 		if !ga.Quiet {
 			ux.PrintflnNormal("Removing %s '%s:%s'.\n", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
-		ga.State = ga.Gears.Selected.Container.Remove()
+		ga.State = ga.Gears.SelectedRemove()
 		if ga.State.IsError() {
 			ga.State.SetError("%s '%s:%s' remove error - %s", defaults.LanguageContainerName, ga.Name, ga.Version, ga.State.GetError())
 			break
@@ -399,7 +399,7 @@ func (ga *LaunchArgs) gbCleanFunc() *ux.State {
 		if !ga.Quiet {
 			ux.PrintflnNormal("Removing %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
-		ga.State = ga.Gears.Selected.Image.Remove()
+		ga.State = ga.Gears.SelectedImageRemove()
 		if ga.State.IsError() {
 			ga.State.SetError("%s '%s:%s' remove error - %s", defaults.LanguageImageName, ga.Name, ga.Version, ga.State.GetError())
 			break
@@ -494,7 +494,7 @@ func (ga *LaunchArgs) gbStartFunc() *ux.State {
 		if !ga.Quiet {
 			ux.PrintflnNormal("Starting %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
-		ga.State = ga.Gears.Selected.Start()
+		ga.State = ga.Gears.SelectedStart()
 		if ga.State.IsError() {
 			ga.State.SetError("%s '%s:%s' start error - %s", defaults.LanguageContainerName, ga.Name, ga.Version, ga.State.GetError())
 			break
@@ -568,7 +568,7 @@ func (ga *LaunchArgs) gbStopFunc() *ux.State {
 		if !ga.Quiet {
 			ux.PrintflnNormal("Stopping %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
-		ga.State = ga.Gears.Selected.Stop()
+		ga.State = ga.Gears.SelectedStop()
 		if ga.State.IsError() {
 			ga.State.SetError("%s '%s:%s' stop error - %s", defaults.LanguageContainerName, ga.Name, ga.Version, ga.State.GetError())
 			break
@@ -644,35 +644,12 @@ func (ga *LaunchArgs) gbLogsFunc() *ux.State {
 		if !found {
 			break
 		}
-		//if ga.State.IsExited() {
-		//	ga.State.SetOk("%s '%s:%s' already stopped.", defaults.LanguageImageName, ga.Name, ga.Version)
-		//	ga.State.SetOutput("")
-		//	break
-		//}
 
-
-		//if !ga.Quiet {
-		//	ux.PrintflnNormal("Stopping %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
-		//}
-		ga.State = ga.Gears.Selected.Logs()
+		ga.State = ga.Gears.SelectedLogs()
 		if ga.State.IsError() {
 			ga.State.SetError("%s '%s:%s' stop error - %s", defaults.LanguageContainerName, ga.Name, ga.Version, ga.State.GetError())
 			break
 		}
-
-		//if ga.State.IsExited() {
-		//	ga.State.SetOk("%s '%s:%s' stopped OK", defaults.LanguageContainerName, ga.Name, ga.Version)
-		//	ga.State.SetOutput("")
-		//	break
-		//}
-		//
-		//if ga.State.IsCreated() {
-		//	ga.State.SetOk("%s '%s:%s' stopped OK", defaults.LanguageContainerName, ga.Name, ga.Version)
-		//	ga.State.SetOutput("")
-		//	break
-		//}
-		//
-		//ga.State.SetWarning("%s '%s:%s' cannot be stopped", defaults.LanguageContainerName, ga.Name, ga.Version)
 	}
 
 	if !ga.Quiet {
