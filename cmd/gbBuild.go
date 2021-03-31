@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/newclarity/scribeHelpers/toolGear"
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"launch/defaults"
@@ -96,14 +97,14 @@ func (ga *LaunchArgs) gbBuildCreateFunc() *ux.State {
 
 // ******************************************************************************** //
 var gbBuildCleanCmd = &cobra.Command {
-	Use:					fmt.Sprintf("clean <%s name>", defaults.LanguageContainerName),
+	Use:					fmt.Sprintf("clean <%s name> [%s version]", defaults.LanguageContainerName, defaults.LanguageContainerName),
 	SuggestFor:				[]string{},
 	Short:					ux.SprintfBlue("Remove a %s %s build", defaults.LanguageAppName, defaults.LanguageContainerName),
 	Long:					ux.SprintfBlue("Remove a %s %s build.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch create clean golang"),
+	Example:				ux.SprintfWhite("launch build clean golang"),
 	DisableFlagParsing:		false,
 	Run:					gbBuildCleanFunc,
-	Args:					cobra.ExactArgs(1),
+	Args:					cobra.RangeArgs(1, 2),
 }
 
 //goland:noinspection GoUnusedParameter
@@ -116,11 +117,107 @@ func gbBuildCleanFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 
-		Cmd.State = ga.gbCleanFunc()
+		Cmd.State = ga.gbBuildCleanFunc()
 		if Cmd.State.IsNotOk() {
 			break
 		}
 	}
+}
+func (ga *LaunchArgs) gbBuildCleanFunc() *ux.State {
+	if state := ux.IfNilReturnError(ga); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		var containers map[string]*toolGear.Gear
+		containers, ga.State = ga.Gears.FindContainers(ga.Name)
+
+		foo := ga.Gears.SelectedVersions()
+		foo.GetVersions()
+
+		for _, c := range containers {
+			ux.PrintflnGreen("Build clean %s '%s:%s'", defaults.LanguageContainerName, c.Container.Name, c.Container.Version)
+			//fmt.Printf("C: %s\n", c.GearConfig.Meta.String())
+			ga.Gears.Selected = c
+
+			ga.State = c.Stop()
+			if ga.State.IsError() {
+				continue
+			}
+			if !ga.State.IsExited() {
+				ga.State.SetWarning("%s '%s:%s' didn't stop", defaults.LanguageContainerName, c.Container.Name, c.Container.Version)
+				continue
+			}
+
+			ga.State = c.Remove()
+			if ga.State.IsError() {
+				ga.State.SetWarning("%s '%s:%s' didn't remove", defaults.LanguageContainerName, c.Container.Name, c.Container.Version)
+				continue
+			}
+
+			ux.PrintflnGreen("Build clean %s '%s:%s'", defaults.LanguageImageName, c.Container.Name, c.Container.Version)
+			ga.State = c.ImageRemove()
+			if ga.State.IsError() {
+				ga.State.SetWarning("%s '%s:%s' didn't remove", defaults.LanguageImageName, c.Image.Name, c.Image.Version)
+				continue
+			}
+
+			//if ga.State.IsExited() {
+			//	ga.State.SetOk("%s '%s:%s' stopped OK", defaults.LanguageContainerName, ga.Name, ga.Version)
+			//	continue
+			//}
+			//if ga.State.IsCreated() {
+			//	ga.State.SetOk("%s '%s:%s' stopped OK", defaults.LanguageContainerName, ga.Name, ga.Version)
+			//	continue
+			//}
+
+		}
+
+		//ga.State = ga.gbUninstallFunc()
+		//if ga.State.IsError() {
+		//	break
+		//}
+		//
+		//var found bool
+		//ga.State = ga.Gears.FindImage(ga.Name, ga.Version)
+		//if ga.State.IsError() {
+		//	break
+		//}
+		//found = ga.Gears.State.GetResponseAsBool()
+		//if !found {
+		//	ga.State.SetOk("%s '%s:%s' already removed.", defaults.LanguageImageName, ga.Name, ga.Version)
+		//	ga.State.SetOutput("")
+		//	break
+		//}
+		//ga.State.Clear()
+		//
+		//if !ga.Quiet {
+		//	ux.PrintflnNormal("Removing %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
+		//}
+		//ga.State = ga.Gears.SelectedImageRemove()
+		//if ga.State.IsError() {
+		//	ga.State.SetError("%s '%s:%s' remove error - %s", defaults.LanguageImageName, ga.Name, ga.Version, ga.State.GetError())
+		//	break
+		//}
+		//
+		//if ga.State.IsOk() {
+		//	if ga.Temporary {
+		//		ga.State.Clear()
+		//		break
+		//	}
+		//
+		//	ga.State.SetOk("%s '%s:%s' removed OK", defaults.LanguageImageName, ga.Name, ga.Version)
+		//	ga.State.SetOutput("")
+		//	break
+		//}
+		//
+		//ga.State.SetWarning("%s '%s:%s' cannot be removed", defaults.LanguageImageName, ga.Name, ga.Version)
+	}
+
+	if !ga.Quiet {
+		ga.State.PrintResponse()
+	}
+	return ga.State
 }
 
 
@@ -130,7 +227,7 @@ var gbPublishCmd = &cobra.Command {
 	SuggestFor:				[]string{"upload"},
 	Short:					ux.SprintfBlue("Publish a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
 	Long:					ux.SprintfBlue("Publish a %s %s to GitHub or DockerHub.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch create publish golang"),
+	Example:				ux.SprintfWhite("launch build publish golang"),
 	DisableFlagParsing:		false,
 	Run:					gbPublishFunc,
 	Args:					cobra.ExactArgs(1),
@@ -264,7 +361,7 @@ var gbUnitTestCmd = &cobra.Command {
 	Use:					fmt.Sprintf("test <%s name>", defaults.LanguageContainerName),
 	Short:					ux.SprintfBlue("Execute unit tests in %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
 	Long:					ux.SprintfBlue("Execute unit tests in %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch create test terminus"),
+	Example:				ux.SprintfWhite("launch build test terminus"),
 	DisableFlagParsing:		true,
 	DisableFlagsInUseLine:	true,
 	Run:					gbUnitTestFunc,
