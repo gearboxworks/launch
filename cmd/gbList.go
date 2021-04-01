@@ -176,6 +176,8 @@ func gbPortsFunc(cmd *cobra.Command, args []string) {
 			break
 		}
 
+		//ga.Gears.Selected.ScanPorts()
+
 		Cmd.State = ga.gbPortsFunc()
 		if Cmd.State.IsNotOk() {
 			break

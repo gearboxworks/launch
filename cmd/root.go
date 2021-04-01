@@ -189,10 +189,20 @@ func IsInstalled() bool {
 		}
 
 		path, err := exec.LookPath(Cmd.Runtime.CmdName)
+
+		//fmt.Printf("path: %s\n", path)
+		//fmt.Printf("binfile: %s\n", binfile.String())
+		//fmt.Printf("Cmd.Runtime.BinDir: %s\n", Cmd.Runtime.Cmd)
+
 		if err != nil {
 			// launch binary NOT found in PATH
 			ux.PrintflnBlue("%s installed properly, but '%s' is not in your PATH.", defaults.BinaryName, Cmd.Runtime.BinDir.String())
 			os.Exit(0)	// Sad... really sad...
+		}
+
+		if path == binfile.String() {
+			ok = true
+			break
 		}
 
 		if binfile.String() != Cmd.Runtime.Cmd {
@@ -203,11 +213,6 @@ func IsInstalled() bool {
 				Cmd.Runtime.BinDir.String(),
 				)
 			os.Exit(0)	// Sad... really sad...
-		}
-
-		if path == binfile.String() {
-			ok = true
-			break
 		}
 
 		// Remove old launch binary.
@@ -444,9 +449,6 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 		//break
 	}
 
-	//if Cmd.State.IsNotOk() {
-	//	Cmd.State.PrintResponse()
-	//}
 }
 
 
@@ -456,11 +458,6 @@ func Execute() *ux.State {
 	Cmd.State = Cmd.State.EnsureNotNil()
 
 	for range onlyOnce {
-		if !IsInstalled() {
-			Cmd.State = Install()
-			break
-		}
-
 		// WARNING: Critical code area.
 		// Support for running launch via symlink.
 		if !Cmd.Runtime.IsRunningAs(defaults.BinaryName) {
@@ -474,6 +471,11 @@ func Execute() *ux.State {
 			rootCmd.DisableFlagParsing = true
 		}
 		// WARNING: Critical code area.
+
+		if !IsInstalled() {
+			Cmd.State = Install()
+			break
+		}
 
 		err := rootCmd.Execute()
 		if err != nil {
