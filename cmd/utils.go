@@ -339,12 +339,12 @@ func DeterminePath(mp string) string {
 }
 
 
-func GetGearboxDir() string {
+func GetLaunchDir() string {
 	var d string
 
 	for range onlyOnce {
 		u, _ := user.Current()
-		d = filepath.Join(u.HomeDir, ".gearbox")
+		d = filepath.Join(u.HomeDir, ".launch")
 	}
 
 	return d

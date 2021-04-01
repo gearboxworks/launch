@@ -40,12 +40,14 @@ import (
 	"github.com/newclarity/scribeHelpers/loadTools"
 	"github.com/newclarity/scribeHelpers/toolCobraHelp"
 	"github.com/newclarity/scribeHelpers/toolGear"
+	"github.com/newclarity/scribeHelpers/toolRuntime"
 	"github.com/newclarity/scribeHelpers/toolSelfUpdate"
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"launch/defaults"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -154,7 +156,7 @@ func initConfig() {
 			viper.SetConfigFile(Cmd.Config)
 		} else {
 			// Search config in home directory with name "launch" (without extension).
-			viper.AddConfigPath(GetGearboxDir())
+			viper.AddConfigPath(GetLaunchDir())
 			viper.SetConfigName("launch")
 		}
 
@@ -168,6 +170,136 @@ func initConfig() {
 			_ = viper.WriteConfig()
 		}
 	}
+}
+
+
+func IsInstalled() bool {
+	var ok bool
+
+	for range onlyOnce {
+		if !Cmd.Runtime.BaseDir.DirExists() {
+			// launch DIR NOT found
+			break
+		}
+
+		binfile := Cmd.Runtime.BinDir.Join(Cmd.Runtime.CmdName)
+		if !binfile.FileExists() {
+			// launch binary NOT found
+			break
+		}
+
+		path, err := exec.LookPath(Cmd.Runtime.CmdName)
+		if err != nil {
+			// launch binary NOT found in PATH
+			ux.PrintflnBlue("%s installed properly, but '%s' is not in your PATH.", defaults.BinaryName, Cmd.Runtime.BinDir.String())
+			os.Exit(0)	// Sad... really sad...
+		}
+
+		if binfile.String() != Cmd.Runtime.Cmd {
+			// Not running proper launch binary.
+			ux.PrintflnBlue("%s installed properly, but '%s' is ahead of '%s' in your PATH.",
+				defaults.BinaryName,
+				Cmd.Runtime.CmdDir,
+				Cmd.Runtime.BinDir.String(),
+				)
+			os.Exit(0)	// Sad... really sad...
+		}
+
+		if path == binfile.String() {
+			ok = true
+			break
+		}
+
+		// Remove old launch binary.
+		//ux.PrintflnBlue("%s installed properly. You can remove the '%s' binary.", defaults.BinaryName, Cmd.Runtime.Cmd)
+		ux.PrintflnBlue("%s installed properly, but '%s' is not in your PATH.", defaults.BinaryName, Cmd.Runtime.BinDir.String())
+		os.Exit(0)	// Sad... really sad...
+	}
+
+	return ok
+}
+
+
+func Install() *ux.State {
+	var err error
+
+	for range onlyOnce {
+		ux.PrintfBlue("%s is being run for the first time. Installing", defaults.BinaryName)
+
+		ux.PrintfGreen(".")
+		err = Cmd.Runtime.BaseDir.MkdirAll()
+		if err != nil {
+			break
+		}
+
+		ux.PrintfGreen(".")
+		err = Cmd.Runtime.ConfigDir.MkdirAll()
+		if err != nil {
+			break
+		}
+
+		ux.PrintfGreen(".")
+		err = Cmd.Runtime.CacheDir.MkdirAll()
+		if err != nil {
+			break
+		}
+
+		ux.PrintfGreen(".")
+		err = Cmd.Runtime.TempDir.MkdirAll()
+		if err != nil {
+			break
+		}
+
+		ux.PrintfGreen(".")
+		err = Cmd.Runtime.BinDir.MkdirAll()
+		if err != nil {
+			break
+		}
+
+		ux.PrintfGreen(".")
+		err = Cmd.Runtime.BinDir.Copy(Cmd.Runtime.Cmd)
+		if err != nil {
+			break
+		}
+		ux.PrintflnGreen(".")
+
+		ux.PrintflnBlue("launch will install shims into %s", Cmd.Runtime.BinDir)
+		ux.PrintflnBlue("Ensure you add this directory to your PATH.")
+
+		GrepFiles()
+	}
+
+	if err != nil {
+		Cmd.State.SetError(err)
+	}
+
+	return Cmd.State
+}
+
+
+func GrepFiles() *ux.State {
+	var err error
+
+	for range onlyOnce {
+		var files []string
+		files, err = toolRuntime.GrepFiles("PATH")
+		if err != nil {
+			break
+		}
+
+		ux.PrintflnBlue("PATH environment variable found in these files:")
+		for _, f := range files {
+			ux.PrintflnWhite("\t%s", f)
+		}
+
+		ux.PrintflnWhite("You are using the %s shell.", os.Getenv("SHELL"))
+	}
+
+	if err != nil {
+		Cmd.State.SetError(err)
+	}
+
+	return Cmd.State
 }
 
 
@@ -324,6 +456,11 @@ func Execute() *ux.State {
 	Cmd.State = Cmd.State.EnsureNotNil()
 
 	for range onlyOnce {
+		if !IsInstalled() {
+			Cmd.State = Install()
+			break
+		}
+
 		// WARNING: Critical code area.
 		// Support for running launch via symlink.
 		if !Cmd.Runtime.IsRunningAs(defaults.BinaryName) {

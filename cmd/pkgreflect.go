@@ -13,7 +13,7 @@ var Functions = map[string]reflect.Value{
 	"CheckReturns": reflect.ValueOf(CheckReturns),
 	"DeterminePath": reflect.ValueOf(DeterminePath),
 	"Execute": reflect.ValueOf(Execute),
-	"GetGearboxDir": reflect.ValueOf(GetGearboxDir),
+	"GetGearboxDir": reflect.ValueOf(GetLaunchDir),
 	"New": reflect.ValueOf(New),
 	"SetCmd": reflect.ValueOf(SetCmd),
 }
