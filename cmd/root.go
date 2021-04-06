@@ -72,7 +72,11 @@ const DefaultTemplateFile = "gearbox.tmpl"
 //{{- $gear.ParseGearConfig .Json }}
 //{{- $gear.PrintGearConfig }}
 //`
-const DefaultTemplateString = ""
+const DefaultTemplateString = `{{ $gears := Gearbox .Json "" }}
+{{ $state := $gears.ListImages "" }}
+{{ $state := $gears.ListContainers "" }}
+{{ $state := $gears.Ls "" }}
+`
 
 
 type redirectHelp struct {

@@ -6,6 +6,7 @@ import (
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"launch/defaults"
+	"strings"
 )
 
 
@@ -495,6 +496,14 @@ func (ga *LaunchArgs) gbStartFunc() *ux.State {
 			ux.PrintflnNormal("Starting %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
 		ga.State = ga.Gears.SelectedStart()
+		if strings.Contains(ga.State.GetError().Error(), "address already in use") {
+			//ux.PrintflnRed("Error: There are ports already used.")
+			//saved := gear.State.GetError()
+			ga.Gears.Selected.ListImagePorts()
+			ga.State.SetError("Error: There are ports already used.")
+			break
+		}
+
 		if ga.State.IsError() {
 			ga.State.SetError("%s '%s:%s' start error - %s", defaults.LanguageContainerName, ga.Name, ga.Version, ga.State.GetError())
 			break

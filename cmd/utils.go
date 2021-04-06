@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/newclarity/scribeHelpers/toolGear"
+	"github.com/newclarity/scribeHelpers/toolGear/gearConfig"
 	"github.com/newclarity/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"launch/defaults"
@@ -94,7 +95,7 @@ func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
 			}
 
 			if ga.Version == "" {
-				ga.Version = "latest"
+				ga.Version = gearConfig.LatestName
 			}
 		}
 
@@ -193,7 +194,7 @@ func (ga *LaunchArgs) ListLinks(create bool) *ux.State {
 				continue
 			}
 
-			if ga.Version == "latest" {
+			if ga.Version == gearConfig.LatestName {
 				if dc.Container.IsLatest {
 					ga.State = dc.ListLinks()	// dc.Container.Version)
 				}
@@ -226,6 +227,7 @@ func (ga *LaunchArgs) ListPorts(remote bool) *ux.State {
 		for _, dc := range ga.Gears.Array {
 			if ga.Name == "" {
 				ga.State = dc.ListContainerPorts()
+				ga.State = dc.ListImagePorts()
 				continue
 			}
 
@@ -238,7 +240,7 @@ func (ga *LaunchArgs) ListPorts(remote bool) *ux.State {
 				continue
 			}
 
-			if ga.Version == "latest" {
+			if ga.Version == gearConfig.LatestName {
 				if dc.Container.IsLatest {
 					ga.State = dc.ListContainerPorts()
 				}
