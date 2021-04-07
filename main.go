@@ -20,7 +20,6 @@ func init() {
 		_, _ = ux.Open(defaults.BinaryName, false)
 	}
 
-
 	// Not reliable enough.
 	//fi, _ := os.Stdin.Stat()
 	//if (fi.Mode() & os.ModeCharDevice) == 0 {

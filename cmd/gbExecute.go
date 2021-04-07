@@ -27,6 +27,12 @@ func gbRunFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
+		ga.Quiet = true
+		// Windows...
+		//br, _ := rootCmd.Flags().GetBool(flagQuiet)
+		//fmt.Printf("DEBUG: flagQuiet: %v\n", br)
+		//fmt.Printf("DEBUG: DisableFlagParsing: %v\n", rootCmd.DisableFlagParsing)
+
 		Cmd.State = ga.ProcessArgs(rootCmd, args)
 		if Cmd.State.IsError() {
 			break

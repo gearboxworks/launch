@@ -76,13 +76,14 @@ func (ga *LaunchArgs) gbSearchFunc(args []string) *ux.State {
 	}
 
 	for range onlyOnce {
-		term := toolGear.DefaultOrganization
+		//term := toolGear.DefaultOrganization
+		term := ""
 		if len(args) > 0 {
 			term = args[0]
 		}
 
-		ga.State = ga.Gears.Search(term, "")
-		if ga.State.IsError() {
+		ga.State = ga.Gears.SearchPrint(term, "")
+		if ga.State.IsNotOk() {
 			break
 		}
 	}
@@ -129,6 +130,18 @@ func (ga *LaunchArgs) gbInstallFunc() *ux.State {
 	}
 
 	for range onlyOnce {
+		ga.State = ga.Gears.Search(ga.Name, ga.Version)
+		if !ga.State.GetResponseAsBool() {
+			ga.State.PrintResponse()
+			ux.PrintflnBlue("")
+			ga.gbSearchFunc([]string{})
+			ga.State.SetWarning("%s not found in registry.", ga.Gears.Language.ImageName)
+			break
+		}
+		if ga.State.IsNotOk() {
+			break
+		}
+
 		var found bool
 		found, ga.State = ga.Gears.FindContainer(ga.Name, ga.Version)
 		if ga.State.IsError() {
@@ -464,6 +477,7 @@ func (ga *LaunchArgs) gbStartFunc() *ux.State {
 		var found bool
 		found, ga.State = ga.Gears.FindContainer(ga.Name, ga.Version)
 		if ga.State.IsError() {
+			// Pass-through warnings.
 			break
 		}
 		if !found {
@@ -481,8 +495,11 @@ func (ga *LaunchArgs) gbStartFunc() *ux.State {
 				ga.State.SetError("Cannot start %s '%s:%s'.", defaults.LanguageContainerName, ga.Name, ga.Version)
 				break
 			}
+			if ga.State.IsNotOk() {
+				break
+			}
 
-			// Need a better way to handle the "Docker client error: context deadline exceeded" errors.
+			// @TODO - Need a better way to handle the "Docker client error: context deadline exceeded" errors.
 		}
 
 		if ga.State.IsRunning() {
@@ -496,15 +513,14 @@ func (ga *LaunchArgs) gbStartFunc() *ux.State {
 			ux.PrintflnNormal("Starting %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
 		ga.State = ga.Gears.SelectedStart()
-		if strings.Contains(ga.State.GetError().Error(), "address already in use") {
-			//ux.PrintflnRed("Error: There are ports already used.")
-			//saved := gear.State.GetError()
-			ga.Gears.Selected.ListImagePorts()
-			ga.State.SetError("Error: There are ports already used.")
-			break
-		}
-
 		if ga.State.IsError() {
+			if strings.Contains(ga.State.GetError().Error(), "address already in use") {
+				//ux.PrintflnRed("Error: There are ports already used.")
+				//saved := gear.State.GetError()
+				ga.Gears.Selected.ListImagePorts()
+				ga.State.SetError("Error: There are ports already used.")
+				break
+			}
 			ga.State.SetError("%s '%s:%s' start error - %s", defaults.LanguageContainerName, ga.Name, ga.Version, ga.State.GetError())
 			break
 		}

@@ -186,13 +186,13 @@ func IsInstalled() bool {
 			break
 		}
 
-		binfile := Cmd.Runtime.BinDir.Join(Cmd.Runtime.CmdName)
+		binfile := Cmd.Runtime.BinDir.Join(Cmd.Runtime.CmdFile)
 		if !binfile.FileExists() {
 			// launch binary NOT found
 			break
 		}
 
-		path, err := exec.LookPath(Cmd.Runtime.CmdName)
+		path, err := exec.LookPath(Cmd.Runtime.CmdFile)
 
 		//fmt.Printf("path: %s\n", path)
 		//fmt.Printf("binfile: %s\n", binfile.String())
@@ -218,6 +218,9 @@ func IsInstalled() bool {
 				)
 			os.Exit(0)	// Sad... really sad...
 		}
+
+		//fmt.Printf("binfile: %s\n", binfile.String())
+		//fmt.Printf("Cmd.Runtime.Cmd: %s\n", Cmd.Runtime.Cmd)
 
 		// Remove old launch binary.
 		//ux.PrintflnBlue("%s installed properly. You can remove the '%s' binary.", defaults.BinaryName, Cmd.Runtime.Cmd)
@@ -290,6 +293,11 @@ func GrepFiles() *ux.State {
 	var err error
 
 	for range onlyOnce {
+		if Cmd.Runtime.IsWindows() {
+			ux.PrintflnWhite("You are using Windows.")
+			break
+		}
+
 		var files []string
 		files, err = toolRuntime.GrepFiles("PATH")
 		if err != nil {
@@ -376,35 +384,12 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 			CmdScribe.State.SetOk()
 			break
 		}
-
-		//fl := cmd.Flags()
-		//
-		//// Produce BASH completion script.
-		//ok, _ := fl.GetBool(flagCompletion)
-		//if ok {
-		//	var out bytes.Buffer
-		//	_ = cmd.GenBashCompletion(&out)
-		//	fmt.Printf("# %s BASH completion:\n%s\n", defaults.LanguageAppName, out.String())
-		//	Cmd.State.SetOk()
-		//	break
-		//}
-		//
-		//// Show flag help.
-		//ok, _ := fl.GetBool(flagHelp)
-		//if ok {
-		//	CobraHelp.ChangeHelp(cmd, tmplFlagUsage, tmplFlagHelp)
-		//	_ = cmd.Help()
-		//	Cmd.State.SetOk()
-		//	break
-		//}
-
 		Cmd.State.SetOk()
 
 		if len(args) == 0 {
 			_ = cmd.Help()
 			break
 		}
-
 
 		cla := ""
 		if len(args) > 1 {
@@ -464,12 +449,20 @@ func Execute() *ux.State {
 	for range onlyOnce {
 		// WARNING: Critical code area.
 		// Support for running launch via symlink.
+		//fmt.Printf("DEBUG: defaults.BinaryName: %s\n", defaults.BinaryName)
 		if !Cmd.Runtime.IsRunningAs(defaults.BinaryName) {
 			//defaults.RunAs.AsLink = true
 			Cmd.Runtime.CmdFile = strings.ReplaceAll(Cmd.Runtime.CmdFile, "-", ":")
-			newArgs := []string{"run", Cmd.Runtime.CmdFile}
+			newArgs := []string{"run"}
+			if Cmd.Runtime.IsWindows() {
+				newArgs = append(newArgs, strings.TrimSuffix(Cmd.Runtime.CmdFile, ".exe"))
+			} else {
+				newArgs = append(newArgs, Cmd.Runtime.CmdFile)
+			}
 			newArgs = append(newArgs, os.Args[1:]...)
 			rootCmd.SetArgs(newArgs)
+			//fmt.Printf("DEBUG: rootCmd.Args: %s\n", newArgs)
+			//fmt.Printf("DEBUG: Cmd.Runtime.CmdFile: %s\n", Cmd.Runtime.CmdFile)
 
 			_ = rootCmd.Flags().Set(flagQuiet, "true")
 			rootCmd.DisableFlagParsing = true
