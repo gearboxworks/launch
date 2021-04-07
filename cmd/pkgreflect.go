@@ -11,9 +11,13 @@ var Types = map[string]reflect.Type{
 
 var Functions = map[string]reflect.Value{
 	"CheckReturns": reflect.ValueOf(CheckReturns),
+	"DangerousHelpLoop": reflect.ValueOf(DangerousHelpLoop),
 	"DeterminePath": reflect.ValueOf(DeterminePath),
 	"Execute": reflect.ValueOf(Execute),
-	"GetGearboxDir": reflect.ValueOf(GetLaunchDir),
+	"GetLaunchDir": reflect.ValueOf(GetLaunchDir),
+	"GrepFiles": reflect.ValueOf(GrepFiles),
+	"Install": reflect.ValueOf(Install),
+	"IsInstalled": reflect.ValueOf(IsInstalled),
 	"New": reflect.ValueOf(New),
 	"SetCmd": reflect.ValueOf(SetCmd),
 }
