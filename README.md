@@ -1,8 +1,9 @@
 ## About `launch`
 
-`launch` is a tool specifically designed to interact with a Gearbox Docker container.
+`launch` is a tool specifically designed to simplify running Docker containers.
 
-It provides three important functional areas, without any Docker container learning curve:
+Launch provides three (3) important functional areas, without any Docker container learning curve:
+
 - Allows control over Gearbox Docker containers: stop, start, create, remove.
 - Build, update, modify and release Docker images.
 - Acts as a proxy for interactive commands within a Gearbox Docker container.
