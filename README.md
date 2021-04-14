@@ -35,8 +35,6 @@ For now, simply download the standalone `launch` binary for your O/S.
 ## Top level commands
 
 Where `launch [command]` is one of the below commands.
-
-Use launch help [command] for more information about a command.
  
 ### Basic commands
 
@@ -78,8 +76,6 @@ Use launch help [command] for more information about a command.
 
 Where `launch build [command]` is one of the below commands.
 
-Use launch help [command] for more information about a command.
-
 ### Building & creation
  
 	create		- Build		- Build a Launch Container
@@ -90,6 +86,15 @@ Use launch help [command] for more information about a command.
 	import		- Build		- Load a Launch Container 
 
 
+## Guru commands
+
+Where `launch [command]` is one of the below commands.
+
+	scribe		- Guru		- scribe - The ultimate scripting toolkit.
+	version		- Guru		- launch - Self-manage this executable. 
+	completion	- Guru		- Generate BASH completion file
+	
+	
 ## Flags
 
 ### Provider flags
