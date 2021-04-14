@@ -1,11 +1,15 @@
+![Gearbox](docs/Gearbox-100x.png)
+
+
 ## About `launch`
 
 `launch` is a tool specifically designed to simplify running Docker containers.
 
-Launch provides three (3) important functional areas, without any Docker container learning curve:
+Launch provides three (4) important functional areas, without any Docker container learning curve:
 
+- Allows for "install" of applications as though natively installed - even on a remote Docker server!
 - Allows control over Gearbox Docker containers: stop, start, create, remove.
-- Build, update, modify and release Docker images.
+- Build, update, modify and release Gearbox Docker images.
 - Acts as a proxy for interactive commands within a Gearbox Docker container.
 
 It also provides a functional SSH daemon for connecting remotely as well as a standard set of common tools and utilities.
@@ -16,11 +20,12 @@ It also provides a functional SSH daemon for connecting remotely as well as a st
 Once out of beta, it will be included within the Gearbox installation package.
 
 For now, simply download the standalone `launch` binary for your O/S.
-- [Mac OSX 64bit](https://github.com/gearboxworks/docker-template/raw/master/bin/Darwin/launch)
-- [Linux 64bit](https://github.com/gearboxworks/docker-template/raw/master/bin/Linux/launch)
-- [Windows 64bit](https://github.com/gearboxworks/docker-template/raw/master/bin/Windows/launch)
+| Mac OSX | Linux | Linux | Windows | Windows | SBC | SBC |
+| ------- | ----- | ----- | ------- | ------- | --- | --- |
+| [![Mac OSX](docs/logos/64x64/mac.png) Mac OSX 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-darwin_amd64.tar.gz) | [![Linux](docs/logos/64x64/linux.png) Linux 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_amd64.tar.gz) | [![Linux](docs/logos/64x64/linux.png) Linux 32bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_i386.tar.gz) | [![Windows](docs/logos/64x64/windows.png) Windows 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-windows_amd64.tar.gz) | [![Windows](docs/logos/64x64/windows.png) Windows 32bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-windows_i386.tar.gz) | [![Raspberry Pi](docs/logos/64x64/linux.png) Raspberry Pi 32bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_arm.tar.gz) | [![SBC](docs/logos/64x64/linux.png) SBC 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_arm64.tar.gz) |
 
 
+---
 ## Usage
 
  Description:
@@ -33,74 +38,136 @@ For now, simply download the standalone `launch` binary for your O/S.
 
 ## Top level commands
 
-Where [command] is one of the below commands.
+Where `launch [command]` is one of the below commands.
+ 
+### Basic commands
 
-Use launch help [command] for more information about a command.
+	version		- Guru		- launch - Self-manage this executable.
+	search		- Manage	- Search for available Launch Container
+	list		- Manage	- List a Launch Container
+	run		- Execute	- Run default Launch Container command
+	shell		- Execute	- Execute shell in Launch Container
+ 
+### Manage
+
+	search		- Manage	- Search for available Launch Container
+	list		- Manage	- List a Launch Container
+	install		- Manage	- Install a Launch Container
+	uninstall	- Manage	- Uninstall a Launch Container
+	update		- Manage	- Update a Launch Container
+	clean		- Manage	- Completely uninstall a Launch Container
+	log		- Manage	- Show logs of Launch Container
+	start		- Manage	- Start a Launch Container
+	stop		- Manage	- Stop a Launch Container
+
+### Run
+
+	run		- Execute	- Run default Launch Container command
+	shell		- Execute	- Execute shell in Launch Container
 
 ### Help
 
- 	help		- Help about any command
+ 	help		- Help		- Help about any command.
+	assist		- Help		- Show additional help
+ 	assist flags	- Help		- Show additional flags
+	assist examples	- Help		- Show examples
+	assist basic	- Help		- Show basic help
+	assist advanced	- Help		- Show advanced help
+	assist all	- Help		- Show all help
+ 
+
+---
+## Build commands
+
+Where `launch build [command]` is one of the below commands.
 
 ### Building & creation
  
- 	build		- Build a Gearbox gear
- 	export		- Save state of a Gearbox gear
- 	import		- Load a Gearbox gear
- 	publish		- Publish a Gearbox gear
- 	test		- Execute unit tests in Gearbox gear
-
-### Install & uninstall
-
- 	install		- Install a Gearbox gear
- 	uninstall	- Uninstall a Gearbox gear
- 	reinstall	- Update a Gearbox gear
- 	list		- List a Gearbox gear
-
-### Start & stop
-
- 	start		- Start a Gearbox gear
- 	stop		- Stop a Gearbox gear
-
-### Running
-
- 	run		- Run default Gearbox gear command
- 	shell		- Execute shell in Gearbox gear
+	create		- Build		- Build a Launch Container
+	test		- Build		- Execute unit tests in Launch Container
+	publish		- Build		- Publish a Launch Container
+	clean		- Build		- Remove a Launch Container build
+	export		- Build		- Save state of a Launch Container
+	import		- Build		- Load a Launch Container 
 
 
+---
+## Guru commands
+
+Where `launch [command]` is one of the below commands.
+
+	scribe		- Guru		- scribe - The ultimate scripting toolkit.
+	version		- Guru		- launch - Self-manage this executable. 
+	completion	- Guru		- Generate BASH completion file
+	
+	
+---
 ## Flags
-
-### General flags
-
-   -b, --completion        Generate BASH completion script.
-   -v, --version           Display version of launch
 
 ### Provider flags
 
-       --provider string   Set virtual provider (default "docker")
-       --host string       Set virtual provider host.
-       --port string       Set virtual provider port.
+	--provider string	Set virtual provider (default "docker")
+	--host string		Set virtual provider host.
+	--port string		Set virtual provider port.
 
 ### Runtime flags
 
-       --config string     Config file. (default "$HOME/.gearbox/launch.json")
-   -d, --debug             Debug mode.
-   -q, --quiet             Silence all Gearbox messsages.
-   -n, --no-create         Don't create container.
-   -t, --temporary         Temporary container - remove after running command.
+	-d, --debug		Debug mode.
+	-n, --no-create		Don't create container.
+	-q, --quiet		Silence all launch messages.
+	-t, --temporary		Temporary container - remove after running command.
+	--tmp string		Alternate TMP dir mount point. (default "none")
+	-v, --version		Display version of launch
 
 ### Interactive shell flags
 
-   -s, --status            Show shell status line.
+	-s, --status		Show shell status line.
 
 ### Mounting flags
 
-   -m, --mount string      Mount arbitrary directory via SSHFS. (default "none")
-   -p, --project string    Mount project directory. (default "none")
+	-m, --mount string	Mount arbitrary directory via SSHFS. (default "none")
+	-p, --project string	Mount project directory. (default "none")
 
 
+---
 ## Running launch
 
-### Examples
+### GoLang
+
+Building a simple GoLang application with multiple versions.
+
+![GoLang](docs/launch-GoLang.gif)
+
+### Imagemagick
+
+Identify and resize a plain PNG file.
+
+![Imagemagick](docs/launch-Imagemagick.gif)
+
+### Mountebank
+
+Install and run latest version of Mountebank with one command!
+
+![Mountebank1](docs/launch-Mountebank1.gif)
+
+Install latest version of Mountebank and use the builtin command `mb`.
+
+![Mountebank2](docs/launch-Mountebank2.gif)
+
+### Launch on Windows
+
+Prefer Windows? Sure, launch has you covered.
+
+![Mountebank3](docs/launch-Mountebank4.gif)
+
+### Using a remote Docker instance
+
+Don't have Docker installed on your machine? Set the `DOCKER_HOST` environment variable and you have complete access as though it's installed locally.
+
+![Mountebank3](docs/launch-Mountebank3.gif)
+
+
+### Further examples
 
 There are many ways to call launch, either directly or indirectly.
 Additionally, all host environment variables will be imported into the container seamlessly.
@@ -110,40 +177,44 @@ If a container is missing, it will be downloaded and created. Multiple versions 
 
 Install, create, and start the gearbox-base Gearbox container.
 
-`./launch install gearbox-base`
+`launch install golang`
 
 Create, and start the gearbox-base Gearbox container. Run a shell.
 
-`./launch shell gearbox-base`
+`launch shell golang`
 
 Create, and start the gearbox-base Gearbox container with version alpine-3.4 and run a shell.
 
-`./launch shell gearbox-base:alpine-3.4`
+`launch shell golang:latest`
 
-`./launch shell gearbox-base:alpine-3.4 ls -l`
+`launch shell golang:1.20 ls -l`
 
-`./launch shell gearbox-base:alpine-3.4 ps -eaf`
+`launch shell golang:1.11.1 ps -eaf`
 
 
 ### Available commands
 If gearbox-base is symlinked to `launch`, then the Gearbox container will be determined automatically and the default command will be run.
 All available commands for a Gearbox container will be automatically symlinked upon installation.
 
-`./gearbox-base`
+`go`
 
 Running gearbox-base Gearbox container default command. If a container has a default interactive command, arguments can be supplied without specifying that command.
 
-`./gearbox-base -flag1 -flag2 variable`
+`go -flag1 -flag2 variable`
 
-`./launch gearbox-base:alpine-3.4 -flag1 -flag2 variable`
+`launch run golang -flag1 -flag2 variable`
 
-Gearbox containers may have multiple executables that can be run. The gearbox-base Gearbox container has the following available commands:
-- The default command will execute `` within the container.
+Gearbox containers may have multiple executables that can be run. These will be automatically made available when you install a launch container.
+
+
+### Remote Docker
+
+You don't have to have Docker installed on your PC! As long as you set the DOCKER_HOST environment variable, then launch will use the remote Docker instance!
 
 
 ### Remote connection
 ssh - All [Gearbox](https://github.com/gearboxworks/) containers have a running SSH daemon. So you can connect remotely.
 To show what ports are exported to the host, use the following command.
 
-`./launch list gearbox-base`
+`launch list ports`
 
