@@ -1,3 +1,6 @@
+![Gearbox](docs/Gearbox-100x.png)
+
+
 ## About `launch`
 
 `launch` is a tool specifically designed to simplify running Docker containers.
@@ -129,7 +132,20 @@ Where `launch [command]` is one of the below commands.
 ---
 ## Running launch
 
-### Examples
+### GoLang
+
+Building a simple GoLang application with multiple versions.
+
+![GoLang](docs/launch-GoLang.gif)
+
+## Imagemagick
+
+Identify and resize a plain PNG file.
+
+![Imagemagick](docs/launch-Imagemagick.gif)
+
+
+### Further examples
 
 There are many ways to call launch, either directly or indirectly.
 Additionally, all host environment variables will be imported into the container seamlessly.
