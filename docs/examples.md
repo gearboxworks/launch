@@ -1,4 +1,4 @@
-![Gearbox](https://github.com/gearboxworks/launch/raw/master/docs/Gearbox-100x.png)
+![Gearbox](Gearbox-100x.png)
 
 # Examples: Using launch
 
@@ -6,35 +6,35 @@
 
 Building a simple GoLang application with multiple versions.
 
-![GoLang](docs/launch-GoLang.gif)
+![GoLang](launch-GoLang.gif)
 
 ## Imagemagick
 
 Identify and resize a plain PNG file.
 
-![Imagemagick](docs/launch-Imagemagick.gif)
+![Imagemagick](launch-Imagemagick.gif)
 
 ## Mountebank
 
 Install and run latest version of Mountebank with one command!
 
-![Mountebank1](docs/launch-Mountebank1.gif)
+![Mountebank1](launch-Mountebank1.gif)
 
 Install latest version of Mountebank and use the builtin command `mb`.
 
-![Mountebank2](docs/launch-Mountebank2.gif)
+![Mountebank2](launch-Mountebank2.gif)
 
 ## Launch on Windows
 
 Prefer Windows? Sure, launch has you covered.
 
-![Mountebank3](docs/launch-Mountebank4.gif)
+![Mountebank3](launch-Mountebank4.gif)
 
 ## Using a remote Docker instance
 
 Don't have Docker installed on your machine? Set the `DOCKER_HOST` environment variable and you have complete access as though it's installed locally.
 
-![Mountebank3](docs/launch-Mountebank3.gif)
+![Mountebank3](launch-Mountebank3.gif)
 
 
 # Further examples
