@@ -40,38 +40,38 @@ Use launch help [command] for more information about a command.
  
 ### Basic commands
 
-	version     - Guru  	 - launch - Self-manage this executable.
-	search     	- Manage  - Search for available Launch Container
-	list     	  - Manage  - List a Launch Container
-	run     	   - Execute	- Run default Launch Container command
-	shell     	 - Execute	- Execute shell in Launch Container
+	version		- Guru		- launch - Self-manage this executable.
+	search		- Manage	- Search for available Launch Container
+	list		- Manage	- List a Launch Container
+	run		- Execute	- Run default Launch Container command
+	shell		- Execute	- Execute shell in Launch Container
  
 ### Manage
 
-	search   	- Manage  	- Search for available Launch Container
-	list     	- Manage  	- List a Launch Container
-	install   - Manage  	- Install a Launch Container
-	uninstall - Manage  	- Uninstall a Launch Container
-	update    - Manage  	- Update a Launch Container
-	clean     - Manage  	- Completely uninstall a Launch Container
-	log      	- Manage  	- Show logs of Launch Container
-	start     - Manage  	- Start a Launch Container
-	stop     	- Manage  	- Stop a Launch Container
+	search		- Manage	- Search for available Launch Container
+	list		- Manage	- List a Launch Container
+	install		- Manage	- Install a Launch Container
+	uninstall	- Manage	- Uninstall a Launch Container
+	update		- Manage	- Update a Launch Container
+	clean		- Manage	- Completely uninstall a Launch Container
+	log		- Manage	- Show logs of Launch Container
+	start		- Manage	- Start a Launch Container
+	stop		- Manage	- Stop a Launch Container
 
 ### Run
 
- run      	- Execute  - Run default Launch Container command
-	shell     - Execute  - Execute shell in Launch Container
+	run		- Execute	- Run default Launch Container command
+	shell		- Execute	- Execute shell in Launch Container
 
 ### Help
 
- help       	     - Help  	- Help about any command.
-	assist     	     - Help  	- Show additional help
- assist flags     - Help  	- Show additional flags
-	assist examples  - Help  	- Show examples
-	assist basic    	- Help  	- Show basic help
-	assist advanced  - Help  	- Show advanced help
-	assist all      	- Help  	- Show all help
+ 	help		- Help		- Help about any command.
+	assist		- Help		- Show additional help
+ 	assist flags	- Help		- Show additional flags
+	assist examples	- Help		- Show examples
+	assist basic	- Help		- Show basic help
+	assist advanced	- Help		- Show advanced help
+	assist all	- Help		- Show all help
  
 
 ## Build commands
@@ -82,39 +82,39 @@ Use launch help [command] for more information about a command.
 
 ### Building & creation
  
-	create    - Build  	- Build a Launch Container
-	test     	- Build  	- Execute unit tests in Launch Container
-	publish  	- Build  	- Publish a Launch Container
-	clean    	- Build  	- Remove a Launch Container build
-	export   	- Build  	- Save state of a Launch Container
-	import   	- Build  	- Load a Launch Container 
+	create		- Build		- Build a Launch Container
+	test		- Build		- Execute unit tests in Launch Container
+	publish		- Build		- Publish a Launch Container
+	clean		- Build		- Remove a Launch Container build
+	export		- Build		- Save state of a Launch Container
+	import		- Build		- Load a Launch Container 
 
 
 ## Flags
 
 ### Provider flags
 
-      --provider string   Set virtual provider (default "docker")
-      --host string       Set virtual provider host.
-      --port string       Set virtual provider port.
+	--provider string	Set virtual provider (default "docker")
+	--host string		Set virtual provider host.
+	--port string		Set virtual provider port.
 
 ### Runtime flags
 
-  -d, --debug             Debug mode.
-  -n, --no-create         Don't create container.
-  -q, --quiet             Silence all launch messages.
-  -t, --temporary         Temporary container - remove after running command.
-      --tmp string        Alternate TMP dir mount point. (default "none")
-  -v, --version           Display version of launch
+	-d, --debug		Debug mode.
+	-n, --no-create		Don't create container.
+	-q, --quiet		Silence all launch messages.
+	-t, --temporary		Temporary container - remove after running command.
+	--tmp string		Alternate TMP dir mount point. (default "none")
+	-v, --version		Display version of launch
 
 ### Interactive shell flags
 
-  -s, --status            Show shell status line.
+	-s, --status		Show shell status line.
 
 ### Mounting flags
 
-  -m, --mount string      Mount arbitrary directory via SSHFS. (default "none")
-  -p, --project string    Mount project directory. (default "none")
+	-m, --mount string	Mount arbitrary directory via SSHFS. (default "none")
+	-p, --project string	Mount project directory. (default "none")
 
 
 ## Running launch
