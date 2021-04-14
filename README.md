@@ -136,13 +136,29 @@ Where `launch [command]` is one of the below commands.
 
 Building a simple GoLang application with multiple versions.
 
-![GoLang](docs/launch-GoLang-Pause.gif)
+![GoLang](docs/launch-GoLang.gif)
 
-## Imagemagick
+### Imagemagick
 
 Identify and resize a plain PNG file.
 
-![Imagemagick](docs/launch-Imagemagick-Pause.gif)
+![Imagemagick](docs/launch-Imagemagick.gif)
+
+### Mountebank
+
+Install and run latest version of Mountebank with one command!
+
+![Mountebank1](docs/launch-Mountebank1.gif)
+
+Install latest version of Mountebank and use the builtin command `mb`.
+
+![Mountebank2](docs/launch-Mountebank2.gif)
+
+### Using a remote Docker instance
+
+Don't have Docker installed on your machine? Set the `DOCKER_HOST` and you have complete access as though it's installed locally.
+
+![Mountebank3](docs/launch-Mountebank3.gif)
 
 
 ### Further examples
