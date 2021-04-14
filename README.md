@@ -154,6 +154,12 @@ Install latest version of Mountebank and use the builtin command `mb`.
 
 ![Mountebank2](docs/launch-Mountebank2.gif)
 
+### Launch on Windows
+
+Prefer Windows? Sure, launch has you covered.
+
+![Mountebank3](docs/launch-Mountebank4.gif)
+
 ### Using a remote Docker instance
 
 Don't have Docker installed on your machine? Set the `DOCKER_HOST` environment variable and you have complete access as though it's installed locally.
