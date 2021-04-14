@@ -1,0 +1,369 @@
+{{- $Gearbox := "[Gearbox](https://github.com/gearboxworks/)" }}
+
+{{- $repoUrl := printf "https://github.com/%s/docker-%s" .Json.meta.organization .Json.meta.name }}
+{{- $repoMdUrl := printf "[%s](%s)" .Json.meta.name $repoUrl }}
+
+{{- $gearboxJsonUrl := printf "%s/blob/master/gearbox.json" $repoUrl }}
+{{- $repoMdUrl := printf "[gearbox.json](%s)" $gearboxJsonUrl }}
+
+{{- $refUrl := $repoUrl }}
+{{- $refMdUrl := $repoMdUrl }}
+{{- with .Json.meta.refurl }}
+{{- $refUrl = . }}
+{{- with $.Json.meta.label }}
+{{- $refMdUrl = printf "[%s](%s)" . $refUrl }}
+{{- else }}
+{{- $refMdUrl = printf "[%s](%s)" $.Json.meta.name $refUrl }}
+{{- end }}
+{{- end }}
+
+{{- $vk := keys .Json.versions }}{{- $pv := index $vk 0 }}
+{{- $cmds := keys .Json.run.commands }}
+{{- $c1 := "" }}{{- if gt (len $cmds) 1 }}{{ $c1 = index $cmds 0 }}{{ end }}
+{{- $c2 := "" }}{{- if gt (len $cmds) 2 }}{{ $c2 = index $cmds 1 }}{{ end }}
+{{- $c3 := "" }}{{- if gt (len $cmds) 3 }}{{ $c3 = index $cmds (sub (len $cmds) 1) }}{{ end }}
+
+![Gearbox](https://gearboxworks.github.io/assets/images/gearbox-logo.png)
+
+
+{{ with .Json.meta.label -}}
+# {{ . }} Docker container service for {{ $Gearbox }}
+{{ else -}}
+# {{ $.Json.meta.name }} Docker container service for {{ $Gearbox }}
+{{ end }}
+
+This is the repository for the {{ $refMdUrl }} Docker container implemented for {{ $Gearbox }}.
+
+{{ with .Json.meta.info }}## {{ . }}{{ end }}
+{{- with .Json.meta.description }}
+{{- range $key, $value := . }}
+
+{{ $value }}
+{{- end }}
+{{- end }}
+
+
+## Repository Info
+GitHub commit: [![commit-date](https://img.shields.io/github/last-commit/{{ .Json.meta.organization }}/docker-{{ .Json.meta.name }}?style=flat-square)]({{ $repoUrl }}/commits/master)
+
+GitHub release(latest): [![last-release-date](https://img.shields.io/github/release-date/{{ $.Json.meta.organization }}/docker-{{ .Json.meta.name }})]({{ $repoUrl }}/releases) [![last-release-date](https://img.shields.io/github/v/tag/{{ .Json.meta.organization }}/docker-{{ .Json.meta.name }}?sort=semver)]({{ $repoUrl }}/releases) [![release-state]({{ $repoUrl }}/workflows/release/badge.svg?event=release)]({{ $repoUrl }}/actions?query=workflow%3Arelease)
+
+
+## Supported versions and respective Dockerfiles
+{{- if (FindInMap .Json.build "base") }}
+| Base | GitHub Version | Docker Version | Docker Size | Docker Tags |
+|:----:|:--------------:|:--------------:|:-----------:|:-----------:|
+{{- range $key, $value := .Json.versions }}
+{{- if ne $key "" }}
+| {{ $refMdUrl }} | [![{{ $.Json.meta.name }}](https://img.shields.io/badge/{{ $key }}-green.svg)]({{ $repoUrl }}/releases/) | [![Docker Version)](https://img.shields.io/docker/v/{{ $.Json.meta.organization }}/{{ $.Json.meta.name }}/{{ $key }})](https://hub.docker.com/repository/docker/{{ $.Json.meta.organization }}/{{ $.Json.meta.name }}) | [![Docker Size](https://img.shields.io/docker/image-size/{{ $.Json.meta.organization }}/{{ $.Json.meta.name }}/{{ $key }})](https://hub.docker.com/repository/docker/{{ $.Json.meta.organization }}/{{ $.Json.meta.name }}/tags) | _([`{{ $key }}`{{ with $value.majorversion }}, `{{ . }}`{{ end }}{{ with $value.latest }}, `latest`{{ end }}]({{ $repoUrl }}/blob/master/versions/{{ $key }}/DockerfileRuntime))_ |
+{{- end }}
+{{- end }}
+{{- else }}
+| Service Website | Gear Name | GitHub Version | Docker Version | Docker Size | Docker Tags |
+|:---------------:|:---------:|:--------------:|:--------------:|:-----------:|:-----------:|
+{{- range $key, $value := .Json.versions }}
+{{- if ne $key "" }}
+| {{ $refMdUrl }} | {{ $repoMdUrl }} | [![{{ $.Json.meta.name }}](https://img.shields.io/badge/{{ $.Json.meta.name }}-{{ $key }}-green.svg)]({{ $repoUrl }}/releases/) | [![Docker Version](https://img.shields.io/docker/v/{{ $.Json.meta.organization }}/{{ $.Json.meta.name }}/{{ $key }})](https://hub.docker.com/repository/docker/{{ $.Json.meta.organization }}/{{ $.Json.meta.name }}) | [![Docker Size](https://img.shields.io/docker/image-size/{{ $.Json.meta.organization }}/{{ $.Json.meta.name }}/{{ $key }})](https://hub.docker.com/repository/docker/{{ $.Json.meta.organization }}/{{ $.Json.meta.name }}/tags) | _([`{{ $key }}`{{ with $value.majorversion }}, `{{ . }}`{{ end }}{{ with $value.latest }}, `latest`{{ end }}]({{ $repoUrl }}/blob/master/versions/{{ $key }}/DockerfileRuntime))_ |
+{{- end }}
+{{- end }}
+{{- end }}
+
+
+* * *
+## About this container.
+A driving force behind {{ $Gearbox }} is to improve the user experience using software, and especially for software developers.
+
+Our vision is to empower developers and other software users to quickly and easily use almost any version of a software service, command line tool or API without without first getting bogged down with installation and configuration.
+
+In other words, our vision for {{ $Gearbox }} users is that software "**just works**".
+
+
+## Using this container.
+This container has been designed to work within the {{ $Gearbox }} framework.
+However, due to the flexability of {{ $Gearbox }}, it can be used outside of this framework.
+
+There are two methods:
+
+
+* * *
+## Method 1: Using {{ $Gearbox }} launch
+`launch` is a tool specifically designed to interact with a {{ $Gearbox }} Docker container.
+
+It provides three important functional areas, without any Docker container learning curve:
+- Install, uninstall services and applications as though it was native. **(Even multiple versions!)**
+- Complete integration with {{ $Gearbox }} container commands with the host PC. **(Environment and filesystem.)**
+- Allows control over {{ $Gearbox }} containers: stop, start, create, remove.
+- Build, update, modify and release {{ $Gearbox }} images.
+- The {{ $Gearbox }} container doesn't even have to be local. **(Great for team development.)**
+
+It also provides a functional SSH daemon for connecting remotely as well as a standard set of common tools and utilities.
+
+Further `launch` documentation can be [found here](https://github.com/gearboxworks/docker-template/blob/master/LAUNCH.md).
+
+
+### Installing launch
+`launch` is currently in beta testing and is included along with all {{ $Gearbox }} Docker repos.
+Once out of beta, it will be included within the {{ $Gearbox }} installation package.
+
+For now, simply download the standalone `launch` binary for your O/S.
+- [Mac OSX 64bit](https://github.com/gearboxworks/docker-template/raw/master/bin/Darwin/launch)
+- [Linux 64bit](https://github.com/gearboxworks/docker-template/raw/master/bin/Linux/launch)
+- [Windows 64bit](https://github.com/gearboxworks/docker-template/raw/master/bin/Windows/launch)
+
+This executable can be placed anywhere on your filesystem that is within your PATH environment variable.
+(This is usually **/usr/local/bin**)
+
+It's suggested to copy this binary to it's own directory
+
+```
+mkdir -p /usr/local/gearbox/bin
+cp ./launch /usr/local/gearbox/bin
+chmod a+x /usr/local/gearbox/bin/launch
+```
+
+and add this to your PATH.
+
+```
+echo 'PATH="/usr/local/gearbox/bin:${PATH}"' >> ~/.profile
+```
+
+
+### Running launch
+There are many ways to call launch, either directly or indirectly.
+Additionally, **all host environment variables will be imported into the container seamlessly**.
+This allows a devloper to try multiple versions of software **as though they were installed locally**.
+
+If a container is missing, it will be downloaded and created. Multiple versions can co-exist.
+
+Install, create, and start the **latest** version of **{{ .Json.meta.name }}** {{ $Gearbox }} container.
+
+**./bin/launch install {{ .Json.meta.name }}**
+
+```
+me@home:~ % ./bin/launch shell {{ .Json.meta.name }}
+Gearbox: Installing Gear '{{ .Json.meta.name }}:latest'.
+Gearbox: Downloading Gear '{{ .Json.meta.name }}:latest'.
+Gearbox: Pulling Gear {{ .Json.meta.name }}:latest.
+Gearbox: [==================================================>]  141.6MB/141.6MB
+Gearbox: Pulling Gear {{ .Json.meta.name }}:latest - OK.
+Gearbox: Installed Gear '{{ .Json.meta.name }}:latest' OK.
+me@home:~ 
+```
+
+Install, create, and start the **latest** version of **{{ .Json.meta.name }}** {{ $Gearbox }} container. Run a shell.
+
+**./bin/launch shell {{ .Json.meta.name }}**
+
+```
+me@home:~ % ./bin/launch shell {{ .Json.meta.name }}
+Gearbox: Installing Gear '{{ .Json.meta.name }}:latest'.
+Gearbox: Downloading Gear '{{ .Json.meta.name }}:latest'.
+Gearbox: Pulling Gear {{ .Json.meta.name }}:latest.
+Gearbox: [==================================================>]  141.6MB/141.6MB
+Gearbox: Pulling Gear {{ .Json.meta.name }}:latest - OK.
+Gearbox: Installed Gear '{{ .Json.meta.name }}:latest' OK.
+Gearbox: Starting gear '{{ .Json.meta.name }}:latest':
+Gearbox: Gear '{{ .Json.meta.name }}:latest' started OK
+[{{ .Json.meta.name }}:{{ $pv }}] ~ $ 
+```
+
+Create, and start version **{{ $pv }}** of the **{{ .Json.meta.name }}** {{ $Gearbox }} container and run a shell with commands.
+
+**./bin/launch shell {{ .Json.meta.name }}:{{ $pv }} ls -l**
+
+```
+me@home:~ % ./bin/launch shell {{ .Json.meta.name }}:{{ $pv }} ls -l
+Gearbox: Gear '{{ .Json.meta.name }}:{{ $pv }}' already started.
+total 60
+-rw-r--r--    1 gearbox  gearbox       5864 May 24 02:25 Makefile
+-rw-r--r--    1 gearbox  gearbox      18757 May 24 02:25 README.md
+drwxr-xr-x    1 gearbox  gearbox        374 May 24 02:25 TEMPLATE
+drwxr-xr-x    1 gearbox  gearbox       1224 May  9 05:48 bin
+drwxr-xr-x    1 gearbox  gearbox        238 May 22 01:33 build
+-rw-r--r--    1 gearbox  gearbox       2196 May 22 01:35 files
+-rw-r--r--    1 gearbox  gearbox       5313 May 24 01:34 gearbox.json
+-rw-r--r--    1 gearbox  gearbox        596 May 22 01:27 packages
+drwxr-xr-x    1 gearbox  gearbox        136 May 22 01:40 versions
+me@home:~ % 
+```
+
+**./bin/launch shell {{ .Json.meta.name }}:{{ $pv }} ps -eaf**
+
+```
+me@home:~ % ./bin/launch shell {{ .Json.meta.name }}:{{ $pv }} ps -eaf
+Gearbox: Gear '{{ .Json.meta.name }}:{{ $pv }}' already started.
+PID   USER     TIME  COMMAND
+    1 root      0:00 /bin/s6-svscan /etc/gearbox/services
+   16 root      0:00 s6-supervise GearShift
+   17 root      0:00 s6-supervise sshd
+   18 root      0:00 s6-supervise {{ .Json.meta.name }}
+   19 root      0:00 {GearboxGearshif} /bin/bash /usr/local/sbin/GearboxGearshift
+   20 root      0:00 /usr/sbin/sshd -D -e
+ 3342 root      0:00 sshd: gearbox [priv]
+ 3344 gearbox   0:00 sshd: gearbox@notty
+ 3345 gearbox   0:00 ps -eaf
+me@home:~ % 
+```
+
+Provide information on the installed {{ $Gearbox }} container.
+
+**./bin/launch list {{ .Json.meta.name }}**
+
+```
+me@home:~ % ./bin/launch list {{ .Json.meta.name }}
+Downloaded Gearbox images: 1 found
++----------+----------------------------------+-------+--------+
+| CLASS    | IMAGE                            | PORTS | SIZE   |
++----------+----------------------------------+-------+--------+
+| graphics | gearboxworks/{{ .Json.meta.name }}:{{ $pv }}  |       |  40 MB |
++----------+----------------------------------+-------+--------+
+
+Installed Gearbox gears: 1 found
++---------------------+----------+---------+----------------------------------+-------+----------+---------------+--------+--------+
+| NAME                | CLASS    | STATE   | IMAGE                            | PORTS | SSH PORT | IP ADDRESS    | MOUNTS | SIZE   |
++---------------------+----------+---------+----------------------------------+-------+----------+---------------+--------+--------+
+| {{ .Json.meta.name }}-{{ $pv }}  | graphics | created | gearboxworks/{{ .Json.meta.name }}:{{ $pv }}  |       |          | (gearboxnet)  |        |  40 MB |
+|                     |          |         |                                  |       |          |               |        |        |
++---------------------+----------+---------+----------------------------------+-------+----------+---------------+--------+--------+
+
+
+Configured Gearbox networks:
++------------+--------+---------------+
+| NAME       | DRIVER | SUBNET        |
++------------+--------+---------------+
+| gearboxnet | bridge | 172.42.0.0/24 |
++------------+--------+---------------+
+```
+
+
+* * *
+### {{ $Gearbox }} container command integration
+When a {{ $Gearbox }} container is installed - specified commands, (as defined by the {{ $repoMdUrl }} file), will be symlinked to the `./bin/launch` executable.
+
+This allows for seamless integration of a {{ $Gearbox }} container's commands with the host machine.
+
+{{ $Gearbox }} containers may have many executables. Additionally if {{ .Json.meta.name }} is also symlinked to `./bin/launch`, it will run the default command defined with the the container. No need to specify that command as in the shell example above.
+
+`./{{ .Json.meta.name }}`
+
+`./{{ .Json.meta.name }} -flag1 -flag2 variable1 variable2 variable3`
+
+`./bin/launch run {{ .Json.meta.name }}:{{ $pv }} -flag1 -flag2 variable1 variable2 variable3`
+
+{{ if $c1 }}`./{{ $c1 }} -flag1 -flag2`
+{{ end }}
+{{ if $c2 }}`./{{ $c2 }}`
+{{ end }}
+{{ if $c3 }}`./{{ $c3 }} -flag1 variable1 variable2 variable3`
+{{ end }}
+
+
+### Available commands
+
+The **{{ .Json.meta.name }}** {{ $Gearbox }} container has no defined commands within the {{ $repoMdUrl }} file.
+
+{{- if eq (len $cmds) 0 }}
+{{- else }}
+The **{{ .Json.meta.name }}** {{ $Gearbox }} container has the following **{{ len .Json.run.commands }}** available commands:
+| Host Executable Name | {{ $Gearbox }} Container Executable Name |
+| -------------------- | ---------------------------------------- |
+{{- range $key, $value := .Json.run.commands }}
+| {{- if eq $key "default" }}(default command){{ else }}{{ $key }}{{ end }} | {{ $value }} |
+{{- end }}
+{{- end }}
+
+
+### Remote connection
+ssh - All {{ $Gearbox }} containers have a running SSH daemon. So you can connect remotely.
+To show what ports are exported to the host, use the following command.
+
+`./bin/launch list {{ .Json.meta.name }}`
+
+
+## Method 2: Docker Hub
+It is strongly suggested to use {{ $Gearbox }} `launch` as everything is done for you. However, you can still work with a {{ $Gearbox }} Gears as though it's a normal Docker container.
+
+
+### Setup from Docker Hub
+A simple `docker pull gearbox/{{ .Json.meta.name }}` will pull down the latest version.
+
+
+### Starting
+start - Spin up a Docker container with the correct runtime configs.
+
+`docker run -d --name {{ .Json.meta.name }}-latest --restart unless-stopped --network gearboxnet gearbox/{{ .Json.meta.name }}:latest`
+
+
+### Stopping
+stop - Stop a Docker container.
+
+`docker stop {{ .Json.meta.name }}-latest`
+
+
+### Remove container
+rm - Remove the Docker container.
+
+`docker container rm {{ .Json.meta.name }}-latest`
+
+
+### Run in foreground
+run - Run a Docker container in the foreground, (all STDOUT and STDERR will go to console). The Container be removed on termination.
+
+`docker run --rm --name {{ .Json.meta.name }}-latest --network gearboxnet gearbox/{{ .Json.meta.name }}:latest`
+
+
+### Run a shell
+shell - Run a shell, (/bin/bash), within a Docker container.
+
+`docker run --rm --name {{ .Json.meta.name }}-latest -i -t --network gearboxnet gearbox/{{ .Json.meta.name }}:latest /bin/bash`
+
+
+### SSH
+ssh - All {{ $Gearbox }} containers have a running SSH daemon. So you can connect remotely.
+
+Either use `launch` above or discover the port and SSH directly.
+
+```
+SSH_PORT="$(docker port {{ .Json.meta.name }}-latest 22/tcp | sed 's/0.0.0.0://')"
+ssh -p ${SSH_PORT} -o StrictHostKeyChecking=no gearbox@localhost
+```
+
+
+* * *
+## Building from this GitHub repo.
+
+
+### Setup from GitHub repo
+Simply clone this repository to your local machine
+
+`git clone {{ $repoUrl }}.git`
+
+
+### Makefile targets
+`make build` - Build Docker images. Build all versions from the base directory or specific versions from each directory.
+
+`make list` - List already built Docker images. List all versions from the base directory or specific versions from each directory.
+
+`make clean` - Remove already built Docker images. Remove all versions from the base directory or specific versions from each directory.
+
+`make push` - Push already built Docker images to Docker Hub, (only for {{ $Gearbox }} admins). Push all versions from the base directory or specific versions from each directory.
+
+
+### Runtime from GitHub repo
+You can either build your container as above, or use it from DockerHub with these commands:
+
+`make start` - Spin up a Docker container with the correct runtime configs.
+
+`make stop` - Stop a Docker container.
+
+`make run` - Run a Docker container in the foreground, (all STDOUT and STDERR will go to console). The Container be removed on termination.
+
+`make shell` - Run a shell, (/bin/bash), within a Docker container.
+
+`make rm` - Remove the Docker container.
+
+`make test` - Will issue a `stop`, `rm`, `clean`, `build`, `create` and `start` on a Docker container.
+
+
+* * *
+**Note: This README was generated by `{{ .Exec.CmdName }} - v{{ .Exec.CmdVersion }}` - {{ .CreationInfo }}**

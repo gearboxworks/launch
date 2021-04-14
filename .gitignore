@@ -3,4 +3,5 @@ bin/
 buildtools/*/*
 launch
 .*.swp
-
+.DS_Store
+.idea/

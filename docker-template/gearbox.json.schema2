@@ -1,0 +1,60 @@
+{
+	"schema": "gear-2",
+	"meta": {
+		"state": "production",
+		"organization": "gearboxworks",
+		"name": "example",
+		"label": "Example Container",
+		"info": "A short description of an example container.",
+		"description": [
+			"This is a longer description of an example container.",
+			"CR/LF will be stripped out of these comments...",
+			"... and every line will have a CR appended.",
+			"",
+			""
+		],
+		"maintainer": "Gearbox Team <team@gearbox.works>",
+		"class": "system",
+		"refurl": "https://example.org/"
+	},
+	"build": {
+		"ports": {
+			"http": "80",
+			"https": "443"
+		},
+		"run": "",
+		"args": "/usr/local/bin/php -S 0.0.0.0:80 -t /var/www/html",
+		"workdir": "",
+		"env": {
+			"EXAMPLE_USER": "gearbox"
+		},
+		"network": "--network gearboxnet",
+		"volumes": "",
+		"restart": "--restart no"
+	},
+	"run": {
+		"commands": {
+			"default": "/usr/bin/example",
+			"example": "/usr/bin/example",
+			"foo": "/usr/bin/foo"
+		}
+	},
+	"project": {
+	},
+	"extensions": {
+	},
+	"versions": {
+		"4.1.0": {
+			"majorversion": "4.1",
+			"latest": false,
+			"ref": "",
+			"base": "gearboxworks/gearbox-base:alpine-3.10"
+		},
+		"4.2.0": {
+			"majorversion": "4.2",
+			"latest": true,
+			"ref": "something:4.2.0",
+			"base": "gearboxworks/gearbox-base:alpine-3.11"
+		}
+	}
+}

@@ -1,1 +1,0 @@
-multibin.sh
