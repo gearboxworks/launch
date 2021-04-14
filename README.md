@@ -136,13 +136,13 @@ Where `launch [command]` is one of the below commands.
 
 Building a simple GoLang application with multiple versions.
 
-![GoLang](docs/launch-GoLang.gif)
+![GoLang](docs/launch-GoLang-Pause.gif)
 
 ## Imagemagick
 
 Identify and resize a plain PNG file.
 
-![Imagemagick](docs/launch-Imagemagick.gif)
+![Imagemagick](docs/launch-Imagemagick-Pause.gif)
 
 
 ### Further examples
