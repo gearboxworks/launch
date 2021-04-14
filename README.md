@@ -2,10 +2,11 @@
 
 `launch` is a tool specifically designed to simplify running Docker containers.
 
-Launch provides three (3) important functional areas, without any Docker container learning curve:
+Launch provides three (4) important functional areas, without any Docker container learning curve:
 
+- Allows for "install" of applications as though natively installed - even on a remote Docker server!
 - Allows control over Gearbox Docker containers: stop, start, create, remove.
-- Build, update, modify and release Docker images.
+- Build, update, modify and release Gearbox Docker images.
 - Acts as a proxy for interactive commands within a Gearbox Docker container.
 
 It also provides a functional SSH daemon for connecting remotely as well as a standard set of common tools and utilities.
@@ -16,9 +17,13 @@ It also provides a functional SSH daemon for connecting remotely as well as a st
 Once out of beta, it will be included within the Gearbox installation package.
 
 For now, simply download the standalone `launch` binary for your O/S.
-- [Mac OSX 64bit](https://github.com/gearboxworks/docker-template/raw/master/bin/Darwin/launch)
-- [Linux 64bit](https://github.com/gearboxworks/docker-template/raw/master/bin/Linux/launch)
-- [Windows 64bit](https://github.com/gearboxworks/docker-template/raw/master/bin/Windows/launch)
+- [Mac OSX 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-darwin_amd64.tar.gz)
+- [Linux 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_amd64.tar.gz)
+- [Linux 32bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_i386.tar.gz)
+- [Windows 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-windows_amd64.tar.gz)
+- [Windows 32bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-windows_i386.tar.gz)
+- [Raspberry Pi](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_arm.tar.gz)
+- [SBC 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_arm64.tar.gz)
 
 
 ## Usage
