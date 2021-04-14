@@ -17,14 +17,9 @@ It also provides a functional SSH daemon for connecting remotely as well as a st
 Once out of beta, it will be included within the Gearbox installation package.
 
 For now, simply download the standalone `launch` binary for your O/S.
-- [![Mac OSX](docs/logos/64x64/mac.png) Mac OSX 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-darwin_amd64.tar.gz)
-- [![Linux](docs/logos/64x64/linux.png) Linux 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_amd64.tar.gz)
-- [![Linux](docs/logos/64x64/linux.png) Linux 32bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_i386.tar.gz)
-- [![Windows](docs/logos/64x64/windows.png) Windows 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-windows_amd64.tar.gz)
-- [![Windows](docs/logos/64x64/windows.png) Windows 32bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-windows_i386.tar.gz)
-- [![Raspberry Pi](docs/logos/64x64/linux.png) Raspberry Pi 32bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_arm.tar.gz)
-- [![SBC](docs/logos/64x64/linux.png) SBC 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_arm64.tar.gz)
-
+| Mac OSX | Linux | Linux | Windows | Windows | SBC | SBC |
+| ------- | ----- | ----- | ------- | ------- | --- | --- |
+| [![Mac OSX](docs/logos/64x64/mac.png) Mac OSX 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-darwin_amd64.tar.gz) | [![Linux](docs/logos/64x64/linux.png) Linux 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_amd64.tar.gz) | [![Linux](docs/logos/64x64/linux.png) Linux 32bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_i386.tar.gz) | [![Windows](docs/logos/64x64/windows.png) Windows 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-windows_amd64.tar.gz) | [![Windows](docs/logos/64x64/windows.png) Windows 32bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-windows_i386.tar.gz) | [![Raspberry Pi](docs/logos/64x64/linux.png) Raspberry Pi 32bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_arm.tar.gz) | [![SBC](docs/logos/64x64/linux.png) SBC 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_arm64.tar.gz) |
 
 
 ## Usage
