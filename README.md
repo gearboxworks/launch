@@ -156,7 +156,7 @@ Install latest version of Mountebank and use the builtin command `mb`.
 
 ### Using a remote Docker instance
 
-Don't have Docker installed on your machine? Set the `DOCKER_HOST` and you have complete access as though it's installed locally.
+Don't have Docker installed on your machine? Set the `DOCKER_HOST` environment variable and you have complete access as though it's installed locally.
 
 ![Mountebank3](docs/launch-Mountebank3.gif)
 
