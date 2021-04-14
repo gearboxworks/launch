@@ -22,6 +22,7 @@ For now, simply download the standalone `launch` binary for your O/S.
 | [![Mac OSX](docs/logos/64x64/mac.png) Mac OSX 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-darwin_amd64.tar.gz) | [![Linux](docs/logos/64x64/linux.png) Linux 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_amd64.tar.gz) | [![Linux](docs/logos/64x64/linux.png) Linux 32bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_i386.tar.gz) | [![Windows](docs/logos/64x64/windows.png) Windows 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-windows_amd64.tar.gz) | [![Windows](docs/logos/64x64/windows.png) Windows 32bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-windows_i386.tar.gz) | [![Raspberry Pi](docs/logos/64x64/linux.png) Raspberry Pi 32bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_arm.tar.gz) | [![SBC](docs/logos/64x64/linux.png) SBC 64bit](https://github.com/gearboxworks/launch/releases/download/latest/launch-linux_arm64.tar.gz) |
 
 
+---
 ## Usage
 
  Description:
@@ -72,6 +73,7 @@ Where `launch [command]` is one of the below commands.
 	assist all	- Help		- Show all help
  
 
+---
 ## Build commands
 
 Where `launch build [command]` is one of the below commands.
@@ -86,6 +88,7 @@ Where `launch build [command]` is one of the below commands.
 	import		- Build		- Load a Launch Container 
 
 
+---
 ## Guru commands
 
 Where `launch [command]` is one of the below commands.
@@ -95,6 +98,7 @@ Where `launch [command]` is one of the below commands.
 	completion	- Guru		- Generate BASH completion file
 	
 	
+---
 ## Flags
 
 ### Provider flags
@@ -122,6 +126,7 @@ Where `launch [command]` is one of the below commands.
 	-p, --project string	Mount project directory. (default "none")
 
 
+---
 ## Running launch
 
 ### Examples
@@ -134,40 +139,44 @@ If a container is missing, it will be downloaded and created. Multiple versions 
 
 Install, create, and start the gearbox-base Gearbox container.
 
-`./launch install gearbox-base`
+`launch install golang`
 
 Create, and start the gearbox-base Gearbox container. Run a shell.
 
-`./launch shell gearbox-base`
+`launch shell golang`
 
 Create, and start the gearbox-base Gearbox container with version alpine-3.4 and run a shell.
 
-`./launch shell gearbox-base:alpine-3.4`
+`launch shell golang:latest`
 
-`./launch shell gearbox-base:alpine-3.4 ls -l`
+`launch shell golang:1.20 ls -l`
 
-`./launch shell gearbox-base:alpine-3.4 ps -eaf`
+`launch shell golang:1.11.1 ps -eaf`
 
 
 ### Available commands
 If gearbox-base is symlinked to `launch`, then the Gearbox container will be determined automatically and the default command will be run.
 All available commands for a Gearbox container will be automatically symlinked upon installation.
 
-`./gearbox-base`
+`go`
 
 Running gearbox-base Gearbox container default command. If a container has a default interactive command, arguments can be supplied without specifying that command.
 
-`./gearbox-base -flag1 -flag2 variable`
+`go -flag1 -flag2 variable`
 
-`./launch gearbox-base:alpine-3.4 -flag1 -flag2 variable`
+`launch run golang -flag1 -flag2 variable`
 
-Gearbox containers may have multiple executables that can be run. The gearbox-base Gearbox container has the following available commands:
-- The default command will execute `` within the container.
+Gearbox containers may have multiple executables that can be run. These will be automatically made available when you install a launch container.
+
+
+### Remote Docker
+
+You don't have to have Docker installed on your PC! As long as you set the DOCKER_HOST environment variable, then launch will use the remote Docker instance!
 
 
 ### Remote connection
 ssh - All [Gearbox](https://github.com/gearboxworks/) containers have a running SSH daemon. So you can connect remotely.
 To show what ports are exported to the host, use the following command.
 
-`./launch list gearbox-base`
+`launch list ports`
 
