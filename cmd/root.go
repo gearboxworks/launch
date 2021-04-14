@@ -37,12 +37,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/newclarity/scribeHelpers/loadTools"
-	"github.com/newclarity/scribeHelpers/toolCobraHelp"
-	"github.com/newclarity/scribeHelpers/toolGear"
-	"github.com/newclarity/scribeHelpers/toolRuntime"
-	"github.com/newclarity/scribeHelpers/toolSelfUpdate"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/loadTools"
+	"github.com/gearboxworks/scribeHelpers/toolCobraHelp"
+	"github.com/gearboxworks/scribeHelpers/toolGear"
+	"github.com/gearboxworks/scribeHelpers/toolRuntime"
+	"github.com/gearboxworks/scribeHelpers/toolSelfUpdate"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"launch/defaults"

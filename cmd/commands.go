@@ -3,7 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"launch/defaults"
 	"strings"

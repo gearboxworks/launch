@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/newclarity/scribeHelpers/ux"
+	"github.com/gearboxworks/scribeHelpers/ux"
 	"github.com/pkg/profile"
 	"launch/cmd"
 	"launch/defaults"
