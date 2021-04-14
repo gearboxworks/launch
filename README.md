@@ -27,7 +27,8 @@ For now, simply download the standalone `launch` binary for your O/S.
  	launch - Gearbox gear launcher.
 
  Usage:
- 	launch [flags] [command] <gear name>
+
+    launch [flags] [command] <gear name>
 
 
 ## Top level commands

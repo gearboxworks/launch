@@ -1,7 +1,6 @@
-versions/*/logs/*.log
-logs*zip
+dist/
+bin/
+buildtools/*/*
+launch
 .*.swp
-*.OLD
-docker-template
-docker-template.tgz
-videos
+
