@@ -3,14 +3,14 @@
 
 ## About `launch`
 
-`launch` is a tool specifically designed to simplify running Docker containers.
+Launch simplifies running Docker containers.
 
-Launch provides three (4) important functional areas, without any Docker container learning curve:
+It provides four (4) important functional areas, without any Docker container learning curve:
 
-- Allows for "install" of applications as though natively installed - even on a remote Docker server!
-- Allows control over _"Launchified"_ Docker containers: stop, start, create, remove.
-- Build, update, modify and release _"Launchified"_ Docker images.
-- Acts as a proxy for interactive commands within a Gearbox Docker container.
+1. Allows for "install" of applications as though natively installed - even on a remote Docker server!
+2. Allows control over _"Launchified"_ Docker containers: stop, start, create, remove.
+3. Build, update, modify and release _"Launchified"_ Docker images.
+4. Acts as a proxy for interactive commands within a Gearbox Docker container.
 
 It also provides a functional SSH daemon for connecting remotely as well as a standard set of common tools and utilities.
 
