@@ -5,12 +5,13 @@
 
 Launch simplifies running Docker containers.
 
-It provides four (4) important functional areas, without any Docker container learning curve:
+It provides five (5) important functional areas, without any Docker container learning curve:
 
-1. Allows for "install" of applications as though natively installed - even on a remote Docker server!
+1. Allows for "install" of applications as though natively installed.
 2. Allows control over _"Launchified"_ Docker containers: stop, start, create, remove.
 3. Build, update, modify and release _"Launchified"_ Docker images.
 4. Acts as a proxy for interactive commands within a Gearbox Docker container.
+5. Can even run applications that are installed on remote computers!
 
 It also provides a functional SSH daemon for connecting remotely as well as a standard set of common tools and utilities.
 
