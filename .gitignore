@@ -5,3 +5,4 @@ launch
 .*.swp
 .DS_Store
 .idea/
+installer/darwin/out/*
