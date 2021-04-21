@@ -2,10 +2,11 @@ package defaults
 
 import "time"
 
+
 const (
 	BrandName = "Gearbox"
 	Organization = "gearboxworks"
-	Timeout = time.Second * 2
+	Timeout = time.Second * 20
 	DefaultProject = "/home/gearbox/projects/default"
 	GearboxNetwork = "gearboxnet"
 	DefaultUnitTestCmd = "/etc/gearbox/unit-tests/run.sh"
@@ -16,6 +17,8 @@ const (
 	DefaultPathHome = "home"
 	DefaultPathEmpty = ""
 	DefaultProvider = "docker"
+
+	EnvPrefix = "LAUNCH"
 
 	LanguageAppName = "Launch"
 	LanguageContainerName = "Container"

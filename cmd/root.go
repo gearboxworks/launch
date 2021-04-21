@@ -1,38 +1,3 @@
-/*
-terminus == launch --name terminus -- --flag1 arg1 --flag2 arg2 --flag3 --flag4
-
-launch --gb-name terminus --gb-version 2.4.0 site:list --format=json --gb-project foo
-
-launch --gb-name terminus --gb-version 2.4.0 --gb-project foo site:list --format=json
-
-launch --gb-name terminus --gb-version 2.4.0 --gb-project site:list --format=json
-
-launch
-	[verb modifiers] uninstall	<gear name> <gear args>
-	[verb modifiers] install	<gear name> <gear args>
-	[verb modifiers] list		<gear name> <gear args>
-	[verb modifiers] import		<gear name> <gear args>
-	[verb modifiers] export		<gear name> <gear args>
-
-    [verb modifiers] start		<gear name> <gear args>
-	[verb modifiers] stop		<gear name> <gear args>
-
-	[verb modifiers] run		<gear name> <gear args>
-	[verb modifiers] shell		<gear name> <gear args>
-
-	[verb modifiers] build		<gear name>
-	[verb modifiers] publish	<gear name>
-	[verb modifiers] help
-
-[verb modifiers]
-	--help
-	--examples
-	--version
-	--provider	- docker, aws, vm, etc, (default:docker local socket)
-	--host		- default:localhost
-	--port		- default:2356
-	--project
-*/
 package cmd
 
 import (
@@ -44,6 +9,7 @@ import (
 	"github.com/gearboxworks/scribeHelpers/toolSelfUpdate"
 	"github.com/gearboxworks/scribeHelpers/ux"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"launch/defaults"
 	"os"
@@ -64,9 +30,10 @@ var CmdScribe *loadTools.TypeScribeArgs
 var ConfigFile string
 const flagConfigFile  	= "config"
 
-const DefaultJsonFile = "gearbox.json"
+// Scribe files absolutely cannot be called 'launch' as the launch config file is called 'launch.json'.
+const DefaultJsonFile = "scribe.json"
 const DefaultJsonString = "{}"
-const DefaultTemplateFile = "gearbox.tmpl"
+const DefaultTemplateFile = "scribe.tmpl"
 //const DefaultTemplateString = `
 //{{- $gear := NewGear }}
 //{{- $gear.ParseGearConfig .Json }}
@@ -77,6 +44,15 @@ const DefaultTemplateString = `{{ $gears := Gearbox .Json "" }}
 {{ $state := $gears.ListContainers "" }}
 {{ $state := $gears.Ls "" }}
 `
+
+var rootViper *viper.Viper
+var rootCmd = &cobra.Command {
+	Use:   defaults.BinaryName,
+	Short: ux.SprintfBlue("%s %s launcher", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long: ux.SprintfBlue("%s %s launcher", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Run: gbRootFunc,
+	TraverseChildren: true,
+}
 
 
 type redirectHelp struct {
@@ -123,9 +99,6 @@ func init() {
 	CobraHelp.SetLevelAdvanced(gbBuildCmd, gbCompletionCmd, CmdScribe.GetCmd())
 	CobraHelp.SetType("Guru", CmdScribe.GetCmd(), CmdSelfUpdate.GetCmd())
 
-	cobra.OnInitialize(initConfig)
-	cobra.EnableCommandSorting = false
-
 	rootCmd.PersistentFlags().StringVar(&ConfigFile, flagConfigFile, fmt.Sprintf("%s-config.json", defaults.BinaryName), ux.SprintfBlue("%s: config file.", defaults.BinaryName))
 	_ = rootCmd.PersistentFlags().MarkHidden(flagConfigFile)
 
@@ -146,6 +119,9 @@ func init() {
 	rootCmd.Flags().BoolVarP(&Cmd.Debug, flagDebug, "d", false, ux.SprintfBlue("Debug mode."))
 	rootCmd.Flags().BoolVarP(&Cmd.Quiet, flagQuiet, "q", false, ux.SprintfBlue("Silence all launch messages."))
 
+	cobra.OnInitialize(initConfig)
+	cobra.EnableCommandSorting = false
+
 	//rootCmd.Flags().BoolVarP(&Cmd.Completion, flagCompletion, "b", false, ux.SprintfBlue("Generate BASH completion script."))
 }
 
@@ -155,25 +131,63 @@ func initConfig() {
 	var err error
 
 	for range onlyOnce {
-		if Cmd.Config != "" {
-			// Use config file from the flag.
-			viper.SetConfigFile(Cmd.Config)
-		} else {
-			// Search config in home directory with name "launch" (without extension).
-			viper.AddConfigPath(GetLaunchDir())
-			viper.SetConfigName("launch")
-		}
+		rootViper = viper.New()
 
-		viper.AutomaticEnv() // read in environment variables that match
+		if Cmd.Config != "" {
+			rootViper.SetConfigFile(Cmd.Config)
+		} else {
+			rootViper.AddConfigPath(Cmd.Runtime.ConfigDir.String())
+			rootViper.SetConfigName("launch")
+		}
 
 		// If a config file is found, read it in.
-		err = viper.ReadInConfig()
+		err = rootViper.ReadInConfig()
 		if err == nil {
+			err = rootViper.MergeInConfig()
+			//err = viper.Unmarshal(Cmd)
 			//ux.Printf("using config file '%s'\n", viper.ConfigFileUsed())
 		} else {
-			_ = viper.WriteConfig()
+			rootViper.SetDefault(flagProvider, defaults.DefaultProvider)
+			rootViper.SetDefault(flagHost, "")
+			rootViper.SetDefault(flagPort, "")
+			rootViper.SetDefault(flagProject, defaults.DefaultPathNone)
+			rootViper.SetDefault(flagStatus, false)
+			rootViper.SetDefault(flagDebug, false)
+			err = rootViper.WriteConfig()
 		}
+
+		rootViper.SetEnvPrefix(defaults.EnvPrefix)
+		rootViper.AutomaticEnv() // read in environment variables that match
+		err = bindFlags(rootCmd, rootViper)
 	}
+
+	if err != nil {
+		Cmd.State.SetError(err)
+	}
+
+	//return err
+}
+
+
+func bindFlags(cmd *cobra.Command, v *viper.Viper) error {
+	var err error
+
+	cmd.Flags().VisitAll(func(f *pflag.Flag) {
+		// Environment variables can't have dashes in them, so bind them to their equivalent
+		// keys with underscores, e.g. --favorite-color to STING_FAVORITE_COLOR
+		if strings.Contains(f.Name, "-") {
+			envVarSuffix := strings.ToUpper(strings.ReplaceAll(f.Name, "-", "_"))
+			err = v.BindEnv(f.Name, fmt.Sprintf("%s_%s", defaults.EnvPrefix, envVarSuffix))
+		}
+
+		// Apply the viper config value to the flag when the flag is not set and viper has a value
+		if !f.Changed && v.IsSet(f.Name) {
+			val := v.Get(f.Name)
+			err = cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val))
+		}
+	})
+
+	return err
 }
 
 
@@ -366,15 +380,6 @@ func SetCmd() {
 			}
 		}
 	}
-}
-
-
-var rootCmd = &cobra.Command {
-	Use:   defaults.BinaryName,
-	Short: ux.SprintfBlue("%s %s launcher", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long: ux.SprintfBlue("%s %s launcher", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Run: gbRootFunc,
-	TraverseChildren: true,
 }
 
 
