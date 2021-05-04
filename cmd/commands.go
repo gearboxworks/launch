@@ -177,6 +177,7 @@ func gbHelpFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsNotOk() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		if len(args) == 0 {
 			CobraHelp.ChangeHelp(rootCmd, tmplUsageCmd, tmplHelpCmd)
@@ -233,6 +234,7 @@ func gbHelpAllFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsNotOk() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		parent := cmd.Root()
 
@@ -309,6 +311,7 @@ func gbHelpBasicFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsNotOk() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		parent := cmd.Root()
 		for _, v := range parent.Commands() {
@@ -342,6 +345,7 @@ func gbHelpAdvancedFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsNotOk() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		parent := cmd.Root()
 		for _, v := range parent.Commands() {
@@ -376,6 +380,7 @@ func gbHelpFlagsFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsNotOk() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		CobraHelp.ChangeHelp(rootCmd, tmplFlagUsage, tmplFlagHelp)
 		_ = rootCmd.Help()
@@ -406,6 +411,7 @@ func gbHelpExamplesFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsNotOk() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		//CobraHelp.ChangeHelp(rootCmd, tmplFlagUsage, tmplFlagHelp)
 		//_ = rootCmd.Help()
@@ -436,6 +442,7 @@ func gbCompletionFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsNotOk() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		var out bytes.Buffer
 		_ = cmd.GenBashCompletion(&out)

@@ -93,3 +93,13 @@ func New() *TypeLaunchArgs {
 
 	return &la
 }
+
+func (la *TypeLaunchArgs) SetDebug(d bool) {
+	la.Debug = d
+	if la.Runtime != nil {
+		la.Runtime.Debug = d
+	}
+	if la.State != nil {
+		la.State.DebugSet(d)
+	}
+}

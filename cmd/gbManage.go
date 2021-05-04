@@ -31,7 +31,7 @@ import (
 //		if Cmd.State.IsNotOk() {
 //			break
 //		}
-//
+//		Cmd.SetDebug(ga.Debug)
 //		//switch {
 //		//	case len(args) == 0:
 //				_ = cmd.Help()
@@ -62,6 +62,7 @@ func gbSearchFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsNotOk() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbSearchFunc(args)
 		if Cmd.State.IsNotOk() {
@@ -116,6 +117,7 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsNotOk() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbInstallFunc()
 		if Cmd.State.IsNotOk() {
@@ -130,19 +132,25 @@ func (ga *LaunchArgs) gbInstallFunc() *ux.State {
 	}
 
 	for range onlyOnce {
-		ga.State = ga.Gears.Search(ga.Name, ga.Version)
-		if !ga.State.GetResponseAsBool() {
-			ga.State.PrintResponse()
-			ux.PrintflnBlue("")
-			ga.gbSearchFunc([]string{})
-			ga.State.SetWarning("%s not found in registry.", ga.Gears.Language.ImageName)
-			break
-		}
-		if ga.State.IsNotOk() {
-			break
+		var found bool
+
+		ga.State = ga.Gears.FindImage(ga.Name, ga.Version)
+		found = ga.Gears.State.GetResponseAsBool()
+
+		if !found {
+			ga.State = ga.Gears.Search(ga.Name, ga.Version)
+			if !ga.State.GetResponseAsBool() {
+				ga.State.PrintResponse()
+				ux.PrintflnBlue("")
+				ga.gbSearchFunc([]string{})
+				ga.State.SetWarning("%s not found in registry.", ga.Gears.Language.ImageName)
+				break
+			}
+			if ga.State.IsNotOk() {
+				break
+			}
 		}
 
-		var found bool
 		found, ga.State = ga.Gears.FindContainer(ga.Name, ga.Version)
 		if ga.State.IsError() {
 			break
@@ -231,6 +239,7 @@ func gbUninstallFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsNotOk() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbUninstallFunc()
 		if Cmd.State.IsNotOk() {
@@ -325,6 +334,7 @@ func gbReinstallFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsNotOk() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbReinstallFunc()
 		if Cmd.State.IsNotOk() {
@@ -378,6 +388,7 @@ func gbCleanFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsNotOk() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbCleanFunc()
 		if Cmd.State.IsNotOk() {
@@ -460,6 +471,7 @@ func gbStartFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsNotOk() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbStartFunc()
 		if Cmd.State.IsNotOk() {
@@ -561,6 +573,7 @@ func gbStopFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsNotOk() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbStopFunc()
 		if Cmd.State.IsNotOk() {
@@ -645,6 +658,7 @@ func gbLogsFunc(cmd *cobra.Command, args []string) {
 			}
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		if len(args) == 0 {
 			Cmd.State.SetError("Need to specify a %s.", defaults.LanguageContainerName)

@@ -111,6 +111,8 @@ func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
 			ga.TmpDir = DeterminePath(Cmd.TmpDir)
 		}
 
+		ga.Debug = Cmd.Debug
+
 		//ga.Provider = toolGear.NewProvider(Cmd.Runtime)
 		//ga.State = ga.Provider.State
 		//if ga.State.IsError() {

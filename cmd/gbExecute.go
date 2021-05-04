@@ -37,6 +37,7 @@ func gbRunFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsError() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbRunFunc()
 		if Cmd.State.IsError() {
@@ -111,6 +112,7 @@ func gbShellFunc(cmd *cobra.Command, args []string) {
 			//}
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbShellFunc()
 		if Cmd.State.IsError() {
@@ -138,6 +140,7 @@ func (ga *LaunchArgs) gbShellFunc() *ux.State {
 			break
 		}
 
+		//ga.Gears.Selected.SetDebug(ga.Debug)
 		ga.State = ga.Gears.SelectedSsh(true, ga.SshStatus, ga.Mount, ga.Args[1:])
 
 		if ga.Temporary {

@@ -30,6 +30,7 @@ func gbListFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsNotOk() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		switch {
 			case len(args) == 0:
@@ -89,6 +90,7 @@ func gbDetailsFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsNotOk() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbListFunc()
 		if Cmd.State.IsNotOk() {
@@ -120,6 +122,7 @@ func gbLinksFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsNotOk() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbLinksFunc()
 		if Cmd.State.IsNotOk() {
@@ -175,6 +178,7 @@ func gbPortsFunc(cmd *cobra.Command, args []string) {
 		if Cmd.State.IsNotOk() {
 			break
 		}
+		Cmd.SetDebug(ga.Debug)
 
 		//ga.Gears.Selected.ScanPorts()
 
