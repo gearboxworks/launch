@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"github.com/gearboxworks/scribeHelpers/toolGear"
 	"github.com/gearboxworks/scribeHelpers/toolRuntime"
 	"github.com/gearboxworks/scribeHelpers/ux"
 	"launch/defaults"
+	"time"
 )
 
 
@@ -23,10 +25,11 @@ const (
 	flagProject    = "project"
 	flagMount      = "mount"
 	flagTmpDir     = "tmp"
-	flagCompletion = "completion"
+	//flagCompletion = "completion"
 	flagQuiet      = "quiet"
 	flagTemporary  = "temporary"
 	flagStatus     = "status"
+	flagTimeout    = "timeout"
 )
 
 
@@ -44,15 +47,16 @@ type TypeLaunchArgs struct {
 	Mount      string // Flag: --mount
 	TmpDir     string // Flag: --tmp
 
-	NoCreate   bool   // Flag: --no-create
-	Debug      bool   // Flag: --debug
-	Quiet      bool   // Flag: --quiet
-	Temporary  bool   // Flag: --temporary
-	Status     bool   // Flag: --status
+	NoCreate   bool   			// Flag: --no-create
+	Debug      bool   			// Flag: --debug
+	Quiet      bool   			// Flag: --quiet
+	Temporary  bool   			// Flag: --temporary
+	Status     bool   			// Flag: --status
+	Timeout    time.Duration  	// Flag: --timeout
 
 	HelpAll        bool
 	HelpExamples   bool
-	HelpFlags   bool
+	HelpFlags      bool
 
 	Runtime        *toolRuntime.TypeRuntime
 	State          *ux.State
@@ -81,6 +85,7 @@ func New() *TypeLaunchArgs {
 		Quiet:        false,
 		Temporary:    false,
 		Status:       false,
+		Timeout:      toolGear.DefaultTimeout,
 
 		HelpAll:      false,
 		HelpExamples: false,
@@ -94,12 +99,20 @@ func New() *TypeLaunchArgs {
 	return &la
 }
 
-func (la *TypeLaunchArgs) SetDebug(d bool) {
+func (la *TypeLaunchArgs) _SetDebug(d bool) {
 	la.Debug = d
 	if la.Runtime != nil {
 		la.Runtime.Debug = d
 	}
 	if la.State != nil {
 		la.State.DebugSet(d)
+	}
+}
+
+func (la *TypeLaunchArgs) _SetOptions(ga LaunchArgs) {
+	la._SetDebug(ga.Debug)
+	la.Timeout = ga.Timeout
+	if la.Runtime.Timeout == 0 {
+		la.Runtime.Timeout = ga.Timeout
 	}
 }

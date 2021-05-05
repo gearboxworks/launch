@@ -83,20 +83,30 @@ func init() {
 	CobraHelp.ChangeHelp(rootCmd, tmplUsage, tmplHelp)
 
 	// Level 1 commands.
-	CobraHelp.AddCommands("Manage", rootCmd, gbSearchCmd, gbListCmd, gbInstallCmd, gbUninstallCmd, gbReinstallCmd, gbCleanCmd, gbLogsCmd, gbStartCmd, gbStopCmd)
-	CobraHelp.AddCommands("Execute", rootCmd, gbRunCmd, gbShellCmd)
-	CobraHelp.AddCommands("Build", rootCmd, gbBuildCmd)
-	CobraHelp.AddCommands("Guru", rootCmd, gbCompletionCmd)
-	CobraHelp.AddCommands("Help", rootCmd, gbHelpCmd)
+	CobraHelp.AddCommands("Manage", rootCmd,
+		gbSearchCmd, gbListCmd, gbInstallCmd, gbUninstallCmd, gbReinstallCmd, gbCleanCmd, gbLogsCmd, gbStartCmd, gbStopCmd)
+	CobraHelp.AddCommands("Execute", rootCmd,
+		gbRunCmd, gbShellCmd)
+	CobraHelp.AddCommands("Build", rootCmd,
+		gbBuildCmd)
+	CobraHelp.AddCommands("Guru", rootCmd,
+		gbCompletionCmd, gbConfigCmd)
+	CobraHelp.AddCommands("Help", rootCmd,
+		gbHelpCmd)
 
 	// Level 2 commands.
-	CobraHelp.AddCommands("Build", gbBuildCmd, gbBuildCreateCmd, gbUnitTestCmd, gbPublishCmd, gbBuildCleanCmd, gbSaveCmd, gbLoadCmd)
-	CobraHelp.AddCommands("List", gbListCmd, gbDetailsCmd, gbLinksCmd, gbPortsCmd)
-	CobraHelp.AddCommands("Help", gbHelpCmd, gbHelpFlagsCmd, gbHelpExamplesCmd, gbHelpBasicCmd, gbHelpAdvancedCmd, gbHelpAllCmd)
+	CobraHelp.AddCommands("Config", gbConfigCmd,
+		gbConfigTimeoutCmd)
+	CobraHelp.AddCommands("Build", gbBuildCmd,
+		gbBuildCreateCmd, gbBuildStartCmd, gbBuildStopCmd, gbBuildCleanCmd, gbUnitTestCmd, gbPublishCmd, gbSaveCmd, gbLoadCmd)
+	CobraHelp.AddCommands("List", gbListCmd,
+		gbDetailsCmd, gbLinksCmd, gbPortsCmd)
+	CobraHelp.AddCommands("Help", gbHelpCmd,
+		gbHelpFlagsCmd, gbHelpExamplesCmd, gbHelpBasicCmd, gbHelpAdvancedCmd, gbHelpAllCmd)
 
 	CobraHelp.SetLevelDefault(gbRunCmd, gbShellCmd, gbListCmd, gbSearchCmd, CmdSelfUpdate.GetCmd())
 	CobraHelp.SetLevelAdvanced(gbInstallCmd, gbUninstallCmd, gbReinstallCmd, gbCleanCmd, gbLogsCmd, gbStartCmd, gbStopCmd)
-	CobraHelp.SetLevelAdvanced(gbBuildCmd, gbCompletionCmd, CmdScribe.GetCmd())
+	CobraHelp.SetLevelAdvanced(gbBuildCmd, gbCompletionCmd, gbConfigCmd, CmdScribe.GetCmd())
 	CobraHelp.SetType("Guru", CmdScribe.GetCmd(), CmdSelfUpdate.GetCmd())
 
 	rootCmd.PersistentFlags().StringVar(&ConfigFile, flagConfigFile, fmt.Sprintf("%s-config.json", defaults.BinaryName), ux.SprintfBlue("%s: config file.", defaults.BinaryName))
@@ -110,6 +120,7 @@ func init() {
 	rootCmd.Flags().StringVarP(&Cmd.Provider, flagProvider, "", defaults.DefaultProvider, ux.SprintfBlue("Set virtual provider"))
 	rootCmd.Flags().StringVarP(&Cmd.Host, flagHost, "", "", ux.SprintfBlue("Set virtual provider host."))
 	rootCmd.Flags().StringVarP(&Cmd.Port, flagPort, "", "", ux.SprintfBlue("Set virtual provider port."))
+	rootCmd.Flags().DurationVarP(&Cmd.Timeout, flagTimeout, "", toolGear.DefaultTimeout, ux.SprintfBlue("Timeout for Provider."))
 	rootCmd.Flags().StringVarP(&Cmd.Project, flagProject, "p", defaults.DefaultPathNone, ux.SprintfBlue("Mount project directory."))
 	rootCmd.Flags().StringVarP(&Cmd.Mount, flagMount, "m", defaults.DefaultPathNone, ux.SprintfBlue("Mount arbitrary directory via SSHFS."))
 	rootCmd.Flags().StringVarP(&Cmd.TmpDir, flagTmpDir, "", defaults.DefaultPathNone, ux.SprintfBlue("Alternate TMP dir mount point."))
@@ -153,6 +164,7 @@ func initConfig() {
 			rootViper.SetDefault(flagProject, defaults.DefaultPathNone)
 			rootViper.SetDefault(flagStatus, false)
 			rootViper.SetDefault(flagDebug, false)
+			rootViper.SetDefault(flagTimeout, defaults.DefaultTimeout)
 			err = rootViper.WriteConfig()
 		}
 
@@ -200,6 +212,7 @@ func IsInstalled() bool {
 			break
 		}
 
+		//goland:noinspection SpellCheckingInspection
 		binfile := Cmd.Runtime.BinDir.Join(Cmd.Runtime.CmdFile)
 		if !binfile.FileExists() {
 			// launch binary NOT found
@@ -207,10 +220,6 @@ func IsInstalled() bool {
 		}
 
 		path, err := exec.LookPath(Cmd.Runtime.CmdFile)
-
-		//fmt.Printf("path: %s\n", path)
-		//fmt.Printf("binfile: %s\n", binfile.String())
-		//fmt.Printf("Cmd.Runtime.BinDir: %s\n", Cmd.Runtime.Cmd)
 
 		if err != nil {
 			// launch binary NOT found in PATH
@@ -233,11 +242,7 @@ func IsInstalled() bool {
 			os.Exit(0)	// Sad... really sad...
 		}
 
-		//fmt.Printf("binfile: %s\n", binfile.String())
-		//fmt.Printf("Cmd.Runtime.Cmd: %s\n", Cmd.Runtime.Cmd)
-
 		// Remove old launch binary.
-		//ux.PrintflnBlue("%s installed properly. You can remove the '%s' binary.", defaults.BinaryName, Cmd.Runtime.Cmd)
 		ux.PrintflnBlue("%s installed properly, but '%s' is not in your PATH.", defaults.BinaryName, Cmd.Runtime.BinDir.String())
 		os.Exit(0)	// Sad... really sad...
 	}
@@ -420,27 +425,6 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 		ux.PrintflnError("Unknown command: '%s'", strings.Join(args, " "))
 		Cmd.State.SetError()
 		Cmd.State.SetExitCode(1)
-
-		//switch {
-		//	case len(args) == 0:
-		//		_ = cmd.Help()
-		//
-		//	case len(args) == 1:
-		//		if _, ok := courtesyHelp[args[0]]; ok {
-		//			ux.PrintflnWarning("Did you mean '%s'?", courtesyHelp[args[0]].Text)
-		//		} else {
-		//			ux.PrintflnWarning("Unknown command: '%s'", strings.Join(args, " "))
-		//		}
-		//
-		//	case len(args) > 1:
-		//		if _, ok := courtesyHelp[args[0]]; ok {
-		//			ux.PrintflnWarning("Did you mean '%s'?", courtesyHelp[args[0]].Text, strings.Join(args[1:], " "))
-		//		} else {
-		//			ux.PrintflnWarning("Unknown command: '%s'", strings.Join(args, " "))
-		//		}
-		//}
-		//
-		//break
 	}
 
 }

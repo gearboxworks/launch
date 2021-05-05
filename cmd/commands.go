@@ -10,6 +10,7 @@ import (
 )
 
 
+//goland:noinspection SpellCheckingInspection
 var tmplUsageCmd = `
 {{ SprintfBlue "Usage: " }}    	{{ GetUsage . }}
 
@@ -64,7 +65,7 @@ var tmplHelpCmd = `{{ GetVersion . }}
 {{- end }}
 `
 
-
+//goland:noinspection SpellCheckingInspection
 var tmplUsageSmall = `{{ SprintfGreen .CommandPath }}
 	- {{ GetUsage . }}
 	- {{ with (or .Long .Short) }}{{- . | trimTrailingWhitespaces }}{{- end }}
@@ -173,11 +174,11 @@ func gbHelpFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, false)
 		if Cmd.State.IsNotOk() {
 			break
 		}
-		Cmd.SetDebug(ga.Debug)
+		//Cmd.SetDebug(ga.Debug)
 
 		if len(args) == 0 {
 			CobraHelp.ChangeHelp(rootCmd, tmplUsageCmd, tmplHelpCmd)
@@ -230,11 +231,11 @@ func gbHelpAllFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, false)
 		if Cmd.State.IsNotOk() {
 			break
 		}
-		Cmd.SetDebug(ga.Debug)
+		//Cmd.SetDebug(ga.Debug)
 
 		parent := cmd.Root()
 
@@ -307,11 +308,11 @@ func gbHelpBasicFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, false)
 		if Cmd.State.IsNotOk() {
 			break
 		}
-		Cmd.SetDebug(ga.Debug)
+		//Cmd.SetDebug(ga.Debug)
 
 		parent := cmd.Root()
 		for _, v := range parent.Commands() {
@@ -341,11 +342,11 @@ func gbHelpAdvancedFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, false)
 		if Cmd.State.IsNotOk() {
 			break
 		}
-		Cmd.SetDebug(ga.Debug)
+		//Cmd.SetDebug(ga.Debug)
 
 		parent := cmd.Root()
 		for _, v := range parent.Commands() {
@@ -376,11 +377,11 @@ func gbHelpFlagsFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, false)
 		if Cmd.State.IsNotOk() {
 			break
 		}
-		Cmd.SetDebug(ga.Debug)
+		//Cmd.SetDebug(ga.Debug)
 
 		CobraHelp.ChangeHelp(rootCmd, tmplFlagUsage, tmplFlagHelp)
 		_ = rootCmd.Help()
@@ -407,11 +408,11 @@ func gbHelpExamplesFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, false)
 		if Cmd.State.IsNotOk() {
 			break
 		}
-		Cmd.SetDebug(ga.Debug)
+		//Cmd.SetDebug(ga.Debug)
 
 		//CobraHelp.ChangeHelp(rootCmd, tmplFlagUsage, tmplFlagHelp)
 		//_ = rootCmd.Help()
@@ -438,11 +439,11 @@ func gbCompletionFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, false)
 		if Cmd.State.IsNotOk() {
 			break
 		}
-		Cmd.SetDebug(ga.Debug)
+		//Cmd.SetDebug(ga.Debug)
 
 		var out bytes.Buffer
 		_ = cmd.GenBashCompletion(&out)

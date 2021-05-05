@@ -6,6 +6,7 @@ import (
 	"github.com/gearboxworks/scribeHelpers/ux"
 	"github.com/spf13/cobra"
 	"launch/defaults"
+	"strings"
 )
 
 
@@ -26,21 +27,21 @@ func gbBuildFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, false)
 		if Cmd.State.IsNotOk() {
 			break
 		}
 
-		for _, c := range cmd.Commands() {
-			for k, v := range c.Annotations {
-				fmt.Printf(`%s - "%s": "%s"`,
-					c.Use,
-					k,
-					v,
-					)
-				fmt.Printf("\n")
-			}
-		}
+		//for _, c := range cmd.Commands() {
+		//	for k, v := range c.Annotations {
+		//		fmt.Printf(`%s - "%s": "%s"`,
+		//			c.Use,
+		//			k,
+		//			v,
+		//			)
+		//		fmt.Printf("\n")
+		//	}
+		//}
 
 		switch {
 			case len(args) == 0:
@@ -67,7 +68,7 @@ func gbBuildCreateFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, true)
 		if Cmd.State.IsNotOk() {
 			break
 		}
@@ -78,14 +79,15 @@ func gbBuildCreateFunc(cmd *cobra.Command, args []string) {
 		}
 	}
 }
-
 func (ga *LaunchArgs) gbBuildCreateFunc() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
 	}
 
 	for range onlyOnce {
-		ga.State = ga.Gears.CreateImage(ga.Name, ga.Version)
+		var gearJsonFile string
+		gearJsonFile = "gearbox.json"
+		ga.State = ga.Gears.CreateImage(gearJsonFile, defaults.Organization, ga.Name, ga.Version)
 	}
 
 	if !ga.Quiet {
@@ -112,7 +114,7 @@ func gbBuildCleanFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, true)
 		if Cmd.State.IsNotOk() {
 			break
 		}
@@ -222,6 +224,101 @@ func (ga *LaunchArgs) gbBuildCleanFunc() *ux.State {
 
 
 // ******************************************************************************** //
+var gbBuildStartCmd = &cobra.Command{
+	Use:					fmt.Sprintf("start <%s name>", defaults.LanguageContainerName),
+	Short:					ux.SprintfBlue("Start a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfBlue("Start a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch build start golang"),
+	DisableFlagParsing:		false,
+	Run:					gbBuildStartFunc,
+	Args:					cobra.ExactArgs(1),
+}
+
+//goland:noinspection GoUnusedParameter
+func gbBuildStartFunc(cmd *cobra.Command, args []string) {
+	for range onlyOnce {
+		var ga LaunchArgs
+
+		Cmd.State = ga.ProcessArgs(rootCmd, args, true)
+		if Cmd.State.IsNotOk() {
+			break
+		}
+		//Cmd.SetDebug(ga.Debug)
+
+		Cmd.State = ga.gbStartFunc()
+		if Cmd.State.IsNotOk() {
+			break
+		}
+	}
+}
+func (ga *LaunchArgs) gbBuildStartFunc() *ux.State {
+	if state := ux.IfNilReturnError(ga); state.IsError() {
+		return state
+	}
+
+	for range onlyOnce {
+		var found bool
+		found, ga.State = ga.Gears.FindContainer(ga.Name, ga.Version)
+		if ga.State.IsNotOk() {
+			break
+		}
+		if !found {
+			ga.State.SetError("%s not found '%s:%s'.", defaults.LanguageContainerName, ga.Name, ga.Version)
+			break
+		}
+
+		if ga.State.IsRunning() {
+			ga.State.SetOk("%s '%s:%s' already started.", defaults.LanguageContainerName, ga.Name, ga.Version)
+			ga.State.SetOutput("")
+			break
+		}
+
+
+		if !ga.Quiet {
+			ux.PrintflnNormal("Starting %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
+		}
+		ga.State = ga.Gears.SelectedStart()
+		if ga.State.IsError() {
+			if strings.Contains(ga.State.GetError().Error(), "address already in use") {
+				//ux.PrintflnRed("Error: There are ports already used.")
+				//saved := gear.State.GetError()
+				ga.Gears.Selected.ListImagePorts()
+				ga.State.SetError("Error: There are ports already used.")
+				break
+			}
+			ga.State.SetError("%s '%s:%s' start error - %s", defaults.LanguageContainerName, ga.Name, ga.Version, ga.State.GetError())
+			break
+		}
+
+		if ga.State.IsRunning() {
+			ga.State.SetOk("%s '%s:%s' started OK", defaults.LanguageContainerName, ga.Name, ga.Version)
+			ga.State.SetOutput("")
+			break
+		}
+
+		ga.State.SetError("%s '%s:%s' cannot be started", defaults.LanguageContainerName, ga.Name, ga.Version)
+	}
+
+	if !ga.Quiet {
+		ga.State.PrintResponse()
+	}
+	return ga.State
+}
+
+
+// ******************************************************************************** //
+var gbBuildStopCmd = &cobra.Command{
+	Use:					fmt.Sprintf("stop <%s name>", defaults.LanguageContainerName),
+	Short:					ux.SprintfBlue("Stop a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:					ux.SprintfBlue("Stop a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:				ux.SprintfWhite("launch build stop golang"),
+	DisableFlagParsing:		false,
+	Run:					gbStopFunc,
+	Args:					cobra.ExactArgs(1),
+}
+
+
+// ******************************************************************************** //
 var gbPublishCmd = &cobra.Command {
 	Use:					fmt.Sprintf("publish <%s name>", defaults.LanguageContainerName),
 	SuggestFor:				[]string{"upload"},
@@ -238,7 +335,7 @@ func gbPublishFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, true)
 		if Cmd.State.IsNotOk() {
 			break
 		}
@@ -249,7 +346,6 @@ func gbPublishFunc(cmd *cobra.Command, args []string) {
 		}
 	}
 }
-
 func (ga *LaunchArgs) gbPublishFunc() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
@@ -319,7 +415,7 @@ func gbSaveFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, true)
 		if Cmd.State.IsNotOk() {
 			break
 		}
@@ -346,7 +442,7 @@ func gbLoadFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, true)
 		if Cmd.State.IsNotOk() {
 			break
 		}
@@ -373,7 +469,7 @@ func gbUnitTestFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, true)
 		if Cmd.State.IsNotOk() {
 			break
 		}
@@ -384,7 +480,6 @@ func gbUnitTestFunc(cmd *cobra.Command, args []string) {
 		}
 	}
 }
-
 func (ga *LaunchArgs) gbUnitTestFunc() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state

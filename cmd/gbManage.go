@@ -58,11 +58,11 @@ func gbSearchFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, true)
 		if Cmd.State.IsNotOk() {
 			break
 		}
-		Cmd.SetDebug(ga.Debug)
+		//Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbSearchFunc(args)
 		if Cmd.State.IsNotOk() {
@@ -70,7 +70,6 @@ func gbSearchFunc(cmd *cobra.Command, args []string) {
 		}
 	}
 }
-
 func (ga *LaunchArgs) gbSearchFunc(args []string) *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
@@ -113,11 +112,11 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, true)
 		if Cmd.State.IsNotOk() {
 			break
 		}
-		Cmd.SetDebug(ga.Debug)
+		//Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbInstallFunc()
 		if Cmd.State.IsNotOk() {
@@ -125,7 +124,6 @@ func gbInstallFunc(cmd *cobra.Command, args []string) {
 		}
 	}
 }
-
 func (ga *LaunchArgs) gbInstallFunc() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
@@ -235,11 +233,11 @@ func gbUninstallFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, true)
 		if Cmd.State.IsNotOk() {
 			break
 		}
-		Cmd.SetDebug(ga.Debug)
+		//Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbUninstallFunc()
 		if Cmd.State.IsNotOk() {
@@ -247,7 +245,6 @@ func gbUninstallFunc(cmd *cobra.Command, args []string) {
 		}
 	}
 }
-
 func (ga *LaunchArgs) gbUninstallFunc() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
@@ -330,11 +327,11 @@ func gbReinstallFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, true)
 		if Cmd.State.IsNotOk() {
 			break
 		}
-		Cmd.SetDebug(ga.Debug)
+		//Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbReinstallFunc()
 		if Cmd.State.IsNotOk() {
@@ -342,7 +339,6 @@ func gbReinstallFunc(cmd *cobra.Command, args []string) {
 		}
 	}
 }
-
 func (ga *LaunchArgs) gbReinstallFunc() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
@@ -384,11 +380,11 @@ func gbCleanFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, true)
 		if Cmd.State.IsNotOk() {
 			break
 		}
-		Cmd.SetDebug(ga.Debug)
+		//Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbCleanFunc()
 		if Cmd.State.IsNotOk() {
@@ -396,7 +392,6 @@ func gbCleanFunc(cmd *cobra.Command, args []string) {
 		}
 	}
 }
-
 func (ga *LaunchArgs) gbCleanFunc() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
@@ -467,11 +462,11 @@ func gbStartFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, true)
 		if Cmd.State.IsNotOk() {
 			break
 		}
-		Cmd.SetDebug(ga.Debug)
+		//Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbStartFunc()
 		if Cmd.State.IsNotOk() {
@@ -479,7 +474,6 @@ func gbStartFunc(cmd *cobra.Command, args []string) {
 		}
 	}
 }
-
 func (ga *LaunchArgs) gbStartFunc() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
@@ -527,7 +521,6 @@ func (ga *LaunchArgs) gbStartFunc() *ux.State {
 		ga.State = ga.Gears.SelectedStart()
 		if ga.State.IsError() {
 			if strings.Contains(ga.State.GetError().Error(), "address already in use") {
-				//ux.PrintflnRed("Error: There are ports already used.")
 				//saved := gear.State.GetError()
 				ga.Gears.Selected.ListImagePorts()
 				ga.State.SetError("Error: There are ports already used.")
@@ -569,11 +562,11 @@ func gbStopFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, true)
 		if Cmd.State.IsNotOk() {
 			break
 		}
-		Cmd.SetDebug(ga.Debug)
+		//Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbStopFunc()
 		if Cmd.State.IsNotOk() {
@@ -581,7 +574,6 @@ func gbStopFunc(cmd *cobra.Command, args []string) {
 		}
 	}
 }
-
 func (ga *LaunchArgs) gbStopFunc() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state
@@ -651,14 +643,14 @@ func gbLogsFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, true)
 		if Cmd.State.IsError() {
 			if Cmd.State.IsNotOk() {
 				Cmd.State.PrintResponse()
 			}
 			break
 		}
-		Cmd.SetDebug(ga.Debug)
+		//Cmd.SetDebug(ga.Debug)
 
 		if len(args) == 0 {
 			Cmd.State.SetError("Need to specify a %s.", defaults.LanguageContainerName)
@@ -668,7 +660,6 @@ func gbLogsFunc(cmd *cobra.Command, args []string) {
 		Cmd.State = ga.gbLogsFunc()
 	}
 }
-
 func (ga *LaunchArgs) gbLogsFunc() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
 		return state

@@ -33,11 +33,11 @@ func gbRunFunc(cmd *cobra.Command, args []string) {
 		//fmt.Printf("DEBUG: flagQuiet: %v\n", br)
 		//fmt.Printf("DEBUG: DisableFlagParsing: %v\n", rootCmd.DisableFlagParsing)
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, true)
 		if Cmd.State.IsError() {
 			break
 		}
-		Cmd.SetDebug(ga.Debug)
+		//Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbRunFunc()
 		if Cmd.State.IsError() {
@@ -105,14 +105,14 @@ func gbShellFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
 
-		Cmd.State = ga.ProcessArgs(rootCmd, args)
+		Cmd.State = ga.ProcessArgs(rootCmd, args, true)
 		if Cmd.State.IsError() {
 			//if Cmd.State.IsNotOk() {
 			//	Cmd.State.PrintResponse()
 			//}
 			break
 		}
-		Cmd.SetDebug(ga.Debug)
+		//Cmd.SetDebug(ga.Debug)
 
 		Cmd.State = ga.gbShellFunc()
 		if Cmd.State.IsError() {

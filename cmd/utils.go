@@ -11,10 +11,10 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
-
-//goland:noinspection GoUnusedParameter
+//goland:noinspection GoUnusedFunction
 func showArgs(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		flargs := cmd.Flags().Args()
@@ -44,6 +44,7 @@ type LaunchArgs struct {
 	Quiet     bool
 	Debug     bool
 	NoCreate  bool
+	Timeout   time.Duration
 
 	Provider  *toolGear.Provider
 	//GearRef   *toolGear.Gear
@@ -81,7 +82,7 @@ func (ga *LaunchArgs) IsValid() *ux.State {
 
 
 //goland:noinspection GoUnusedParameter
-func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
+func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string, scan bool) *ux.State {
 	for range onlyOnce {
 		ga.State = ux.NewState(Cmd.Runtime.CmdName, Cmd.Debug)
 
@@ -112,6 +113,12 @@ func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
 		}
 
 		ga.Debug = Cmd.Debug
+		Cmd.Runtime.Debug = Cmd.Debug
+		ga.State.DebugSet(Cmd.Debug)
+
+		ga.Timeout = Cmd.Timeout
+		Cmd.Runtime.Timeout = Cmd.Timeout
+
 
 		//ga.Provider = toolGear.NewProvider(Cmd.Runtime)
 		//ga.State = ga.Provider.State
@@ -147,9 +154,11 @@ func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string) *ux.State {
 			break
 		}
 
-		ga.State = ga.Gears.Get()
-		if ga.State.IsNotOk() {
-			break
+		if scan {
+			ga.State = ga.Gears.Get()
+			if ga.State.IsNotOk() {
+				break
+			}
 		}
 
 		//ga.GearRef = toolGear.NewGear(Cmd.Runtime)
