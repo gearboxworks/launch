@@ -44,6 +44,7 @@ replace github.com/gearboxworks/scribeHelpers/toolNetwork => ../scribeHelpers/to
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
+	github.com/Microsoft/hcsshim v0.8.16 // indirect
 	github.com/containerd/continuity v0.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gearboxworks/scribeHelpers/loadTools v0.0.0-20200621234507-ba6f08c6b68d
@@ -63,7 +64,6 @@ require (
 	github.com/mitchellh/mapstructure v1.3.2 // indirect
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
-	github.com/opencontainers/runc v0.1.1 // indirect
 	github.com/pelletier/go-toml v1.8.0 // indirect
 	github.com/pkg/profile v1.5.0
 	github.com/spf13/afero v1.3.0 // indirect
@@ -72,7 +72,6 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.0
-	google.golang.org/genproto v0.0.0-20200620020550-bd6e04640131 // indirect
 	gopkg.in/ini.v1 v1.57.0 // indirect
 	gotest.tools v2.2.0+incompatible // indirect
 )
