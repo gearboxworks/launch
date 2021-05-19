@@ -10,6 +10,12 @@ import (
 )
 
 
+// https://stackoverflow.com/questions/38804313/build-docker-image-from-go-code
+// https://www.nearform.com/blog/building-docker-images-in-go/
+// https://stackoverflow.com/questions/46878793/golang-docker-api-reports-invalid-argument-while-hitting-imagebuild
+// https://www.loginradius.com/blog/async/build-push-docker-images-golang/
+// 
+
 // ******************************************************************************** //
 var gbBuildCmd = &cobra.Command {
 	Use:					"build",

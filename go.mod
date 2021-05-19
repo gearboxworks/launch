@@ -8,9 +8,9 @@ replace github.com/gearboxworks/scribeHelpers/ux => ../scribeHelpers/ux
 
 replace github.com/gearboxworks/scribeHelpers/toolCopy => ../scribeHelpers/toolCopy
 
-replace github.com/docker/docker => github.com/docker/engine v1.4.2-0.20190717161051-705d9623b7c1
-
-// replace github.com/gearboxworks/scribeHelpers/toolDocker => ../scribeHelpers/toolDocker
+// replace github.com/docker/docker => github.com/docker/engine v1.4.2-0.20190717161051-705d9623b7c1
+//replace github.com/docker/docker => github.com/docker/engine v1.13.1
+//replace github.com/Sirupsen/logrus => github.com/sirupsen/logrus v1.8.1
 
 replace github.com/gearboxworks/scribeHelpers/toolExec => ../scribeHelpers/toolExec
 
@@ -66,6 +66,7 @@ require (
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/pelletier/go-toml v1.8.0 // indirect
 	github.com/pkg/profile v1.5.0
+	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/afero v1.3.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v1.0.0
