@@ -40,10 +40,11 @@ replace github.com/gearboxworks/scribeHelpers/toolGhr => ../scribeHelpers/toolGh
 
 replace github.com/gearboxworks/scribeHelpers/toolCobraHelp => ../scribeHelpers/toolCobraHelp
 
-replace github.com/gearboxworks/scribeHelpers/toolNetwork => ../scribeHelpers/toolNetwork
+//replace github.com/gearboxworks/scribeHelpers/toolNetwork => ../scribeHelpers/toolNetwork
 
 require (
-	github.com/Microsoft/hcsshim v0.8.16 // indirect
+	github.com/Microsoft/hcsshim v0.8.17 // indirect
+	github.com/containerd/containerd v1.5.2 // indirect
 	github.com/containerd/continuity v0.1.0 // indirect
 	github.com/gearboxworks/scribeHelpers/loadTools v0.0.0-20200621234507-ba6f08c6b68d
 	github.com/gearboxworks/scribeHelpers/toolCobraHelp v0.0.0-00010101000000-000000000000
@@ -61,7 +62,6 @@ require (
 	github.com/go-openapi/errors v0.19.6 // indirect
 	github.com/mitchellh/mapstructure v1.3.2 // indirect
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
-	github.com/pelletier/go-toml v1.8.0 // indirect
 	github.com/pkg/profile v1.5.0
 	github.com/spf13/afero v1.3.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
