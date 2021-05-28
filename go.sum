@@ -297,6 +297,9 @@ github.com/gdamore/encoding v1.0.0 h1:+7OoQ1Bc6eTm5niUzBa0Ctsh6JbMW6Ra+YNuAtDBdk
 github.com/gdamore/encoding v1.0.0/go.mod h1:alR0ol34c49FCSBLjhosxzcPHQbf2trDkoo5dl+VrEg=
 github.com/gdamore/tcell v1.3.0 h1:r35w0JBADPZCVQijYebl6YMWWtHRqVEGt7kL2eBADRM=
 github.com/gdamore/tcell v1.3.0/go.mod h1:Hjvr+Ofd+gLglo7RYKxxnzCBmev3BzsS67MebKS4zMM=
+github.com/gearboxworks/scribeHelpers v0.0.0-20210519040240-f89ca15ea2af h1:ok65580uBZhADPX7RmaxMHu63p07/xupvzMkOnwGzV4=
+github.com/gearboxworks/scribeHelpers/toolNetwork v0.0.0-20210519040240-f89ca15ea2af h1:0dwcQTA2cCJHRxvlpyj1i7l4FfqRhK0v/1CuirFfbj0=
+github.com/gearboxworks/scribeHelpers/toolNetwork v0.0.0-20210519040240-f89ca15ea2af/go.mod h1:kQz2XqXsPEDdl/bbyvYVBBWuFCsaA2tb6V1BUjarUWA=
 github.com/ghodss/yaml v0.0.0-20150909031657-73d445a93680/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/gizak/termui/v3 v3.1.0 h1:ZZmVDgwHl7gR7elfKf1xc4IudXZ5qqfDh4wExk4Iajc=

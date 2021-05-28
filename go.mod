@@ -53,6 +53,7 @@ require (
 	github.com/gearboxworks/scribeHelpers/toolGhr v0.0.0-20200621234507-ba6f08c6b68d // indirect
 	github.com/gearboxworks/scribeHelpers/toolGit v0.0.0-20200621234507-ba6f08c6b68d // indirect
 	github.com/gearboxworks/scribeHelpers/toolGitHub v0.0.0-20200621234507-ba6f08c6b68d // indirect
+	github.com/gearboxworks/scribeHelpers/toolNetwork v0.0.0-20210519040240-f89ca15ea2af // indirect
 	github.com/gearboxworks/scribeHelpers/toolRuntime v0.0.0
 	github.com/gearboxworks/scribeHelpers/toolSelfUpdate v0.0.0-20200621234507-ba6f08c6b68d
 	github.com/gearboxworks/scribeHelpers/toolService v0.0.0-20200621234507-ba6f08c6b68d // indirect
