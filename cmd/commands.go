@@ -171,7 +171,6 @@ var gbHelpCmd = &cobra.Command {
 
 //gbHelpFunc takes a pointer to cobra.command and
 //command arguments and output help message
-
 func gbHelpFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -266,7 +265,7 @@ func gbHelpAllFunc(cmd *cobra.Command, args []string) {
 	}
 }
 //DangerousHelpLoop takes pointer to cobra.command and
-// skip boolean value and return appropriate cobra.command object
+//skip boolean value and return appropriate cobra.command object
 func DangerousHelpLoop(cmd *cobra.Command, skip bool) *cobra.Command {
 	for range onlyOnce {
 		if cmd == nil {
@@ -310,7 +309,7 @@ var gbHelpBasicCmd = &cobra.Command {
 }
 
 //gbHelpBasicFunc takes a pointer to cobra.command object and
-// command arguments and output basic help message
+//command arguments and output basic help message
 func gbHelpBasicFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -345,7 +344,7 @@ var gbHelpAdvancedCmd = &cobra.Command {
 	//Args:					cobra.RangeArgs(0, 2),
 }
 //gbHelpAdvancedFunc takes a pointer to cobra.command object and
-// command arguments and output advanced help message
+//command arguments and output advanced help message
 func gbHelpAdvancedFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -382,7 +381,7 @@ var gbHelpFlagsCmd = &cobra.Command {
 
 //goland:noinspection GoUnusedParameter
 //gbHelpFlagsFunc takes a pointer to cobra.command object and
-// command arguments and output help flags message
+//command arguments and output help flags message
 func gbHelpFlagsFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -415,7 +414,7 @@ var gbHelpExamplesCmd = &cobra.Command {
 
 //goland:noinspection GoUnusedParameter
 //gbHelpExamplesFunc takes a pointer to cobra.command object and
-// command arguments and output help examples message
+//command arguments and output help examples message
 func gbHelpExamplesFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -448,7 +447,7 @@ var gbCompletionCmd = &cobra.Command {
 }
 
 //gbCompletionFunc takes a pointer to cobra.command object and
-// command arguments and output completion message
+//command arguments and output completion message
 func gbCompletionFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
