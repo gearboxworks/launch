@@ -31,13 +31,13 @@ func showArgs(cmd *cobra.Command, args []string) {
 }
 
 type LaunchArgs struct {
-	Name      string
-	Version   string
+	Name    string
+	Version string
 
-	Args      []string
-	Project   string
-	Mount     string
-	TmpDir    string
+	Args    []string
+	Project string
+	Mount   string
+	TmpDir  string
 
 	Temporary bool
 	SshStatus bool
@@ -46,14 +46,13 @@ type LaunchArgs struct {
 	NoCreate  bool
 	Timeout   time.Duration
 
-	Provider  *toolGear.Provider
+	Provider *toolGear.Provider
 	//GearRef   *toolGear.Gear
-	Gears     toolGear.Gears
+	Gears toolGear.Gears
 
-	Valid     bool
-	State     *ux.State
+	Valid bool
+	State *ux.State
 }
-
 
 func (ga *LaunchArgs) IsNil() *ux.State {
 	if state := ux.IfNilReturnError(ga); state.IsError() {
@@ -79,7 +78,6 @@ func (ga *LaunchArgs) IsValid() *ux.State {
 
 	return ga.State
 }
-
 
 //goland:noinspection GoUnusedParameter
 func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string, scan bool) *ux.State {
@@ -118,7 +116,6 @@ func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string, scan bool) 
 
 		ga.Timeout = Cmd.Timeout
 		Cmd.Runtime.Timeout = Cmd.Timeout
-
 
 		//ga.Provider = toolGear.NewProvider(Cmd.Runtime)
 		//ga.State = ga.Provider.State
@@ -173,7 +170,6 @@ func (ga *LaunchArgs) ProcessArgs(cmd *cobra.Command, args []string, scan bool) 
 	return ga.State
 }
 
-
 func (ga *LaunchArgs) ListLinks(create bool) *ux.State {
 	if state := ga.IsNil(); state.IsError() {
 		return state
@@ -192,7 +188,7 @@ func (ga *LaunchArgs) ListLinks(create bool) *ux.State {
 			}
 
 			if ga.Name == "" {
-				ga.State = dc.ListLinks()	// dc.Container.Version)
+				ga.State = dc.ListLinks() // dc.Container.Version)
 				continue
 			}
 
@@ -201,24 +197,24 @@ func (ga *LaunchArgs) ListLinks(create bool) *ux.State {
 			}
 
 			if ga.Version == "all" {
-				ga.State = dc.ListLinks()	// dc.Container.Version)
+				ga.State = dc.ListLinks() // dc.Container.Version)
 				continue
 			}
 
 			if ga.Version == gearConfig.LatestName {
 				if dc.Container.IsLatest {
-					ga.State = dc.ListLinks()	// dc.Container.Version)
+					ga.State = dc.ListLinks() // dc.Container.Version)
 				}
 				continue
 			}
 
 			if ga.Version == "" {
-				ga.State = dc.ListLinks()	// dc.Container.Version)
+				ga.State = dc.ListLinks() // dc.Container.Version)
 				continue
 			}
 
 			if dc.Container.Version == ga.Version {
-				ga.State = dc.ListLinks()	// dc.Container.Version)
+				ga.State = dc.ListLinks() // dc.Container.Version)
 				continue
 			}
 		}
@@ -226,7 +222,6 @@ func (ga *LaunchArgs) ListLinks(create bool) *ux.State {
 
 	return ga.State
 }
-
 
 //goland:noinspection GoUnusedParameter
 func (ga *LaunchArgs) ListPorts(remote bool) *ux.State {
@@ -273,7 +268,6 @@ func (ga *LaunchArgs) ListPorts(remote bool) *ux.State {
 	return ga.State
 }
 
-
 func (ga *LaunchArgs) CreateLinks(version string) *ux.State {
 	if state := ga.IsNil(); state.IsError() {
 		return state
@@ -285,7 +279,6 @@ func (ga *LaunchArgs) CreateLinks(version string) *ux.State {
 
 	return ga.State
 }
-
 
 func (ga *LaunchArgs) RemoveLinks(version string) *ux.State {
 	if state := ga.IsNil(); state.IsError() {
@@ -299,7 +292,7 @@ func (ga *LaunchArgs) RemoveLinks(version string) *ux.State {
 	return ga.State
 }
 
-
+// DeterminePath takes a string and return a path.
 func DeterminePath(mp string) string {
 	var ok bool
 
@@ -312,31 +305,31 @@ func DeterminePath(mp string) string {
 		}
 
 		switch {
-			case mp == defaults.DefaultPathEmpty:
-				fallthrough
-			case mp == defaults.DefaultPathCwd:
-				cwd, err = os.Getwd()
-				if err != nil {
-					break
-				}
-				ok = true
-				mp = cwd
+		case mp == defaults.DefaultPathEmpty:
+			fallthrough
+		case mp == defaults.DefaultPathCwd:
+			cwd, err = os.Getwd()
+			if err != nil {
+				break
+			}
+			ok = true
+			mp = cwd
 
-			case mp == defaults.DefaultPathHome:
-				var u *user.User
-				u, err = user.Current()
-				if err != nil {
-					break
-				}
-				ok = true
-				mp = u.HomeDir
+		case mp == defaults.DefaultPathHome:
+			var u *user.User
+			u, err = user.Current()
+			if err != nil {
+				break
+			}
+			ok = true
+			mp = u.HomeDir
 
-			default:
-				mp, err = filepath.Abs(mp)
-				if err != nil {
-					break
-				}
-				ok = true
+		default:
+			mp, err = filepath.Abs(mp)
+			if err != nil {
+				break
+			}
+			ok = true
 		}
 
 		if err != nil {
@@ -351,7 +344,7 @@ func DeterminePath(mp string) string {
 	return mp
 }
 
-
+//GetLaunchDir return launch directory.
 func GetLaunchDir() string {
 	var d string
 

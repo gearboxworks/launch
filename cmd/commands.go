@@ -94,7 +94,6 @@ var tmplHelpSmall = `{{- if or .Runnable .HasSubCommands }}
 {{- end }}
 `
 
-
 var tmplFlagUsage = `
 {{ SprintfBlue "Usage: " }}
 	{{ GetUsage . }}
@@ -155,23 +154,21 @@ var tmplFlagHelpSmall = `{{ SprintfWhite "######################################
 {{- end }}
 `
 
-
 // ******************************************************************************** //
-var gbHelpCmd = &cobra.Command {
-	Use:					"assist",
+var gbHelpCmd = &cobra.Command{
+	Use: "assist",
 	//Aliases:				[]string{"flags"},
-	Short:					"Show additional help",
-	Long:					"Show additional help",
-	Example:				ux.SprintfWhite("launch assist"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbHelpFunc,
-	Args:					cobra.RangeArgs(0, 1),
+	Short:                 "Show additional help",
+	Long:                  "Show additional help",
+	Example:               ux.SprintfWhite("launch assist"),
+	DisableFlagParsing:    false,
+	DisableFlagsInUseLine: false,
+	Run:                   gbHelpFunc,
+	Args:                  cobra.RangeArgs(0, 1),
 }
 
 //gbHelpFunc takes a pointer to cobra.command and
 //command arguments and output help message
-
 func gbHelpFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -191,41 +188,40 @@ func gbHelpFunc(cmd *cobra.Command, args []string) {
 		}
 
 		switch args[0] {
-			case "scribe":
-				c := CmdScribe.GetCmd()
-				//CobraHelp.ChangeHelp(c, tmplUsage, tmplHelp)
-				_ = c.Help()
-				CobraHelp.ChangeHelp(c, tmplUsageSmall, tmplHelpSmall)
-				DangerousHelpLoop(c, false)
+		case "scribe":
+			c := CmdScribe.GetCmd()
+			//CobraHelp.ChangeHelp(c, tmplUsage, tmplHelp)
+			_ = c.Help()
+			CobraHelp.ChangeHelp(c, tmplUsageSmall, tmplHelpSmall)
+			DangerousHelpLoop(c, false)
 
-			case "version":
-				c := CmdSelfUpdate.GetCmd()
-				CobraHelp.ChangeHelp(c, tmplUsage, tmplHelp)
-				_ = c.Help()
-				CobraHelp.ChangeHelp(c, tmplUsageSmall, tmplHelpSmall)
-				DangerousHelpLoop(c, false)
+		case "version":
+			c := CmdSelfUpdate.GetCmd()
+			CobraHelp.ChangeHelp(c, tmplUsage, tmplHelp)
+			_ = c.Help()
+			CobraHelp.ChangeHelp(c, tmplUsageSmall, tmplHelpSmall)
+			DangerousHelpLoop(c, false)
 
-			default:
-				CobraHelp.ChangeHelp(rootCmd, tmplUsageCmd, tmplHelpCmd)
-				_ = rootCmd.Help()
-				ux.PrintfWhite("####################################################################\n")
-				_ = cmd.Help()
+		default:
+			CobraHelp.ChangeHelp(rootCmd, tmplUsageCmd, tmplHelpCmd)
+			_ = rootCmd.Help()
+			ux.PrintfWhite("####################################################################\n")
+			_ = cmd.Help()
 		}
 	}
 	Cmd.State.SetOk()
 }
 
-
 // ******************************************************************************** //
-var gbHelpAllCmd = &cobra.Command {
-	Use:					"all",
+var gbHelpAllCmd = &cobra.Command{
+	Use: "all",
 	//Aliases:				[]string{"flags"},
-	Short:					"Show all help",
-	Long:					"Show all help",
-	Example:				ux.SprintfWhite("launch assist all"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbHelpAllFunc,
+	Short:                 "Show all help",
+	Long:                  "Show all help",
+	Example:               ux.SprintfWhite("launch assist all"),
+	DisableFlagParsing:    false,
+	DisableFlagsInUseLine: false,
+	Run:                   gbHelpAllFunc,
 	//Args:					cobra.RangeArgs(0, 2),
 }
 
@@ -251,10 +247,10 @@ func gbHelpAllFunc(cmd *cobra.Command, args []string) {
 
 		CobraHelp.ChangeHelp(rootCmd, tmplUsageSmall, tmplHelpSmall)
 		for _, c := range parent.Commands() {
-			if strings.HasPrefix(c.CommandPath(), Cmd.Runtime.CmdName + " help") {
+			if strings.HasPrefix(c.CommandPath(), Cmd.Runtime.CmdName+" help") {
 				continue
 			}
-			if strings.HasPrefix(c.CommandPath(), Cmd.Runtime.CmdName + " scribe") {
+			if strings.HasPrefix(c.CommandPath(), Cmd.Runtime.CmdName+" scribe") {
 				continue
 			}
 			DangerousHelpLoop(c, true)
@@ -265,8 +261,9 @@ func gbHelpAllFunc(cmd *cobra.Command, args []string) {
 		//gbHelpExamplesFunc(rootCmd, args)
 	}
 }
+
 //DangerousHelpLoop takes pointer to cobra.command and
-// skip boolean value and return appropriate cobra.command object
+//skip boolean value and return appropriate cobra.command object
 func DangerousHelpLoop(cmd *cobra.Command, skip bool) *cobra.Command {
 	for range onlyOnce {
 		if cmd == nil {
@@ -274,20 +271,20 @@ func DangerousHelpLoop(cmd *cobra.Command, skip bool) *cobra.Command {
 		}
 
 		if skip {
-			if strings.HasPrefix(cmd.CommandPath(), Cmd.Runtime.CmdName + " help") {
+			if strings.HasPrefix(cmd.CommandPath(), Cmd.Runtime.CmdName+" help") {
 				break
 			}
-			if strings.HasPrefix(cmd.CommandPath(), Cmd.Runtime.CmdName + " version") {
+			if strings.HasPrefix(cmd.CommandPath(), Cmd.Runtime.CmdName+" version") {
 				break
 			}
-			if strings.HasPrefix(cmd.CommandPath(), Cmd.Runtime.CmdName + " scribe") {
+			if strings.HasPrefix(cmd.CommandPath(), Cmd.Runtime.CmdName+" scribe") {
 				break
 			}
 		}
 
 		_ = cmd.Help()
 		if cmd.HasSubCommands() {
-			for _, c := range  cmd.Commands() {
+			for _, c := range cmd.Commands() {
 				DangerousHelpLoop(c, skip)
 			}
 		}
@@ -295,22 +292,21 @@ func DangerousHelpLoop(cmd *cobra.Command, skip bool) *cobra.Command {
 	return cmd
 }
 
-
 // ******************************************************************************** //
-var gbHelpBasicCmd = &cobra.Command {
-	Use:					"basic",
+var gbHelpBasicCmd = &cobra.Command{
+	Use: "basic",
 	//Aliases:				[]string{"flags"},
-	Short:					"Show basic help",
-	Long:					"Show basic help",
-	Example:				ux.SprintfWhite("launch assist basic"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbHelpBasicFunc,
+	Short:                 "Show basic help",
+	Long:                  "Show basic help",
+	Example:               ux.SprintfWhite("launch assist basic"),
+	DisableFlagParsing:    false,
+	DisableFlagsInUseLine: false,
+	Run:                   gbHelpBasicFunc,
 	//Args:					cobra.RangeArgs(0, 2),
 }
 
 //gbHelpBasicFunc takes a pointer to cobra.command object and
-// command arguments and output basic help message
+//command arguments and output basic help message
 func gbHelpBasicFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -331,21 +327,21 @@ func gbHelpBasicFunc(cmd *cobra.Command, args []string) {
 	}
 }
 
-
 // ******************************************************************************** //
-var gbHelpAdvancedCmd = &cobra.Command {
-	Use:					"advanced",
-	Aliases:				[]string{"guru"},
-	Short:					"Show advanced help",
-	Long:					"Show advanced help",
-	Example:				ux.SprintfWhite("launch assist advanced"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbHelpAdvancedFunc,
+var gbHelpAdvancedCmd = &cobra.Command{
+	Use:                   "advanced",
+	Aliases:               []string{"guru"},
+	Short:                 "Show advanced help",
+	Long:                  "Show advanced help",
+	Example:               ux.SprintfWhite("launch assist advanced"),
+	DisableFlagParsing:    false,
+	DisableFlagsInUseLine: false,
+	Run:                   gbHelpAdvancedFunc,
 	//Args:					cobra.RangeArgs(0, 2),
 }
+
 //gbHelpAdvancedFunc takes a pointer to cobra.command object and
-// command arguments and output advanced help message
+//command arguments and output advanced help message
 func gbHelpAdvancedFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -366,23 +362,22 @@ func gbHelpAdvancedFunc(cmd *cobra.Command, args []string) {
 	}
 }
 
-
 // ******************************************************************************** //
-var gbHelpFlagsCmd = &cobra.Command {
-	Use:					"flags",
+var gbHelpFlagsCmd = &cobra.Command{
+	Use: "flags",
 	//Aliases:				[]string{"flags"},
-	Short:					"Show additional flags",
-	Long:					"Show additional flags",
-	Example:				ux.SprintfWhite("launch assist flags"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbHelpFlagsFunc,
+	Short:                 "Show additional flags",
+	Long:                  "Show additional flags",
+	Example:               ux.SprintfWhite("launch assist flags"),
+	DisableFlagParsing:    false,
+	DisableFlagsInUseLine: false,
+	Run:                   gbHelpFlagsFunc,
 	//Args:					cobra.RangeArgs(0, 2),
 }
 
 //goland:noinspection GoUnusedParameter
 //gbHelpFlagsFunc takes a pointer to cobra.command object and
-// command arguments and output help flags message
+//command arguments and output help flags message
 func gbHelpFlagsFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -399,23 +394,22 @@ func gbHelpFlagsFunc(cmd *cobra.Command, args []string) {
 	}
 }
 
-
 // ******************************************************************************** //
-var gbHelpExamplesCmd = &cobra.Command {
-	Use:					"examples",
+var gbHelpExamplesCmd = &cobra.Command{
+	Use: "examples",
 	//Aliases:				[]string{"flags"},
-	Short:					"Show examples",
-	Long:					"Show examples",
-	Example:				ux.SprintfWhite("launch assist examples"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbHelpExamplesFunc,
+	Short:                 "Show examples",
+	Long:                  "Show examples",
+	Example:               ux.SprintfWhite("launch assist examples"),
+	DisableFlagParsing:    false,
+	DisableFlagsInUseLine: false,
+	Run:                   gbHelpExamplesFunc,
 	//Args:					cobra.RangeArgs(0, 2),
 }
 
 //goland:noinspection GoUnusedParameter
 //gbHelpExamplesFunc takes a pointer to cobra.command object and
-// command arguments and output help examples message
+//command arguments and output help examples message
 func gbHelpExamplesFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -433,22 +427,21 @@ func gbHelpExamplesFunc(cmd *cobra.Command, args []string) {
 	}
 }
 
-
 // ******************************************************************************** //
-var gbCompletionCmd = &cobra.Command {
-	Use:					"completion",
+var gbCompletionCmd = &cobra.Command{
+	Use: "completion",
 	//Aliases:				[]string{"bash"},
-	Short:					"Generate BASH completion file",
-	Long:					"Generate BASH completion file",
-	Example:				ux.SprintfWhite("launch completion"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbCompletionFunc,
+	Short:                 "Generate BASH completion file",
+	Long:                  "Generate BASH completion file",
+	Example:               ux.SprintfWhite("launch completion"),
+	DisableFlagParsing:    false,
+	DisableFlagsInUseLine: false,
+	Run:                   gbCompletionFunc,
 	//Args:					cobra.RangeArgs(0, 2),
 }
 
 //gbCompletionFunc takes a pointer to cobra.command object and
-// command arguments and output completion message
+//command arguments and output completion message
 func gbCompletionFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs

@@ -8,20 +8,21 @@ import (
 	"launch/defaults"
 )
 
-
 // ******************************************************************************** //
 var gbListCmd = &cobra.Command{
-	Use:					"list",
-	Aliases:				[]string{"show"},
-	Short:					ux.SprintfBlue("List a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfBlue("List a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch manage list all"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbListFunc,
-	Args:					cobra.RangeArgs(0, 1),
+	Use:                   "list",
+	Aliases:               []string{"show"},
+	Short:                 ux.SprintfBlue("List a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:                  ux.SprintfBlue("List a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:               ux.SprintfWhite("launch manage list all"),
+	DisableFlagParsing:    false,
+	DisableFlagsInUseLine: false,
+	Run:                   gbListFunc,
+	Args:                  cobra.RangeArgs(0, 1),
 }
 
+//gbListFunc takes a pointer to cobra.command and command's argument and
+//output appropriate list.
 func gbListFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -33,8 +34,8 @@ func gbListFunc(cmd *cobra.Command, args []string) {
 		//Cmd.SetDebug(ga.Debug)
 
 		switch {
-			case len(args) == 0:
-				_ = cmd.Help()
+		case len(args) == 0:
+			_ = cmd.Help()
 		}
 	}
 }
@@ -67,20 +68,21 @@ func (ga *LaunchArgs) gbListFunc() *ux.State {
 	return ga.State
 }
 
-
 // ******************************************************************************** //
 var gbDetailsCmd = &cobra.Command{
-	Use:					"all",
-	Aliases:				[]string{"details"},
-	Short:					ux.SprintfBlue("List all details provided by a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfBlue("List all details provided by a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch manage list all golang"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbDetailsFunc,
-	Args:					cobra.RangeArgs(0, 1),
+	Use:                   "all",
+	Aliases:               []string{"details"},
+	Short:                 ux.SprintfBlue("List all details provided by a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:                  ux.SprintfBlue("List all details provided by a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:               ux.SprintfWhite("launch manage list all golang"),
+	DisableFlagParsing:    false,
+	DisableFlagsInUseLine: false,
+	Run:                   gbDetailsFunc,
+	Args:                  cobra.RangeArgs(0, 1),
 }
 
+//gbDetailsFunc takes a pointer to cobra.command and command's arguments and
+//output appropriate details message.
 //goland:noinspection GoUnusedParameter
 func gbDetailsFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
@@ -100,20 +102,21 @@ func gbDetailsFunc(cmd *cobra.Command, args []string) {
 	}
 }
 
-
 // ******************************************************************************** //
 var gbLinksCmd = &cobra.Command{
-	Use:					fmt.Sprintf("files [%s name]", defaults.LanguageContainerName),
-	Aliases:				[]string{"links", "ls"},
-	Short:					ux.SprintfBlue("List files provided by a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfBlue("List files provided by a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch manage list files golang"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbLinksFunc,
-	Args:					cobra.RangeArgs(0, 1),
+	Use:                   fmt.Sprintf("files [%s name]", defaults.LanguageContainerName),
+	Aliases:               []string{"links", "ls"},
+	Short:                 ux.SprintfBlue("List files provided by a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:                  ux.SprintfBlue("List files provided by a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:               ux.SprintfWhite("launch manage list files golang"),
+	DisableFlagParsing:    false,
+	DisableFlagsInUseLine: false,
+	Run:                   gbLinksFunc,
+	Args:                  cobra.RangeArgs(0, 1),
 }
 
+//gbLinksFunc takes a pointer to cobra.command and command's arguments and
+//output appropriate links.
 //goland:noinspection GoUnusedParameter
 func gbLinksFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
@@ -156,20 +159,21 @@ func (ga *LaunchArgs) gbLinksFunc() *ux.State {
 	return ga.State
 }
 
-
 // ******************************************************************************** //
 var gbPortsCmd = &cobra.Command{
-	Use:					fmt.Sprintf("ports [%s name]", defaults.LanguageContainerName),
+	Use: fmt.Sprintf("ports [%s name]", defaults.LanguageContainerName),
 	//Aliases:				[]string{"links"},
-	Short:					ux.SprintfBlue("List ports provided by a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfBlue("List ports provided by a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch manage list ports golang"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbPortsFunc,
-	Args:					cobra.RangeArgs(0, 1),
+	Short:                 ux.SprintfBlue("List ports provided by a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:                  ux.SprintfBlue("List ports provided by a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:               ux.SprintfWhite("launch manage list ports golang"),
+	DisableFlagParsing:    false,
+	DisableFlagsInUseLine: false,
+	Run:                   gbPortsFunc,
+	Args:                  cobra.RangeArgs(0, 1),
 }
 
+//gbPortsFunc takes a pointer to cobra.command and command's arguments and
+//output appropriate ports.
 //goland:noinspection GoUnusedParameter
 func gbPortsFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {

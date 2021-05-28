@@ -8,23 +8,22 @@ import (
 	"strings"
 )
 
-
 // ******************************************************************************** //
 var gbRunCmd = &cobra.Command{
-	Use:					fmt.Sprintf("run <%s name> [%s args]", defaults.LanguageContainerName, defaults.LanguageContainerName),
-	Aliases:				[]string{},
-	Short:					ux.SprintfBlue("Run default %s %s command", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfBlue("Run default %s %s command.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch run golang build"),
-	DisableFlagParsing:		true,
-	DisableFlagsInUseLine:	true,
-	Run:					gbRunFunc,
-	Args:					cobra.MinimumNArgs(1),
+	Use:                   fmt.Sprintf("run <%s name> [%s args]", defaults.LanguageContainerName, defaults.LanguageContainerName),
+	Aliases:               []string{},
+	Short:                 ux.SprintfBlue("Run default %s %s command", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:                  ux.SprintfBlue("Run default %s %s command.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:               ux.SprintfWhite("launch run golang build"),
+	DisableFlagParsing:    true,
+	DisableFlagsInUseLine: true,
+	Run:                   gbRunFunc,
+	Args:                  cobra.MinimumNArgs(1),
 }
 
 //goland:noinspection GoUnusedParameter
-// gbRunFunc takes a pointer to cobra.command and
-// command strings to run the command
+//gbRunFunc takes a pointer to cobra.command and
+//command strings to run the command
 func gbRunFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -89,22 +88,21 @@ func (ga *LaunchArgs) gbRunFunc() *ux.State {
 	return ga.State
 }
 
-
 // ******************************************************************************** //
 var gbShellCmd = &cobra.Command{
-	Use:					fmt.Sprintf("shell <%s name> [command] [args]", defaults.LanguageContainerName),
-	Short:					ux.SprintfBlue("Execute shell in %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfBlue("Execute shell in %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch shell mysql ps -eaf"),
-	DisableFlagParsing:		true,
-	DisableFlagsInUseLine:	true,
-	Run:					gbShellFunc,
-	Args:					cobra.MinimumNArgs(1),
+	Use:                   fmt.Sprintf("shell <%s name> [command] [args]", defaults.LanguageContainerName),
+	Short:                 ux.SprintfBlue("Execute shell in %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:                  ux.SprintfBlue("Execute shell in %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:               ux.SprintfWhite("launch shell mysql ps -eaf"),
+	DisableFlagParsing:    true,
+	DisableFlagsInUseLine: true,
+	Run:                   gbShellFunc,
+	Args:                  cobra.MinimumNArgs(1),
 }
 
 //goland:noinspection GoUnusedParameter
-// gbShellFunc takes a pointer to cobra.command and
-// command strings to execute shell command
+//gbShellFunc takes a pointer to cobra.command and
+//command strings to execute shell command
 func gbShellFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs

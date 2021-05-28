@@ -6,21 +6,20 @@ import (
 	"launch/defaults"
 )
 
-
 // ******************************************************************************** //
-var gbConfigCmd = &cobra.Command {
-	Use:					"config",
-	Short:					ux.SprintfBlue("Manage config file for %s", defaults.BinaryName),
-	Long:					ux.SprintfBlue("Manage config file for %s", defaults.BinaryName),
-	Example:				ux.SprintfWhite("launch config"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbConfigFunc,
-	Args:					cobra.RangeArgs(0, 2),
+var gbConfigCmd = &cobra.Command{
+	Use:                   "config",
+	Short:                 ux.SprintfBlue("Manage config file for %s", defaults.BinaryName),
+	Long:                  ux.SprintfBlue("Manage config file for %s", defaults.BinaryName),
+	Example:               ux.SprintfWhite("launch config"),
+	DisableFlagParsing:    false,
+	DisableFlagsInUseLine: false,
+	Run:                   gbConfigFunc,
+	Args:                  cobra.RangeArgs(0, 2),
 }
 
-// gbConfigFunc takes a pointer to cobra.command and
-// command arguments to config command state
+//gbConfigFunc takes a pointer to cobra.command and
+//command arguments to config command state
 func gbConfigFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -42,28 +41,27 @@ func gbConfigFunc(cmd *cobra.Command, args []string) {
 		//}
 
 		switch {
-			case len(args) == 0:
-				_ = cmd.Help()
+		case len(args) == 0:
+			_ = cmd.Help()
 		}
 	}
 }
 
-
 // ******************************************************************************** //
-var gbConfigTimeoutCmd = &cobra.Command {
-	Use:					"timeout",
-	Short:					"Determine the minimum provider timeout",
-	Long:					"Determine the minimum provider timeout",
-	Example:				ux.SprintfWhite("launch config timeout"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbConfigTimeoutFunc,
+var gbConfigTimeoutCmd = &cobra.Command{
+	Use:                   "timeout",
+	Short:                 "Determine the minimum provider timeout",
+	Long:                  "Determine the minimum provider timeout",
+	Example:               ux.SprintfWhite("launch config timeout"),
+	DisableFlagParsing:    false,
+	DisableFlagsInUseLine: false,
+	Run:                   gbConfigTimeoutFunc,
 	//Args:					cobra.RangeArgs(0, 2),
 }
 
 //goland:noinspection GoUnusedParameter
-// gbConfigTimeoutFunc takes a pointer to cobra.command and
-// command arguments to config timeout command state
+//gbConfigTimeoutFunc takes a pointer to cobra.command and
+//command arguments to config timeout command state
 func gbConfigTimeoutFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var err error
