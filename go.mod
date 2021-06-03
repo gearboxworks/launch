@@ -43,8 +43,7 @@ replace github.com/gearboxworks/scribeHelpers/toolCobraHelp => ../scribeHelpers/
 replace github.com/gearboxworks/scribeHelpers/toolNetwork => ../scribeHelpers/toolNetwork
 
 require (
-	github.com/containerd/continuity v0.1.0 // indirect
-	github.com/docker/docker v17.12.0-ce-rc1.0.20200916142827-bd33bbf0497b+incompatible // indirect
+	github.com/docker/docker v20.10.6+incompatible // indirect
 	github.com/gearboxworks/scribeHelpers/loadTools v0.0.0-20200621234507-ba6f08c6b68d
 	github.com/gearboxworks/scribeHelpers/toolCobraHelp v0.0.0-00010101000000-000000000000
 	github.com/gearboxworks/scribeHelpers/toolCopy v0.0.0-20200621234507-ba6f08c6b68d // indirect
@@ -60,7 +59,8 @@ require (
 	github.com/gearboxworks/scribeHelpers/ux v0.0.0
 	github.com/go-openapi/errors v0.19.6 // indirect
 	github.com/mitchellh/mapstructure v1.3.2 // indirect
-	github.com/mitchellh/reflectwalk v1.0.1 // indirect
+	github.com/mitchellh/reflectwalk v1.0.1 // indirect; indirectx`
+	github.com/moby/sys/mount v0.2.0 // indirect
 	github.com/pkg/profile v1.5.0
 	github.com/spf13/afero v1.3.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
