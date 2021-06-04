@@ -29,6 +29,8 @@ var gbBuildCmd = &cobra.Command {
 	Args:					cobra.RangeArgs(0, 2),
 }
 
+//gbBuildFunc takes a pointer to cobra.command and
+//string arguments and output command state object
 func gbBuildFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -70,6 +72,8 @@ var gbBuildCreateCmd = &cobra.Command {
 }
 
 //goland:noinspection GoUnusedParameter
+//gbBuildCreateFunc takes a pointer to cobra.command and
+//string arguments and create command state object
 func gbBuildCreateFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -116,6 +120,8 @@ var gbBuildCleanCmd = &cobra.Command {
 }
 
 //goland:noinspection GoUnusedParameter
+//gbBuildCleanFunc takes a pointer to cobra.command and
+//string arguments and clean command state object
 func gbBuildCleanFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -241,6 +247,8 @@ var gbBuildStartCmd = &cobra.Command{
 }
 
 //goland:noinspection GoUnusedParameter
+//gbBuildCleanFunc takes a pointer to cobra.command and
+//string arguments and start command state object
 func gbBuildStartFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -337,6 +345,8 @@ var gbPublishCmd = &cobra.Command {
 }
 
 //goland:noinspection GoUnusedParameter
+//gbPublishFunc takes a pointer to cobra.command and
+//string arguments and publish command state object
 func gbPublishFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -417,6 +427,9 @@ var gbSaveCmd = &cobra.Command{
 }
 
 //goland:noinspection GoUnusedParameter
+//gbSaveFunc takes a pointer to cobra.command and
+//string arguments and save command state object
+
 func gbSaveFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -444,6 +457,8 @@ var gbLoadCmd = &cobra.Command{
 }
 
 //goland:noinspection GoUnusedParameter
+//gbLoadFunc takes a pointer to cobra.command and
+//string arguments and load command state object
 func gbLoadFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -471,6 +486,8 @@ var gbUnitTestCmd = &cobra.Command {
 }
 
 //goland:noinspection GoUnusedParameter
+//gbUnitTestFunc takes a pointer to cobra.command and
+//string arguments and unit test command state object
 func gbUnitTestFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs

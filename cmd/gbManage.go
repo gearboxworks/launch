@@ -53,6 +53,8 @@ var gbSearchCmd = &cobra.Command {
 	Args:					cobra.RangeArgs(0, 1),
 }
 
+//gbSearchFunc takes a pointer to cobra.command and command's argument
+//and output search result.
 //goland:noinspection GoUnusedParameter
 func gbSearchFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
@@ -107,6 +109,8 @@ var gbInstallCmd = &cobra.Command {
 	Args:					cobra.ExactArgs(1),
 }
 
+//gbInstallFunc takes a pointer to cobra.command and command's argument
+//and get install appropriate needs.
 //goland:noinspection GoUnusedParameter
 func gbInstallFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
@@ -228,6 +232,8 @@ var gbUninstallCmd = &cobra.Command {
 	Args:					cobra.ExactArgs(1),
 }
 
+//gbUninstallFunc takes a pointer to cobra.command and command's argument
+//and get uninstall appropriate needs.
 //goland:noinspection GoUnusedParameter
 func gbUninstallFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
@@ -322,6 +328,8 @@ var gbReinstallCmd = &cobra.Command {
 	Args:					cobra.ExactArgs(1),
 }
 
+//gbReinstallFunc takes a pointer to cobra.command and command's argument
+//and get reinstall appropriate needs.
 //goland:noinspection GoUnusedParameter
 func gbReinstallFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
@@ -375,6 +383,8 @@ var gbCleanCmd = &cobra.Command{
 	Args:					cobra.ExactArgs(1),
 }
 
+//gbCleanFunc takes a pointer to cobra.command and command's argument
+//and get clean appropriate needs.
 //goland:noinspection GoUnusedParameter
 func gbCleanFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
@@ -457,6 +467,8 @@ var gbStartCmd = &cobra.Command{
 	Args:					cobra.ExactArgs(1),
 }
 
+//gbStartFunc takes a pointer to cobra.command and command's argument
+//and get start appropriate needs.
 //goland:noinspection GoUnusedParameter
 func gbStartFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
@@ -557,6 +569,8 @@ var gbStopCmd = &cobra.Command{
 	Args:					cobra.ExactArgs(1),
 }
 
+//gbStopFunc takes a pointer to cobra.command and command's argument
+//and get stop appropriate needs.
 //goland:noinspection GoUnusedParameter
 func gbStopFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
@@ -638,6 +652,8 @@ var gbLogsCmd = &cobra.Command{
 	Args:					cobra.ExactArgs(1),
 }
 
+//gbLogsFunc takes a pointer to cobra.command and command's argument
+//and get logs appropriate needs.
 //goland:noinspection GoUnusedParameter
 func gbLogsFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {

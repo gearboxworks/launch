@@ -18,6 +18,9 @@ var gbConfigCmd = &cobra.Command {
 	Run:					gbConfigFunc,
 	Args:					cobra.RangeArgs(0, 2),
 }
+
+//gbConfigFunc takes a pointer to cobra.command and
+//command arguments to config command state
 func gbConfigFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -59,6 +62,8 @@ var gbConfigTimeoutCmd = &cobra.Command {
 }
 
 //goland:noinspection GoUnusedParameter
+//gbConfigTimeoutFunc takes a pointer to cobra.command and
+//command arguments to config timeout command state
 func gbConfigTimeoutFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var err error

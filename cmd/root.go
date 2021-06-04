@@ -180,7 +180,7 @@ func initConfig() {
 	//return err
 }
 
-
+//bindFlags takes pointer of cobra.command and viper and print appropriate error.
 func bindFlags(cmd *cobra.Command, v *viper.Viper) error {
 	var err error
 
@@ -202,7 +202,7 @@ func bindFlags(cmd *cobra.Command, v *viper.Viper) error {
 	return err
 }
 
-
+//IsInstalled validate whether installed return boolean value.
 func IsInstalled() bool {
 	var ok bool
 
@@ -250,7 +250,7 @@ func IsInstalled() bool {
 	return ok
 }
 
-
+//Install get install appropriate needs.
 func Install() *ux.State {
 	var err error
 
@@ -307,7 +307,7 @@ func Install() *ux.State {
 	return Cmd.State
 }
 
-
+//GrepFiles return pointer to ux.state.
 func GrepFiles() *ux.State {
 	var err error
 
@@ -338,7 +338,7 @@ func GrepFiles() *ux.State {
 	return Cmd.State
 }
 
-
+//SetCmd set the cmd.
 func SetCmd() {
 	for range onlyOnce {
 		if Cmd == nil {
@@ -387,7 +387,7 @@ func SetCmd() {
 	}
 }
 
-
+//gbRootFunc takes a pointer to cobra.command and command arguments and modify root.
 func gbRootFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		if CmdSelfUpdate.FlagCheckVersion(nil) {
@@ -475,7 +475,7 @@ func Execute() *ux.State {
 	return Cmd.State
 }
 
-
+//CheckReturns check and return pointer to ux.state.
 func CheckReturns() *ux.State {
 	state := Cmd.State
 	for range onlyOnce {
