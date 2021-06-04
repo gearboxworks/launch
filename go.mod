@@ -40,13 +40,10 @@ replace github.com/gearboxworks/scribeHelpers/toolGhr => ../scribeHelpers/toolGh
 
 replace github.com/gearboxworks/scribeHelpers/toolCobraHelp => ../scribeHelpers/toolCobraHelp
 
-//replace github.com/gearboxworks/scribeHelpers/toolNetwork => ../scribeHelpers/toolNetwork
+replace github.com/gearboxworks/scribeHelpers/toolNetwork => ../scribeHelpers/toolNetwork
 
 require (
-	github.com/Microsoft/hcsshim v0.8.17 // indirect
 	github.com/containerd/containerd v1.5.2 // indirect
-	github.com/containerd/continuity v0.1.0 // indirect
-	github.com/docker/docker v17.12.0-ce-rc1.0.20200916142827-bd33bbf0497b+incompatible // indirect
 	github.com/gearboxworks/scribeHelpers/loadTools v0.0.0-20200621234507-ba6f08c6b68d
 	github.com/gearboxworks/scribeHelpers/toolCobraHelp v0.0.0-00010101000000-000000000000
 	github.com/gearboxworks/scribeHelpers/toolCopy v0.0.0-20200621234507-ba6f08c6b68d // indirect
@@ -54,7 +51,6 @@ require (
 	github.com/gearboxworks/scribeHelpers/toolGhr v0.0.0-20200621234507-ba6f08c6b68d // indirect
 	github.com/gearboxworks/scribeHelpers/toolGit v0.0.0-20200621234507-ba6f08c6b68d // indirect
 	github.com/gearboxworks/scribeHelpers/toolGitHub v0.0.0-20200621234507-ba6f08c6b68d // indirect
-	github.com/gearboxworks/scribeHelpers/toolNetwork v0.0.0-20210519040240-f89ca15ea2af // indirect
 	github.com/gearboxworks/scribeHelpers/toolRuntime v0.0.0
 	github.com/gearboxworks/scribeHelpers/toolSelfUpdate v0.0.0-20200621234507-ba6f08c6b68d
 	github.com/gearboxworks/scribeHelpers/toolService v0.0.0-20200621234507-ba6f08c6b68d // indirect
@@ -64,6 +60,7 @@ require (
 	github.com/go-openapi/errors v0.19.6 // indirect
 	github.com/mitchellh/mapstructure v1.3.2 // indirect
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
+	github.com/moby/term v0.0.0-20201216013528-df9cb8a40635 // indirect
 	github.com/pkg/profile v1.5.0
 	github.com/spf13/afero v1.3.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
