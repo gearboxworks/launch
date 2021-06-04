@@ -14,9 +14,9 @@ import (
 	"launch/defaults"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
-
 
 var Cmd *TypeLaunchArgs
 
@@ -24,16 +24,19 @@ var CobraHelp *toolCobraHelp.TypeCommands
 
 //noinspection ALL
 var CmdSelfUpdate *toolSelfUpdate.TypeSelfUpdate
+
 //noinspection ALL
 var CmdScribe *loadTools.TypeScribeArgs
 
 var ConfigFile string
-const flagConfigFile  	= "config"
+
+const flagConfigFile = "config"
 
 // Scribe files absolutely cannot be called 'launch' as the launch config file is called 'launch.json'.
 const DefaultJsonFile = "scribe.json"
 const DefaultJsonString = "{}"
 const DefaultTemplateFile = "scribe.tmpl"
+
 //const DefaultTemplateString = `
 //{{- $gear := NewGear }}
 //{{- $gear.ParseGearConfig .Json }}
@@ -46,36 +49,35 @@ const DefaultTemplateString = `{{ $gears := Gearbox .Json "" }}
 `
 
 var rootViper *viper.Viper
-var rootCmd = &cobra.Command {
-	Use:   defaults.BinaryName,
-	Short: ux.SprintfBlue("%s %s launcher", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long: ux.SprintfBlue("%s %s launcher", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Run: gbRootFunc,
+var rootCmd = &cobra.Command{
+	Use:              defaults.BinaryName,
+	Short:            ux.SprintfBlue("%s %s launcher", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:             ux.SprintfBlue("%s %s launcher", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Run:              gbRootFunc,
 	TraverseChildren: true,
 }
-
 
 type redirectHelp struct {
 	Text    string
 	MovedTo string
 }
-var courtesyHelp = map[string]redirectHelp {
+
+var courtesyHelp = map[string]redirectHelp{
 	// Moved to sub-command "manage"
-	"install": { Text: "manage install", MovedTo: "manage"},     // gbManageCmd },
-	"uninstall": { Text: "manage uninstall", MovedTo: "manage"}, // gbManageCmd },
-	"reinstall": { Text: "manage reinstall", MovedTo: "manage"}, // gbManageCmd },
-	"clean": { Text: "manage clean", MovedTo: "manage"},         // gbManageCmd },
-	"list": { Text: "manage list", MovedTo: "manage"},           // gbListCmd },
-	"start": { Text: "manage start", MovedTo: "manage"},         // gbManageCmd },
-	"stop": { Text: "manage stop", MovedTo: "manage"},           // gbManageCmd },
+	"install":   {Text: "manage install", MovedTo: "manage"},   // gbManageCmd },
+	"uninstall": {Text: "manage uninstall", MovedTo: "manage"}, // gbManageCmd },
+	"reinstall": {Text: "manage reinstall", MovedTo: "manage"}, // gbManageCmd },
+	"clean":     {Text: "manage clean", MovedTo: "manage"},     // gbManageCmd },
+	"list":      {Text: "manage list", MovedTo: "manage"},      // gbListCmd },
+	"start":     {Text: "manage start", MovedTo: "manage"},     // gbManageCmd },
+	"stop":      {Text: "manage stop", MovedTo: "manage"},      // gbManageCmd },
 
 	// Moved to sub-command "create"
-	"build": { Text: "create build", MovedTo: "create"},     // gbCreateCmd },
-	"publish": { Text: "create publish", MovedTo: "create"}, // gbCreateCmd },
-	"save": { Text: "create save", MovedTo: "create"},       // gbCreateCmd },
-	"load": { Text: "create load", MovedTo: "create"},       // gbCreateCmd },
+	"build":   {Text: "create build", MovedTo: "create"},   // gbCreateCmd },
+	"publish": {Text: "create publish", MovedTo: "create"}, // gbCreateCmd },
+	"save":    {Text: "create save", MovedTo: "create"},    // gbCreateCmd },
+	"load":    {Text: "create load", MovedTo: "create"},    // gbCreateCmd },
 }
-
 
 func init() {
 	SetCmd()
@@ -136,7 +138,6 @@ func init() {
 	//rootCmd.Flags().BoolVarP(&Cmd.Completion, flagCompletion, "b", false, ux.SprintfBlue("Generate BASH completion script."))
 }
 
-
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	var err error
@@ -180,7 +181,9 @@ func initConfig() {
 	//return err
 }
 
-//bindFlags takes pointer of cobra.command and viper and print appropriate error.
+// bindFlags takes flags passed in and converts to environment variables 
+// (so Scribe can access them? Mick?) and it provides all non-set flags
+// with defaults.
 func bindFlags(cmd *cobra.Command, v *viper.Viper) error {
 	var err error
 
@@ -202,7 +205,8 @@ func bindFlags(cmd *cobra.Command, v *viper.Viper) error {
 	return err
 }
 
-//IsInstalled validate whether installed return boolean value.
+// IsInstalled validates Launch is installed.
+// Returns true if so, false if not.
 func IsInstalled() bool {
 	var ok bool
 
@@ -224,10 +228,15 @@ func IsInstalled() bool {
 		if err != nil {
 			// launch binary NOT found in PATH
 			ux.PrintflnBlue("%s installed properly, but '%s' is not in your PATH.", defaults.BinaryName, Cmd.Runtime.BinDir.String())
-			os.Exit(0)	// Sad... really sad...
+			os.Exit(0) // Sad... really sad...
 		}
 
 		if path == binfile.String() {
+			ok = true
+			break
+		}
+
+		if path == filepath.Base(binfile.String()) {
 			ok = true
 			break
 		}
@@ -238,19 +247,19 @@ func IsInstalled() bool {
 				defaults.BinaryName,
 				Cmd.Runtime.CmdDir,
 				Cmd.Runtime.BinDir.String(),
-				)
-			os.Exit(0)	// Sad... really sad...
+			)
+			os.Exit(0) // Sad... really sad...
 		}
 
 		// Remove old launch binary.
 		ux.PrintflnBlue("%s installed properly, but '%s' is not in your PATH.", defaults.BinaryName, Cmd.Runtime.BinDir.String())
-		os.Exit(0)	// Sad... really sad...
+		os.Exit(0) // Sad... really sad...
 	}
 
 	return ok
 }
 
-//Install get install appropriate needs.
+// Install adds the ~/.launch directories and moves the exeutable to ~/.launch/bin
 func Install() *ux.State {
 	var err error
 
@@ -307,7 +316,7 @@ func Install() *ux.State {
 	return Cmd.State
 }
 
-//GrepFiles return pointer to ux.state.
+// GrepFiles returns pointer to ux.state.
 func GrepFiles() *ux.State {
 	var err error
 
@@ -338,7 +347,7 @@ func GrepFiles() *ux.State {
 	return Cmd.State
 }
 
-//SetCmd set the cmd.
+// SetCmd initializes the commands that require defaults.
 func SetCmd() {
 	for range onlyOnce {
 		if Cmd == nil {
@@ -387,7 +396,7 @@ func SetCmd() {
 	}
 }
 
-//gbRootFunc takes a pointer to cobra.command and command arguments and modify root.
+// gbRootFunc takes a pointer to cobra.command and command arguments and modify root.
 func gbRootFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		if CmdSelfUpdate.FlagCheckVersion(nil) {
@@ -428,7 +437,6 @@ func gbRootFunc(cmd *cobra.Command, args []string) {
 	}
 
 }
-
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -475,7 +483,7 @@ func Execute() *ux.State {
 	return Cmd.State
 }
 
-//CheckReturns check and return pointer to ux.state.
+// CheckReturns gets execution state after Execute().
 func CheckReturns() *ux.State {
 	state := Cmd.State
 	for range onlyOnce {
