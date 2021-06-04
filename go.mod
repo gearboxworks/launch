@@ -46,6 +46,7 @@ require (
 	github.com/Microsoft/hcsshim v0.8.17 // indirect
 	github.com/containerd/containerd v1.5.2 // indirect
 	github.com/containerd/continuity v0.1.0 // indirect
+	github.com/docker/docker v17.12.0-ce-rc1.0.20200916142827-bd33bbf0497b+incompatible // indirect
 	github.com/gearboxworks/scribeHelpers/loadTools v0.0.0-20200621234507-ba6f08c6b68d
 	github.com/gearboxworks/scribeHelpers/toolCobraHelp v0.0.0-00010101000000-000000000000
 	github.com/gearboxworks/scribeHelpers/toolCopy v0.0.0-20200621234507-ba6f08c6b68d // indirect
