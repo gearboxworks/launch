@@ -23,6 +23,8 @@ var gbRunCmd = &cobra.Command{
 }
 
 //goland:noinspection GoUnusedParameter
+//gbRunFunc takes a pointer to cobra.command and
+//command strings to run the command
 func gbRunFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -101,6 +103,8 @@ var gbShellCmd = &cobra.Command{
 }
 
 //goland:noinspection GoUnusedParameter
+//gbShellFunc takes a pointer to cobra.command and
+//command strings to execute shell command
 func gbShellFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs

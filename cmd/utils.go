@@ -299,7 +299,7 @@ func (ga *LaunchArgs) RemoveLinks(version string) *ux.State {
 	return ga.State
 }
 
-
+// DeterminePath takes a string and return a path.
 func DeterminePath(mp string) string {
 	var ok bool
 
@@ -351,7 +351,7 @@ func DeterminePath(mp string) string {
 	return mp
 }
 
-
+//GetLaunchDir return launch directory.
 func GetLaunchDir() string {
 	var d string
 

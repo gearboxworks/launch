@@ -21,7 +21,8 @@ var gbListCmd = &cobra.Command{
 	Run:					gbListFunc,
 	Args:					cobra.RangeArgs(0, 1),
 }
-
+//gbListFunc takes a pointer to cobra.command and command's argument and
+//output appropriate list.
 func gbListFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -81,6 +82,8 @@ var gbDetailsCmd = &cobra.Command{
 	Args:					cobra.RangeArgs(0, 1),
 }
 
+//gbDetailsFunc takes a pointer to cobra.command and command's arguments and
+//output appropriate details message.
 //goland:noinspection GoUnusedParameter
 func gbDetailsFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
@@ -114,6 +117,8 @@ var gbLinksCmd = &cobra.Command{
 	Args:					cobra.RangeArgs(0, 1),
 }
 
+//gbLinksFunc takes a pointer to cobra.command and command's arguments and
+//output appropriate links.
 //goland:noinspection GoUnusedParameter
 func gbLinksFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
@@ -170,6 +175,8 @@ var gbPortsCmd = &cobra.Command{
 	Args:					cobra.RangeArgs(0, 1),
 }
 
+//gbPortsFunc takes a pointer to cobra.command and command's arguments and
+//output appropriate ports.
 //goland:noinspection GoUnusedParameter
 func gbPortsFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {

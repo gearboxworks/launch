@@ -181,6 +181,9 @@ func initConfig() {
 	//return err
 }
 
+// bindFlags takes flags passed in and converts to environment variables 
+// (so Scribe can access them? Mick?) and it provides all non-set flags
+// with defaults.
 func bindFlags(cmd *cobra.Command, v *viper.Viper) error {
 	var err error
 
@@ -202,6 +205,8 @@ func bindFlags(cmd *cobra.Command, v *viper.Viper) error {
 	return err
 }
 
+// IsInstalled validates Launch is installed.
+// Returns true if so, false if not.
 func IsInstalled() bool {
 	var ok bool
 
@@ -254,6 +259,7 @@ func IsInstalled() bool {
 	return ok
 }
 
+// Install adds the ~/.launch directories and moves the exeutable to ~/.launch/bin
 func Install() *ux.State {
 	var err error
 
@@ -310,6 +316,7 @@ func Install() *ux.State {
 	return Cmd.State
 }
 
+// GrepFiles returns pointer to ux.state.
 func GrepFiles() *ux.State {
 	var err error
 
@@ -340,6 +347,7 @@ func GrepFiles() *ux.State {
 	return Cmd.State
 }
 
+// SetCmd initializes the commands that require defaults.
 func SetCmd() {
 	for range onlyOnce {
 		if Cmd == nil {
@@ -388,6 +396,7 @@ func SetCmd() {
 	}
 }
 
+// gbRootFunc takes a pointer to cobra.command and command arguments and modify root.
 func gbRootFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		if CmdSelfUpdate.FlagCheckVersion(nil) {
@@ -474,6 +483,7 @@ func Execute() *ux.State {
 	return Cmd.State
 }
 
+// CheckReturns gets execution state after Execute().
 func CheckReturns() *ux.State {
 	state := Cmd.State
 	for range onlyOnce {
