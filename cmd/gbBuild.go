@@ -9,24 +9,23 @@ import (
 	"strings"
 )
 
-
 // https://stackoverflow.com/questions/38804313/build-docker-image-from-go-code
 // https://www.nearform.com/blog/building-docker-images-in-go/
 // https://stackoverflow.com/questions/46878793/golang-docker-api-reports-invalid-argument-while-hitting-imagebuild
 // https://www.loginradius.com/blog/async/build-push-docker-images-golang/
-// 
+//
 
 // ******************************************************************************** //
-var gbBuildCmd = &cobra.Command {
-	Use:					"build",
+var gbBuildCmd = &cobra.Command{
+	Use: "build",
 	//Aliases:				[]string{"show"},
-	Short:					ux.SprintfBlue("Create %s %s", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
-	Long:					ux.SprintfBlue("Create %s %s.", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
-	Example:				ux.SprintfWhite("launch create"),
-	DisableFlagParsing:		false,
-	DisableFlagsInUseLine:	false,
-	Run:					gbBuildFunc,
-	Args:					cobra.RangeArgs(0, 2),
+	Short:                 ux.SprintfBlue("Create %s %s", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
+	Long:                  ux.SprintfBlue("Create %s %s.", defaults.LanguageAppName, defaults.LanguageContainerPluralName),
+	Example:               ux.SprintfWhite("launch create"),
+	DisableFlagParsing:    false,
+	DisableFlagsInUseLine: false,
+	Run:                   gbBuildFunc,
+	Args:                  cobra.RangeArgs(0, 2),
 }
 
 //gbBuildFunc takes a pointer to cobra.command and
@@ -52,23 +51,22 @@ func gbBuildFunc(cmd *cobra.Command, args []string) {
 		//}
 
 		switch {
-			case len(args) == 0:
-				_ = cmd.Help()
+		case len(args) == 0:
+			_ = cmd.Help()
 		}
 	}
 }
 
-
 // ******************************************************************************** //
-var gbBuildCreateCmd = &cobra.Command {
-	Use:					fmt.Sprintf("create <%s name>", defaults.LanguageContainerName),
-	SuggestFor:				[]string{ "compile", "generate" },
-	Short:					ux.SprintfBlue("Build a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfBlue("Allows building of arbitrary containers as a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch build create golang"),
-	DisableFlagParsing:		false,
-	Run:					gbBuildCreateFunc,
-	Args:					cobra.ExactArgs(1),
+var gbBuildCreateCmd = &cobra.Command{
+	Use:                fmt.Sprintf("create <%s name>", defaults.LanguageContainerName),
+	SuggestFor:         []string{"compile", "generate"},
+	Short:              ux.SprintfBlue("Build a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:               ux.SprintfBlue("Allows building of arbitrary containers as a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:            ux.SprintfWhite("launch build create golang"),
+	DisableFlagParsing: false,
+	Run:                gbBuildCreateFunc,
+	Args:               cobra.ExactArgs(1),
 }
 
 //goland:noinspection GoUnusedParameter
@@ -106,17 +104,16 @@ func (ga *LaunchArgs) gbBuildCreateFunc() *ux.State {
 	return ga.State
 }
 
-
 // ******************************************************************************** //
-var gbBuildCleanCmd = &cobra.Command {
-	Use:					fmt.Sprintf("clean <%s name> [%s version]", defaults.LanguageContainerName, defaults.LanguageContainerName),
-	SuggestFor:				[]string{},
-	Short:					ux.SprintfBlue("Remove a %s %s build", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfBlue("Remove a %s %s build.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch build clean golang"),
-	DisableFlagParsing:		false,
-	Run:					gbBuildCleanFunc,
-	Args:					cobra.RangeArgs(1, 2),
+var gbBuildCleanCmd = &cobra.Command{
+	Use:                fmt.Sprintf("clean <%s name> [%s version]", defaults.LanguageContainerName, defaults.LanguageContainerName),
+	SuggestFor:         []string{},
+	Short:              ux.SprintfBlue("Remove a %s %s build", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:               ux.SprintfBlue("Remove a %s %s build.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:            ux.SprintfWhite("launch build clean golang"),
+	DisableFlagParsing: false,
+	Run:                gbBuildCleanFunc,
+	Args:               cobra.RangeArgs(1, 2),
 }
 
 //goland:noinspection GoUnusedParameter
@@ -234,16 +231,15 @@ func (ga *LaunchArgs) gbBuildCleanFunc() *ux.State {
 	return ga.State
 }
 
-
 // ******************************************************************************** //
 var gbBuildStartCmd = &cobra.Command{
-	Use:					fmt.Sprintf("start <%s name>", defaults.LanguageContainerName),
-	Short:					ux.SprintfBlue("Start a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfBlue("Start a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch build start golang"),
-	DisableFlagParsing:		false,
-	Run:					gbBuildStartFunc,
-	Args:					cobra.ExactArgs(1),
+	Use:                fmt.Sprintf("start <%s name>", defaults.LanguageContainerName),
+	Short:              ux.SprintfBlue("Start a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:               ux.SprintfBlue("Start a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:            ux.SprintfWhite("launch build start golang"),
+	DisableFlagParsing: false,
+	Run:                gbBuildStartFunc,
+	Args:               cobra.ExactArgs(1),
 }
 
 //goland:noinspection GoUnusedParameter
@@ -287,7 +283,6 @@ func (ga *LaunchArgs) gbBuildStartFunc() *ux.State {
 			break
 		}
 
-
 		if !ga.Quiet {
 			ux.PrintflnNormal("Starting %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
@@ -319,29 +314,27 @@ func (ga *LaunchArgs) gbBuildStartFunc() *ux.State {
 	return ga.State
 }
 
-
 // ******************************************************************************** //
 var gbBuildStopCmd = &cobra.Command{
-	Use:					fmt.Sprintf("stop <%s name>", defaults.LanguageContainerName),
-	Short:					ux.SprintfBlue("Stop a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfBlue("Stop a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch build stop golang"),
-	DisableFlagParsing:		false,
-	Run:					gbStopFunc,
-	Args:					cobra.ExactArgs(1),
+	Use:                fmt.Sprintf("stop <%s name>", defaults.LanguageContainerName),
+	Short:              ux.SprintfBlue("Stop a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:               ux.SprintfBlue("Stop a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:            ux.SprintfWhite("launch build stop golang"),
+	DisableFlagParsing: false,
+	Run:                gbStopFunc,
+	Args:               cobra.ExactArgs(1),
 }
 
-
 // ******************************************************************************** //
-var gbPublishCmd = &cobra.Command {
-	Use:					fmt.Sprintf("publish <%s name>", defaults.LanguageContainerName),
-	SuggestFor:				[]string{"upload"},
-	Short:					ux.SprintfBlue("Publish a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfBlue("Publish a %s %s to GitHub or DockerHub.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch build publish golang"),
-	DisableFlagParsing:		false,
-	Run:					gbPublishFunc,
-	Args:					cobra.ExactArgs(1),
+var gbPublishCmd = &cobra.Command{
+	Use:                fmt.Sprintf("publish <%s name>", defaults.LanguageContainerName),
+	SuggestFor:         []string{"upload"},
+	Short:              ux.SprintfBlue("Publish a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:               ux.SprintfBlue("Publish a %s %s to GitHub or DockerHub.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:            ux.SprintfWhite("launch build publish golang"),
+	DisableFlagParsing: false,
+	Run:                gbPublishFunc,
+	Args:               cobra.ExactArgs(1),
 }
 
 //goland:noinspection GoUnusedParameter
@@ -382,7 +375,6 @@ func (ga *LaunchArgs) gbPublishFunc() *ux.State {
 			break
 		}
 
-
 		if !ga.Quiet {
 			ux.PrintflnNormal("Stopping %s '%s:%s': ", defaults.LanguageContainerName, ga.Name, ga.Version)
 		}
@@ -413,23 +405,21 @@ func (ga *LaunchArgs) gbPublishFunc() *ux.State {
 	return ga.State
 }
 
-
 // ******************************************************************************** //
 var gbSaveCmd = &cobra.Command{
-	Use:					fmt.Sprintf("export <%s name>", defaults.LanguageContainerName),
-	SuggestFor:				[]string{"save"},
-	Short:					ux.SprintfBlue("Save state of a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfBlue("Save state of a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch save golang"),
-	DisableFlagParsing:		false,
-	Run:					gbSaveFunc,
-	Args:					cobra.ExactArgs(1),
+	Use:                fmt.Sprintf("export <%s name>", defaults.LanguageContainerName),
+	SuggestFor:         []string{"save"},
+	Short:              ux.SprintfBlue("Save state of a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:               ux.SprintfBlue("Save state of a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:            ux.SprintfWhite("launch save golang"),
+	DisableFlagParsing: false,
+	Run:                gbSaveFunc,
+	Args:               cobra.ExactArgs(1),
 }
 
 //goland:noinspection GoUnusedParameter
 //gbSaveFunc takes a pointer to cobra.command and
 //string arguments and save command state object
-
 func gbSaveFunc(cmd *cobra.Command, args []string) {
 	for range onlyOnce {
 		var ga LaunchArgs
@@ -443,17 +433,16 @@ func gbSaveFunc(cmd *cobra.Command, args []string) {
 	}
 }
 
-
 // ******************************************************************************** //
 var gbLoadCmd = &cobra.Command{
-	Use:					fmt.Sprintf("import <%s name>", defaults.LanguageContainerName),
-	SuggestFor:				[]string{"load"},
-	Short:					ux.SprintfBlue("Load a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfBlue("Load a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch load golang"),
-	DisableFlagParsing:		false,
-	Run:					gbLoadFunc,
-	Args:					cobra.ExactArgs(1),
+	Use:                fmt.Sprintf("import <%s name>", defaults.LanguageContainerName),
+	SuggestFor:         []string{"load"},
+	Short:              ux.SprintfBlue("Load a %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:               ux.SprintfBlue("Load a %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:            ux.SprintfWhite("launch load golang"),
+	DisableFlagParsing: false,
+	Run:                gbLoadFunc,
+	Args:               cobra.ExactArgs(1),
 }
 
 //goland:noinspection GoUnusedParameter
@@ -472,17 +461,16 @@ func gbLoadFunc(cmd *cobra.Command, args []string) {
 	}
 }
 
-
 // ******************************************************************************** //
-var gbUnitTestCmd = &cobra.Command {
-	Use:					fmt.Sprintf("test <%s name>", defaults.LanguageContainerName),
-	Short:					ux.SprintfBlue("Execute unit tests in %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Long:					ux.SprintfBlue("Execute unit tests in %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
-	Example:				ux.SprintfWhite("launch build test terminus"),
-	DisableFlagParsing:		true,
-	DisableFlagsInUseLine:	true,
-	Run:					gbUnitTestFunc,
-	Args:					cobra.MinimumNArgs(1),
+var gbUnitTestCmd = &cobra.Command{
+	Use:                   fmt.Sprintf("test <%s name>", defaults.LanguageContainerName),
+	Short:                 ux.SprintfBlue("Execute unit tests in %s %s", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Long:                  ux.SprintfBlue("Execute unit tests in %s %s.", defaults.LanguageAppName, defaults.LanguageContainerName),
+	Example:               ux.SprintfWhite("launch build test terminus"),
+	DisableFlagParsing:    true,
+	DisableFlagsInUseLine: true,
+	Run:                   gbUnitTestFunc,
+	Args:                  cobra.MinimumNArgs(1),
 }
 
 //goland:noinspection GoUnusedParameter
@@ -528,7 +516,6 @@ func (ga *LaunchArgs) gbUnitTestFunc() *ux.State {
 	}
 	return ga.State
 }
-
 
 /*
 gb_build() {
